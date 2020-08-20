@@ -53,13 +53,16 @@ namespace SpotSync.Infrastructure
 
             if (response.IsSuccessStatusCode)
             {
-                JObject accessTokenResponseBody = JObject.Parse(await response.Content.ReadAsStringAsync());
+                JObject accessTokenBody = JObject.Parse(await response.Content.ReadAsStringAsync());
 
-                string accessToken = accessTokenResponseBody["access_token"].ToString();
+                string accessToken = accessTokenBody["access_token"].ToString();
 
                 string currentUserId = await GetCurrentUserIdAsync(accessToken);
 
-                await _spotifyAuthentication.AddAuthenticatedPartyGoerAsync(currentUserId, accessTokenResponseBody["access_token"].ToString(), accessTokenResponseBody["refresh_token"].ToString());
+                await _spotifyAuthentication.AddAuthenticatedPartyGoerAsync(currentUserId, accessToken,
+                accessTokenBody["refresh_token"].ToString(),
+                Convert.ToInt32(accessTokenBody["expires_in"])
+                );
 
                 return currentUserId;
 

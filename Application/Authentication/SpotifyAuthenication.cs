@@ -20,11 +20,11 @@ namespace SpotSync.Application.Authentication
         private List<string> Scopes { get; }
         private Dictionary<string, AuthenticationToken> AuthenticationTokens { get; }
 
-        public Task AddAuthenticatedPartyGoerAsync(string partyGoerId, string accessToken, string refreshToken)
+        public Task AddAuthenticatedPartyGoerAsync(string partyGoerId, string accessToken, string refreshToken, int secondsTillAccessTokenExpires)
         {
             try
             {
-                AuthenticationTokens.Add(partyGoerId, new AuthenticationToken(accessToken, refreshToken));
+                AuthenticationTokens.Add(partyGoerId, new AuthenticationToken(accessToken, refreshToken, secondsTillAccessTokenExpires));
 
                 return Task.CompletedTask;
             }
@@ -36,27 +36,21 @@ namespace SpotSync.Application.Authentication
 
         public Task<string> GetAccessTokenForPartyGoerAsync(string partyGoerId)
         {
-            // TODO: Add logic to check to see if the token is expired and if it is, refresh it automatically
             AuthenticationToken token;
+
             if (!AuthenticationTokens.TryGetValue(partyGoerId, out token))
             {
                 throw new Exception($"There was no authentication token associated with party goer {partyGoerId}");
             }
 
+            if (token.IsAccessTokenExpired())
+            {
+                // TODO: Add logic to refresh current token
+
+            }
+
             return Task.FromResult(token.AccessToken);
         }
 
-        public Task<bool> DoesAccessTokenExistAsync(string accessToken)
-        {
-            foreach (KeyValuePair<string, AuthenticationToken> entry in AuthenticationTokens)
-            {
-                if (entry.Value.AccessToken.Equals(accessToken, StringComparison.Ordinal))
-                {
-                    return Task.FromResult(true);
-                }
-            }
-
-            return Task.FromResult(false);
-        }
     }
 }
