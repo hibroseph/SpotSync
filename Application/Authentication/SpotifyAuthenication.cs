@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace SpotSync.Application.Authentication
@@ -34,7 +35,7 @@ namespace SpotSync.Application.Authentication
             }
         }
 
-        public Task<string> GetAccessTokenForPartyGoerAsync(string partyGoerId)
+        public Task<AuthenticationHeaderValue> GetAuthenticationHeaderForPartyGoerAsync(string partyGoerId)
         {
             AuthenticationToken token;
 
@@ -49,7 +50,7 @@ namespace SpotSync.Application.Authentication
 
             }
 
-            return Task.FromResult(token.AccessToken);
+            return Task.FromResult(new AuthenticationHeaderValue("Bearer", token.AccessToken));
         }
 
     }

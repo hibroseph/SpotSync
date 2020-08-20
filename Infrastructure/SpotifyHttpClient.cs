@@ -18,17 +18,23 @@ namespace SpotSync.Infrastructure
     {
         private HttpClient _httpClient;
         private SpotifyAuthentication _spotifyAuthentication;
+        private Dictionary<SpotifyApiEndpointType, string> _spotifyApiEndpoints;
 
         public SpotifyHttpClient(string clientId, string clientSecret, string redirectUrl)
         {
             _httpClient = new HttpClient();
             _spotifyAuthentication = new SpotifyAuthentication(clientId, clientSecret, redirectUrl);
+            _spotifyApiEndpoints = new Dictionary<SpotifyApiEndpointType, string>
+            {
+                { SpotifyApiEndpointType.CurrentSong, "https://api.spotify.com/v1/me/player/currently-playing" },
+                { SpotifyApiEndpointType.PlaySong, "https://api.spotify.com/v1/me/player/play" },
+                { SpotifyApiEndpointType.Token, "https://accounts.spotify.com/api/token" },
+                { SpotifyApiEndpointType.UserInformation, "https://api.spotify.com/v1/me" }
+            };
         }
 
         public async Task<string> RequestAccessAndRefreshTokenFromSpotifyAsync(string code)
         {
-            string apiEndpoint = "https://accounts.spotify.com/api/token";
-
             List<KeyValuePair<string, string>> properties = new List<KeyValuePair<string, string>> {
                 new KeyValuePair<string, string>("grant_type", "authorization_code"),
                 new KeyValuePair<string, string>("code", code),
@@ -39,7 +45,7 @@ namespace SpotSync.Infrastructure
 
             HttpResponseMessage response = null;
 
-            using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, apiEndpoint))
+            using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, _spotifyApiEndpoints[SpotifyApiEndpointType.Token]))
             {
                 requestMessage.Content = new FormUrlEncodedContent(properties);
 
@@ -65,18 +71,17 @@ namespace SpotSync.Infrastructure
                 );
 
                 return currentUserId;
-
             }
 
             return null;
         }
+
         private async Task<string> GetCurrentUserIdAsync(string accessToken)
         {
-            string apiEndpoint = "https://api.spotify.com/v1/me";
 
             HttpResponseMessage response = null;
 
-            using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, apiEndpoint))
+            using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, _spotifyApiEndpoints[SpotifyApiEndpointType.UserInformation]))
             {
                 requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
@@ -94,17 +99,14 @@ namespace SpotSync.Infrastructure
 
             return currentUser["id"].ToString();
         }
+
         public async Task<CurrentSongDTO> GetCurrentSongAsync(string partyGoerId)
         {
-            string apiEndpoint = "https://api.spotify.com/v1/me/player/currently-playing";
-
-            string token = await _spotifyAuthentication.GetAccessTokenForPartyGoerAsync(partyGoerId);
-
             HttpResponseMessage response;
 
-            using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, apiEndpoint))
+            using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, _spotifyApiEndpoints[SpotifyApiEndpointType.CurrentSong]))
             {
-                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                requestMessage.Headers.Authorization = await _spotifyAuthentication.GetAuthenticationHeaderForPartyGoerAsync(partyGoerId);
 
                 response = await _httpClient.SendAsync(requestMessage);
             }
@@ -128,15 +130,11 @@ namespace SpotSync.Infrastructure
 
         public async Task<bool> UpdateSongForPartyGoerAsync(string partyGoerId, CurrentSongDTO currentSong)
         {
-            string apiEndpoint = "https://api.spotify.com/v1/me/player/play";
-
-            string token = await _spotifyAuthentication.GetAccessTokenForPartyGoerAsync(partyGoerId);
-
             HttpResponseMessage response;
 
-            using (var requestMessage = new HttpRequestMessage(HttpMethod.Put, apiEndpoint))
+            using (var requestMessage = new HttpRequestMessage(HttpMethod.Put, _spotifyApiEndpoints[SpotifyApiEndpointType.PlaySong]))
             {
-                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                requestMessage.Headers.Authorization = await _spotifyAuthentication.GetAuthenticationHeaderForPartyGoerAsync(partyGoerId);
 
                 requestMessage.Content = new StringContent(JsonConvert.SerializeObject(new StartUserPlaybackSong
                 {
