@@ -1,0 +1,31 @@
+﻿
+@{
+    ViewData["Title"] = "Login";
+}
+
+@model SpotSync.Models.Account.LoginWithSpotifyModel
+
+<style>
+    .spotify-button {
+        background-color: #1db954;
+        color: #fff;
+        font-size: 16px;
+        border-radius: 500px;
+        padding: 20px 50px 20px;
+        margin: 20px 200px 0px;
+        display:block;
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+        .spotify-button:hover {
+            background-color: #1ed760;
+            text-decoration: none;
+            color: #fff;
+        }
+</style>
+
+<div class="text-center">
+    <h2>Login</h2>
+    <a id="spotifyLoginButton" class="spotify-button" href="@Model.CreateSpotifyAuthenicateUrl()">Login with Spotify</a>
+</div>

@@ -1,0 +1,100 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+@model SpotSync.Models.Party.PartyModel
+
+<div id="party-box" class="box">
+    @if (Model.IsCurrentlyHostingParty)
+    {
+        <div class="box-inner">
+            <h4>You are currently hosting a party</h4>
+            <p>Share the code: <b>@Model.CurrentlyActiveParty.PartyCode</b> with your friends to join your party</p>
+            @if (Model.CurrentlyActiveParty.Attendees.Count > 0)
+            {
+                <h4>People Partying With You:</h4>
+                @foreach (string attendee in Model.CurrentlyActiveParty.Attendees)
+                {
+                    <p>@attendee</p>
+                }
+            }
+            else
+            {
+                <p>Looks like no one is partying with you. You should invite some with the party code above</p>
+            }
+
+            <div id="party-controls-box">
+                <button onclick="UpdateSongForParty()">Sync Current Song</button>
+                <button onclick="EndParty()">End Party</button>
+            </div>
+        </div>
+        <div class="box-inner">
+            <h4>Kip Tip:</h4>
+            <p>If you want to join a party, go ahead and end this party</p>
+        </div>
+    }
+    else
+    {
+        <div id="create-party-box" class="box-inner">
+            <Button onclick="CreateParty()">Create Party</Button>
+        </div>
+        <div id="join-party-box" class="box-inner">
+            <input id="partyCodeInput" placeholder="Party Code" />
+            <button onclick="JoinParty()">Join Party</button>
+        </div>
+    }
+</div>
+
+<script>
+    function CreateParty() {
+        $.ajax("/Party/CreateParty")
+            .done((response) => {
+                // Add new party code to DOM
+                location.reload();
+            })
+            .fail((response) => {
+                $("#create-party-box").append(`<p class="error"> <b>An error occurred:</b> ${response.responseText}</p>`)
+            })
+    }
+
+    function JoinParty() {
+        let code = $("#partyCodeInput").val();
+
+        $.ajax("/Party/JoinParty", {
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ PartyCode: code })
+        })
+            .done((response) => {
+                // successfully joined party, update the DOM accordingly
+                $("#join-party-box").append(`<p class="success">You successfully joined the party ${code}`)
+            })
+            .fail((response) => {
+                // unsuccessfully joined party
+                console.log(response)
+                $("#join-party-box").append(`<p class="error"> <b>An error occurred:</b> ${response.responseText}</p>`)
+            })
+    }
+
+    function EndParty() {
+        $.ajax("/Party/EndParty", {
+            type: "DELETE",
+        })
+            .done((response) => {
+                location.reload();
+            })
+            .fail((response) => {
+                $("#party-controls-box").append(`<p class="error"><b>An error occurred:</b> ${response.responseText}</p>`)
+            })
+    }
+
+    function UpdateSongForParty() {
+        $.ajax("/Party/UpdateSongForParty")
+            .done((response) => {
+                $("#party-controls-box").append('<p class="success">Successfully updated song for all party goers.')
+            })
+            .fail((response) => {
+                $("#party-controls-box").append(`<p class="error">Error while updating all party goers with the new song: ${response.responseText}`)
+            })
+    }
+</script>

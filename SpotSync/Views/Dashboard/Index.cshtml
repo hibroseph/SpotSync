@@ -1,0 +1,47 @@
+﻿
+@{
+    ViewData["Title"] = "Dashboard";
+}
+@model SpotSync.Models.Dashboard.DashboardModel
+
+<style>
+    .current-song-box {
+        background-color: #107dac;
+        border-radius: 20px;
+        padding: 20px;
+        color: black;
+        margin: 10px;
+    }
+
+    .current-song-box-flex {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+    }
+
+    .current-song-box-item {
+        padding: 10px;
+    }
+</style>
+<h1>Hello @Model.Name, Welcome to your Dashboard</h1>
+
+@if (Model.CurrentSong != null)
+{
+    <div class="current-song-box">
+        <h2>You are listening to:</h2>
+        <div class="current-song-box-flex">
+            <div class="current-song-box-item">
+                <p>Title: <b>@Model.CurrentSong.Title</b></p>
+                <p>Artist: <b>@Model.CurrentSong.Artist</b></p>
+                <p>Album: <b>@Model.CurrentSong.Album</b></p>
+            </div>
+            <div class="current-song-box-item">
+                <img src="@Model.CurrentSong.AlbumImageUrl" style="height: 256px; width: 256px;" />
+            </div>
+        </div>
+    </div>
+}
+
+
+
+
