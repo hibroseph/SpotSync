@@ -6,6 +6,7 @@ using SpotSync.Domain.Contracts;
 using SpotSync.Domain.DTO;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -109,6 +110,11 @@ namespace SpotSync.Infrastructure
                 requestMessage.Headers.Authorization = await _spotifyAuthentication.GetAuthenticationHeaderForPartyGoerAsync(partyGoerId);
 
                 response = await _httpClient.SendAsync(requestMessage);
+            }
+
+            if (response.StatusCode == HttpStatusCode.NoContent)
+            {
+                return null;
             }
 
             response.EnsureSuccessStatusCode();
