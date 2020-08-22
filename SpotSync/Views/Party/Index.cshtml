@@ -20,27 +20,44 @@
             }
             else
             {
-                <p>Looks like no one is partying with you. You should invite some with the party code above</p>
+                <p>Looks like no one is partying with you. You should invite some friends with the party code above.</p>
             }
 
             <div id="party-controls-box">
-                <button onclick="UpdateSongForParty()">Sync Current Song</button>
-                <button onclick="EndParty()">End Party</button>
+                <button class="btn btn-primary sync-btn" onclick="UpdateSongForParty()">
+                    Sync Current Song <i class="material-icons btn-icon">sync</i>
+                </button>
+                <button class="btn btn-danger" onclick="EndParty()">
+                    End Party <i class="material-icons btn-icon">delete</i>
+                </button>
+                <div id="party-controls-message"></div>
             </div>
         </div>
         <div class="box-inner">
-            <h4>Kip Tip:</h4>
+            <h4>Kip Tip</h4>
             <p>If you want to join a party, go ahead and end this party</p>
         </div>
     }
     else
     {
-        <div id="create-party-box" class="box-inner">
-            <Button onclick="CreateParty()">Create Party</Button>
-        </div>
-        <div id="join-party-box" class="box-inner">
-            <input id="partyCodeInput" placeholder="Party Code" />
-            <button onclick="JoinParty()">Join Party</button>
+        <div class="row">
+            <div class="col-md-6">
+                <div id="create-party-box" class="box-inner">
+                    <h4>Wanna start your own music party?</h4>
+                    <button class="btn btn-primary" onclick="CreateParty()">
+                        Create a Party <i class="material-icons btn-icon">add</i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div id="join-party-box" class="box-inner">
+                    <input id="partyCodeInput" class="input-text" placeholder="Party Code" />
+                    <button class="btn btn-primary" onclick="JoinParty()">
+                        Join Party <i class="material-icons btn-icon">login</i>
+                    </button>
+                    <div id="join-party-message"></div>
+                </div>
+            </div>
         </div>
     }
 </div>
@@ -67,12 +84,12 @@
         })
             .done((response) => {
                 // successfully joined party, update the DOM accordingly
-                $("#join-party-box").append(`<p class="success">You successfully joined the party ${code}`)
+                $("#join-party-message").html(`<p class="success">You successfully joined the party ${code}`)
             })
             .fail((response) => {
                 // unsuccessfully joined party
                 console.log(response)
-                $("#join-party-box").append(`<p class="error"> <b>An error occurred:</b> ${response.responseText}</p>`)
+                $("#join-party-message").html(`<p class="error"> <b>An error occurred:</b> ${response.responseText}</p>`)
             })
     }
 
@@ -84,17 +101,17 @@
                 location.reload();
             })
             .fail((response) => {
-                $("#party-controls-box").append(`<p class="error"><b>An error occurred:</b> ${response.responseText}</p>`)
+                $("#party-controls-message").html(`<p class="error"><b>An error occurred:</b> ${response.responseText}</p>`)
             })
     }
 
     function UpdateSongForParty() {
         $.ajax("/Party/UpdateSongForParty")
             .done((response) => {
-                $("#party-controls-box").append('<p class="success">Successfully updated song for all party goers.')
+                $("#party-controls-message").html('<p class="success">Successfully updated song for all party goers.')
             })
             .fail((response) => {
-                $("#party-controls-box").append(`<p class="error">Error while updating all party goers with the new song: ${response.responseText}`)
+                $("#party-controls-message").html(`<p class="error">Error while updating all party goers with the new song: ${response.responseText}`)
             })
     }
 </script>

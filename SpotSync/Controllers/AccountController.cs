@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +35,7 @@ namespace SpotSync.Controllers
                 SpaceDelimitedScopes = _configuration.GetValue<string>("Spotify:Scopes")
             };
 
-            return View(model);
+            return Redirect(CreateSpotifyAuthenicateUrl(model));
         }
 
         public async Task<IActionResult> Authorized(string code)
@@ -64,6 +65,11 @@ namespace SpotSync.Controllers
             await HttpContext.SignOutAsync();
 
             return RedirectToAction("Index", "Home");
+        }
+
+        private string CreateSpotifyAuthenicateUrl(LoginWithSpotifyModel model)
+        {
+            return $"{model.SpotifyAuthenticationUrl}?response_type=code&client_id={model.ClientId}&scope={HttpUtility.UrlEncode(model.SpaceDelimitedScopes)}&redirect_uri={model.RedirectUrl}";
         }
 
     }
