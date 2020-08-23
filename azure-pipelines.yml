@@ -1,0 +1,27 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'restore'
+    projects: '**/SpotSync.csproj'
+    feedsToUse: 'select'
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build'
+    projects: '**/SpotSync.csproj'
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'publish'
+    publishWebProjects: false
+    projects: '**/SpotSync.csproj'
+    modifyOutputPath: false
