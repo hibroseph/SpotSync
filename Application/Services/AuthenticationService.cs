@@ -1,4 +1,5 @@
-﻿using SpotSync.Domain.Contracts;
+﻿using SpotSync.Application.Authentication;
+using SpotSync.Domain.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,15 +10,22 @@ namespace SpotSync.Application.Services
     public class AuthenticationService : IAuthenticationService
     {
         ISpotifyHttpClient _spotifyHttpClient;
+        SpotifyAuthentication _spotifyAuthentication;
 
-        public AuthenticationService(ISpotifyHttpClient spotifyHttpClient)
+        public AuthenticationService(ISpotifyHttpClient spotifyHttpClient, SpotifyAuthentication spotifyAuthentication)
         {
             _spotifyHttpClient = spotifyHttpClient;
+            _spotifyAuthentication = spotifyAuthentication;
         }
 
         public async Task<string> AuthenticateUserWithAccessCode(string code)
         {
             return await _spotifyHttpClient.RequestAccessAndRefreshTokenFromSpotifyAsync(code);
+        }
+
+        public async Task LogOutUserAsync(string userId)
+        {
+            await _spotifyAuthentication.RemoveAuthenticatedPartyGoerAsync(userId);
         }
     }
 }

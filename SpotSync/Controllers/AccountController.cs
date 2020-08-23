@@ -62,6 +62,8 @@ namespace SpotSync.Controllers
 
         public async Task<IActionResult> Logout()
         {
+            await _authenticationService.LogOutUserAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
             await HttpContext.SignOutAsync();
 
             return RedirectToAction("Index", "Home");
@@ -71,6 +73,5 @@ namespace SpotSync.Controllers
         {
             return $"{model.SpotifyAuthenticationUrl}?response_type=code&client_id={model.ClientId}&scope={HttpUtility.UrlEncode(model.SpaceDelimitedScopes)}&redirect_uri={model.RedirectUrl}";
         }
-
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SpotSync.Domain;
+using System;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -21,6 +22,19 @@ namespace SpotSync.Application.Authentication
         private List<string> Scopes { get; }
         private Dictionary<string, AuthenticationToken> AuthenticationTokens { get; }
 
+        public Task RemoveAuthenticatedPartyGoerAsync(string partyGoerId)
+        {
+            try
+            {
+                AuthenticationTokens.Remove(partyGoerId);
+
+                return Task.CompletedTask;
+            }
+            catch (Exception)
+            {
+                return Task.CompletedTask;
+            }
+        }
         public Task AddAuthenticatedPartyGoerAsync(string partyGoerId, string accessToken, string refreshToken, int secondsTillAccessTokenExpires)
         {
             try

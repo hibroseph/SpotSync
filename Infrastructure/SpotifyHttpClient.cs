@@ -21,10 +21,10 @@ namespace SpotSync.Infrastructure
         private SpotifyAuthentication _spotifyAuthentication;
         private Dictionary<SpotifyApiEndpointType, string> _spotifyApiEndpoints;
 
-        public SpotifyHttpClient(string clientId, string clientSecret, string redirectUrl)
+        public SpotifyHttpClient(SpotifyAuthentication spotifyAuthentication)
         {
             _httpClient = new HttpClient();
-            _spotifyAuthentication = new SpotifyAuthentication(clientId, clientSecret, redirectUrl);
+            _spotifyAuthentication = spotifyAuthentication;
             _spotifyApiEndpoints = new Dictionary<SpotifyApiEndpointType, string>
             {
                 { SpotifyApiEndpointType.CurrentSong, "https://api.spotify.com/v1/me/player/currently-playing" },

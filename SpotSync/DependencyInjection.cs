@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Persistence;
+using SpotSync.Application.Authentication;
 using SpotSync.Application.Services;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
@@ -17,12 +18,14 @@ namespace SpotSync
     {
         public static void AddSpotSyncServices(this IServiceCollection serviceCollection, IConfiguration configuration)
         {
-            ISpotifyHttpClient spotifyHttpClient = new SpotifyHttpClient(configuration["Spotify:ClientId"], configuration["Spotify:ClientSecret"], configuration["Spotify:RedirectUrl"]);
+            SpotifyAuthentication spotifyAuthentication = new SpotifyAuthentication(configuration["Spotify:ClientId"], configuration["Spotify:ClientSecret"], configuration["Spotify:RedirectUrl"]);
+
+            ISpotifyHttpClient spotifyHttpClient = new SpotifyHttpClient(spotifyAuthentication);
             IPartyRepository partyRepository = new PartyRepository();
             IPartyGoerService partyGoerService = new PartyGoerService(spotifyHttpClient);
 
             serviceCollection.AddSingleton<IPartyService>(new PartyService(partyRepository, partyGoerService, spotifyHttpClient));
-            serviceCollection.AddSingleton<IAuthenticationService>(new AuthenticationService(spotifyHttpClient));
+            serviceCollection.AddSingleton<IAuthenticationService>(new AuthenticationService(spotifyHttpClient, spotifyAuthentication));
             serviceCollection.AddSingleton<IPartyGoerService>(partyGoerService);
         }
 

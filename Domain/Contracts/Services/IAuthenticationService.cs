@@ -8,5 +8,6 @@ namespace SpotSync.Domain.Contracts
     public interface IAuthenticationService
     {
         Task<string> AuthenticateUserWithAccessCode(string code);
+        Task LogOutUserAsync(string userId);
     }
 }
