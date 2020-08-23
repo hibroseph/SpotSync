@@ -1,0 +1,14 @@
+﻿.sync-btn {
+    &:hover i {
+        transform: rotate(-360deg);
+    }
+}
+
+.box-inner {
+    margin: 1em 0;
+    padding-bottom: 1em;
+}
+
+#create-party-box {
+    border-bottom: solid 1px gray;
+}

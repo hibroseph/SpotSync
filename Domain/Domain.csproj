@@ -3,6 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>netcoreapp3.1</TargetFramework>
 		<RootNamespace>SpotSync.Domain</RootNamespace>
+    <LangVersion>latest</LangVersion>
 	</PropertyGroup>
 
 </Project>
