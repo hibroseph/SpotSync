@@ -13,14 +13,12 @@ namespace SpotSync.Application.Services
     public class PartyService : IPartyService
     {
         IPartyRepository _partyRepository;
-        IPartyGoerService _partyGoerService;
         ISpotifyHttpClient _spotifyHttpClient;
 
-        public PartyService(IPartyRepository partyRepository, IPartyGoerService partyGoerService, ISpotifyHttpClient spotifyHttpClient)
+        public PartyService(IPartyRepository partyRepository, ISpotifyHttpClient spotifyHttpClient)
         {
             _partyRepository = partyRepository;
             _spotifyHttpClient = spotifyHttpClient;
-            _partyGoerService = partyGoerService;
         }
 
         public bool IsUserHostingAParty(PartyGoer host)
@@ -113,7 +111,6 @@ namespace SpotSync.Application.Services
             }
 
         }
-
         public async Task<Party> GetPartyAsync(PartyCodeDTO partyCode)
         {
             return await _partyRepository.GetAsync(partyCode);
