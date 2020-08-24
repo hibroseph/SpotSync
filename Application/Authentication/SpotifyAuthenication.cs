@@ -58,14 +58,26 @@ namespace SpotSync.Application.Authentication
                 throw new Exception($"There was no authentication token associated with party goer {partyGoerId}");
             }
 
-            if (token.IsAccessTokenExpired())
-            {
-                // TODO: Add logic to refresh current token
-
-            }
-
             return Task.FromResult(new AuthenticationHeaderValue("Bearer", token.AccessToken));
         }
+
+        public Task<bool> DoesAccessTokenNeedRefreshAsync(string partyGoerId)
+        {
+            return Task.FromResult(AuthenticationTokens[partyGoerId].IsAccessTokenExpired());
+        }
+
+        public string GetRefreshTokenForPartyGoer(string partyGoerId)
+        {
+            return AuthenticationTokens[partyGoerId].RefreshToken;
+        }
+
+        public Task RefreshAccessTokenForPartyGoerAsync(string partyGoerId, string accessToken, int expiresInXSeconds)
+        {
+            AuthenticationTokens[partyGoerId].UpdateAccessToken(accessToken, expiresInXSeconds);
+
+            return Task.CompletedTask;
+        }
+
 
     }
 }

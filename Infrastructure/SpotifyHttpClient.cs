@@ -103,6 +103,8 @@ namespace SpotSync.Infrastructure
 
         public async Task<CurrentSongDTO> GetCurrentSongAsync(string partyGoerId)
         {
+            await RefreshTokenForUserAsync(partyGoerId);
+
             HttpResponseMessage response;
 
             using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, _spotifyApiEndpoints[SpotifyApiEndpointType.CurrentSong]))
@@ -136,6 +138,8 @@ namespace SpotSync.Infrastructure
 
         public async Task<bool> UpdateSongForPartyGoerAsync(string partyGoerId, CurrentSongDTO currentSong)
         {
+            await RefreshTokenForUserAsync(partyGoerId);
+
             HttpResponseMessage response;
 
             using (var requestMessage = new HttpRequestMessage(HttpMethod.Put, _spotifyApiEndpoints[SpotifyApiEndpointType.PlaySong]))
@@ -159,6 +163,52 @@ namespace SpotSync.Infrastructure
             {
                 return false;
             }
+        }
+
+        private async Task RefreshTokenForUserAsync(string partyGoerId)
+        {
+            if (await _spotifyAuthentication.DoesAccessTokenNeedRefreshAsync(partyGoerId))
+            {
+                await RequestNewAccessToken(_spotifyAuthentication.GetRefreshTokenForPartyGoer(partyGoerId));
+            }
+        }
+
+        private async Task RequestNewAccessToken(string refreshToken)
+        {
+            List<KeyValuePair<string, string>> properties = new List<KeyValuePair<string, string>> {
+                new KeyValuePair<string, string>("grant_type", "refresh_token"),
+                new KeyValuePair<string, string>("refresh_token", refreshToken),
+                new KeyValuePair<string, string>("client_id", _spotifyAuthentication.ClientId),
+                new KeyValuePair<string, string>("client_secret", _spotifyAuthentication.ClientSecret)
+            };
+
+            HttpResponseMessage response = null;
+
+            using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, _spotifyApiEndpoints[SpotifyApiEndpointType.Token]))
+            {
+                requestMessage.Content = new FormUrlEncodedContent(properties);
+
+                response = await _httpClient.SendAsync(requestMessage);
+            }
+
+            if (response is null)
+            {
+                throw new Exception("The response from request a new access token with a refresh token was null");
+            }
+
+            if (response.IsSuccessStatusCode)
+            {
+                JObject accessTokenBody = JObject.Parse(await response.Content.ReadAsStringAsync());
+
+                string accessToken = accessTokenBody["access_token"].ToString();
+
+                string currentUserId = await GetCurrentUserIdAsync(accessToken);
+
+                await _spotifyAuthentication.RefreshAccessTokenForPartyGoerAsync(currentUserId, accessToken,
+                Convert.ToInt32(accessTokenBody["expires_in"])
+                );
+            }
+
         }
     }
 }

@@ -15,17 +15,24 @@ namespace SpotSync.Application.Authentication
             Id = Guid.NewGuid();
         }
         public Guid Id { get; }
-        public string AccessToken { get; }
+        public string AccessToken { get; private set; }
         public string RefreshToken { get; }
-        public int ExpiresInXSeconds { get; }
-        public DateTime TimeAccessTokenWasRequested { get; }
+        public int ExpiresInXSeconds { get; private set; }
+        public DateTime TimeAccessTokenWasRequested { get; private set; }
 
         public bool IsAccessTokenExpired()
         {
-            if ((DateTime.Now - TimeAccessTokenWasRequested).TotalSeconds > ExpiresInXSeconds)
+            if ((DateTime.UtcNow - TimeAccessTokenWasRequested).TotalSeconds > ExpiresInXSeconds)
                 return true;
             else
                 return false;
+        }
+
+        public void UpdateAccessToken(string accessToken, int expiresInXSeconds)
+        {
+            AccessToken = accessToken;
+            ExpiresInXSeconds = expiresInXSeconds;
+            TimeAccessTokenWasRequested = DateTime.UtcNow;
         }
     }
 }
