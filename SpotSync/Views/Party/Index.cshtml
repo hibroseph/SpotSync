@@ -38,6 +38,29 @@
             <p>If you want to join a party, go ahead and end this party</p>
         </div>
     }
+    else if (Model.IsCurrentlyJoinedInAParty)
+    {
+        <div class="box-inner">
+            <h4>You are currently attending a party</h4>
+            @if (Model.CurrentlyActiveParty.Attendees.Count > 0)
+            {
+                <h4>People Partying With You:</h4>
+                @foreach (string attendee in Model.CurrentlyActiveParty.Attendees)
+                {
+                    <p>@attendee</p>
+                }
+            }
+            else
+            {
+                <p>Looks like no one is partying with you. You should invite some friends with the party code: <b>@Model.CurrentlyActiveParty.PartyCode</b></p>
+            }
+
+            <button class="btn btn-danger" onclick="LeaveParty()">
+                Leave Party <i class="material-icons btn-icon">delete</i>
+            </button>
+            <div id="party-controls-message"></div>
+        </div>
+    }
     else
     {
         <div class="row">
@@ -113,5 +136,22 @@
             .fail((response) => {
                 $("#party-controls-message").html(`<p class="error">Error while updating all party goers with the new song: ${response.responseText}`)
             })
+    }
+    @if(true) {
+     <text>
+    function LeaveParty() {
+        $.ajax("/Party/LeaveParty", {
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ PartyCode: @Model.CurrentlyActiveParty.PartyCode })
+        })
+            .done(response => {
+                location.reload();
+            })
+            .fail(response => {
+                $("#party-controls-message").html(`<p class="error">Error while trying to leave party: ${response.responseText}`)
+            })
+    }
+    </text>
     }
 </script>

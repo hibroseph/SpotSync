@@ -64,7 +64,7 @@ namespace SpotSync.Application.Services
         {
             Party party = new Party(partyHost);
 
-            _partyRepository.Add(party);
+            _partyRepository.CreateParty(party);
 
             return party.PartyCode;
         }
@@ -116,9 +116,32 @@ namespace SpotSync.Application.Services
             return await _partyRepository.GetAsync(partyCode);
         }
 
-        public async Task<Party> GetPartyAsync(PartyGoer host)
+        public async Task<Party> GetPartyWithHostAsync(PartyGoer host)
         {
-            return await _partyRepository.GetAsync(host);
+            return await _partyRepository.GetPartyWithHostAsync(host);
+        }
+
+        public async Task<bool> IsUserPartyingAsync(PartyGoer user)
+        {
+            return await _partyRepository.IsUserInAPartyAsync(user);
+        }
+
+        public async Task<Party> GetPartyWithAttendeeAsync(PartyGoer attendee)
+        {
+            return await _partyRepository.GetPartyWithAttendeeAsync(attendee);
+        }
+
+        public async Task<bool> LeavePartyAsync(PartyGoer attendee)
+        {
+            // Let's make sure he is part of the party
+            if (await _partyRepository.IsUserInAPartyAsync(attendee))
+            {
+                return await _partyRepository.LeavePartyAsync(attendee);
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

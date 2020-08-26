@@ -13,6 +13,9 @@ namespace SpotSync.Domain.Contracts
         Task<bool> UpdateSongForEveryoneInPartyAsync(Party party, PartyGoer host);
         Task<bool> JoinPartyAsync(PartyCodeDTO partyCode, PartyGoer attendee);
         bool IsUserHostingAParty(PartyGoer host);
-        Task<Party> GetPartyAsync(PartyGoer host);
+        Task<Party> GetPartyWithHostAsync(PartyGoer host);
+        Task<bool> IsUserPartyingAsync(PartyGoer user);
+        Task<Party> GetPartyWithAttendeeAsync(PartyGoer attendee);
+        Task<bool> LeavePartyAsync(PartyGoer attendee);
     }
 }

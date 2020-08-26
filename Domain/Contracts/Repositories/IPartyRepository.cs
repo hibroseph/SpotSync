@@ -7,13 +7,17 @@ using SpotSync.Domain.DTO;
 
 namespace SpotSync.Domain.Contracts
 {
-    public interface IPartyRepository : IRepository<Party>
+    public interface IPartyRepository
     {
         Party Get(Guid partyId);
         Task<Party> GetAsync(PartyCodeDTO partyCode);
         void Update(Party party);
-        Task<Party> GetAsync(PartyGoer host);
+        Task<Party> GetPartyWithHostAsync(PartyGoer host);
         Task<bool> DeleteAsync(PartyGoer host);
         bool IsUserHostingAParty(PartyGoer host);
+        Task<bool> IsUserInAPartyAsync(PartyGoer attendee);
+        Task<Party> GetPartyWithAttendeeAsync(PartyGoer attendee);
+        void CreateParty(Party item);
+        Task<bool> LeavePartyAsync(PartyGoer attendee);
     }
 }
