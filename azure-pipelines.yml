@@ -11,21 +11,25 @@ pool:
 
 steps:
 - task: DotNetCoreCLI@2
+  displayName: "Restore SpotSync"
   inputs:
     command: 'restore'
     projects: '**/SpotSync.csproj'
     feedsToUse: 'select'
 - task: DotNetCoreCLI@2
+  displayName: "Build SpotSync"
   inputs:
     command: 'build'
     projects: '**/SpotSync.csproj'
 - task: DotNetCoreCLI@2
+  displayName: "Publish SpotSync"
   inputs:
     command: 'publish'
     publishWebProjects: false
     projects: '**/SpotSync.csproj'
     modifyOutputPath: false
 - task: DotNetCoreCLI@2
+  displayName: "Test SpotSync"
   inputs:
     command: 'test'
     projects: '**/SpotSync.Tests.csproj'
