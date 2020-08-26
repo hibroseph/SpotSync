@@ -143,7 +143,7 @@
         $.ajax("/Party/LeaveParty", {
             type: "POST",
             contentType: "application/json; charset=utf-8",
-            data: JSON.stringify({ PartyCode: @Model.CurrentlyActiveParty.PartyCode })
+            data: JSON.stringify({ PartyCode: '@Model.CurrentlyActiveParty.PartyCode' })
         })
             .done(response => {
                 location.reload();
