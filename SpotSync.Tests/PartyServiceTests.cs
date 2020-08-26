@@ -163,11 +163,5 @@ namespace SpotSync.Tests
             Assert.AreEqual(1, (await _partyService.GetPartyWithHostAsync(PartyHost2)).Attendees.Count);
             Assert.AreEqual(0, (await _partyService.GetPartyWithHostAsync(PartyHost3)).Attendees.Count);
         }
-
-        [Test]
-        public void SimpleTest()
-        {
-            Assert.AreEqual(0, 1 + 1);
-        }
     }
 }
