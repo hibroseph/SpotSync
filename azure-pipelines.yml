@@ -25,11 +25,7 @@ steps:
     publishWebProjects: false
     projects: '**/SpotSync.csproj'
     modifyOutputPath: false
-- task: VSTest@2
+- task: DotNetCoreCLI@2
   inputs:
-    testSelector: 'testAssemblies'
-    testAssemblyVer2: |
-      **\*test*.dll
-      !**\*TestAdapter.dll
-      !**\obj\**
-    searchFolder: '$(System.DefaultWorkingDirectory)'
+    command: 'test'
+    projects: '**/SpotSync.Tests.csproj'
