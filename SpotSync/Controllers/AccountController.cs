@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Models.Account;
 
@@ -17,11 +18,13 @@ namespace SpotSync.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly Domain.Contracts.IAuthenticationService _authenticationService;
+        private readonly IPartyService _partyService;
 
-        public AccountController(Domain.Contracts.IAuthenticationService authenticationService, IConfiguration configuration)
+        public AccountController(Domain.Contracts.IAuthenticationService authenticationService, IConfiguration configuration, IPartyService partyService)
         {
             _authenticationService = authenticationService;
             _configuration = configuration;
+            _partyService = partyService;
         }
 
         [HttpGet]
@@ -62,6 +65,20 @@ namespace SpotSync.Controllers
 
         public async Task<IActionResult> Logout()
         {
+            PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            // If the user is joined in a party, REMOVE HIM
+            if (await _partyService.IsUserPartyingAsync(user))
+            {
+                await _partyService.LeavePartyAsync(user);
+            }
+
+            // If the user is hosting a party, END IT
+            if (_partyService.IsUserHostingAParty(user))
+            {
+                await _partyService.EndPartyAsync(user);
+            }
+
             await _authenticationService.LogOutUserAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             await HttpContext.SignOutAsync();

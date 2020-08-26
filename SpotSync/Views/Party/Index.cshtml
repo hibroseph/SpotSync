@@ -137,7 +137,7 @@
                 $("#party-controls-message").html(`<p class="error">Error while updating all party goers with the new song: ${response.responseText}`)
             })
     }
-    @if(true) {
+    @if(Model.IsCurrentlyJoinedInAParty) {
      <text>
     function LeaveParty() {
         $.ajax("/Party/LeaveParty", {
