@@ -28,17 +28,23 @@ namespace SpotSync.Controllers
 
             PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            if (_partyService.IsUserHostingAParty(user))
-            {
-                Domain.Party party = await _partyService.GetPartyWithHostAsync(user);
-                model.IsCurrentlyHostingParty = true;
-                model.CurrentlyActiveParty = TranslateDomainPartyToPartyModel(party);
-            }
-            else if (await _partyService.IsUserPartyingAsync(user))
+            // test code to test user partying screen
+            string partyCode = _partyService.StartNewParty(user);
+            await _partyService.JoinPartyAsync(new PartyCodeDTO { PartyCode = partyCode }, user);
+
+            if (await _partyService.IsUserPartyingAsync(user))
             {
                 Domain.Party party = await _partyService.GetPartyWithAttendeeAsync(user);
 
                 model.IsCurrentlyJoinedInAParty = true;
+                model.CurrentlyActiveParty = TranslateDomainPartyToPartyModel(party);
+
+            }
+            else if (_partyService.IsUserHostingAParty(user))
+            {
+                Domain.Party party = await _partyService.GetPartyWithHostAsync(user);
+
+                model.IsCurrentlyHostingParty = true;
                 model.CurrentlyActiveParty = TranslateDomainPartyToPartyModel(party);
             }
 
@@ -137,18 +143,29 @@ namespace SpotSync.Controllers
             {
                 Domain.Party party = await _partyService.GetPartyWithHostAsync(user);
 
-                if (await _partyService.UpdateSongForEveryoneInPartyAsync(party, user))
-                {
-                    return Ok();
-                }
-                else
-                {
-                    return BadRequest("Unable to update song for everyone");
-                }
+                return await UpdateSongForEveryoneInPartyAsync(party, user);
+            }
+            else if (await _partyService.IsUserPartyingAsync(user))
+            {
+                Domain.Party party = await _partyService.GetPartyWithAttendeeAsync(user);
+
+                return await UpdateSongForEveryoneInPartyAsync(party, user);
             }
             else
             {
-                return BadRequest($"You are currently not hosting a party: {partyCode.PartyCode}");
+                return BadRequest($"You are currently not hosting a party or attending a party: {partyCode.PartyCode}");
+            }
+        }
+
+        private async Task<IActionResult> UpdateSongForEveryoneInPartyAsync(Domain.Party party, PartyGoer partyGoer)
+        {
+            if (await _partyService.UpdateSongForEveryoneInPartyAsync(party, partyGoer))
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest("Unable to update song for everyone");
             }
         }
     }

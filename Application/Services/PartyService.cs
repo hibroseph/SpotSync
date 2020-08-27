@@ -69,7 +69,7 @@ namespace SpotSync.Application.Services
             return party.PartyCode;
         }
 
-        public async Task<bool> UpdateSongForEveryoneInPartyAsync(Party party, PartyGoer host)
+        public async Task<bool> UpdateSongForEveryoneInPartyAsync(Party party, PartyGoer user)
         {
             try
             {
@@ -78,13 +78,14 @@ namespace SpotSync.Application.Services
                     throw new Exception($"Obtaining a party with ID {party.Id} returned null from the database");
                 }
 
-                if (!party.Host.Id.Equals(host.Id, StringComparison.CurrentCultureIgnoreCase))
+                if (!party.Host.Id.Equals(user.Id, StringComparison.CurrentCultureIgnoreCase) &&
+                !party.Attendees.Exists(p => p.Id.Equals(user.Id, StringComparison.CurrentCultureIgnoreCase)))
                 {
-                    throw new Exception($"A non host tried to change the song for the party with ID {party.Id}. Attempted host ID: {host.Id}");
+                    throw new Exception($"A non host or party attendee tried to change the song for the party with ID {party.Id}. Attempted user ID: {user.Id}");
                 }
 
                 // Get the current song from the host
-                CurrentSongDTO song = await _spotifyHttpClient.GetCurrentSongAsync(host.Id);
+                CurrentSongDTO song = await _spotifyHttpClient.GetCurrentSongAsync(user.Id);
 
                 List<Task<bool>> updateSongForPartyTask = new List<Task<bool>>();
                 foreach (PartyGoer attendee in party.Attendees)
