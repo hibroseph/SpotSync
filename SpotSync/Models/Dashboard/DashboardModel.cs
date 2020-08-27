@@ -9,6 +9,7 @@ namespace SpotSync.Models.Dashboard
     {
         public string Name { get; set; }
         public Song CurrentSong { get; set; }
+        public string RandomGreeting { get; set; }
 
         public string PrintCurrentSong()
         {

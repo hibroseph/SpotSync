@@ -57,7 +57,7 @@ namespace SpotSync.Infrastructure
             {
                 throw new Exception("The response from requesting the access and refresh token was null");
             }
-
+            // TODO: Add logic to know if it spotifys problem or ours
             if (response.IsSuccessStatusCode)
             {
                 JObject accessTokenBody = JObject.Parse(await response.Content.ReadAsStringAsync());

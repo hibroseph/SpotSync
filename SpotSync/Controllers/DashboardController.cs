@@ -19,11 +19,31 @@ namespace SpotSync.Controllers
     {
         private readonly IPartyService _partyService;
         private readonly IPartyGoerService _partyGoerService;
-
+        private readonly Random _random;
+        private readonly List<string> _greetings;
         public DashboardController(IPartyService partyService, IPartyGoerService partyGoerService)
         {
             _partyService = partyService;
             _partyGoerService = partyGoerService;
+            _random = new Random();
+            _greetings = new List<string>
+            {
+                "Ello mate",
+                "Howdy",
+                "What's up",
+                "Hey",
+                "Aloha",
+                "Sup",
+                "Yo",
+                "Greetings",
+                "Ahoy",
+                "Salutations",
+                "Namaste",
+                "Bonjour",
+                "Que pasa",
+                "Konnichiwa",
+                "Ciao"
+            };
         }
 
         [Authorize]
@@ -40,12 +60,16 @@ namespace SpotSync.Controllers
                     Artist = currentSong.Artist,
                     Album = currentSong.Album,
                     AlbumImageUrl = currentSong.AlbumArtUrl
-                } : null
+                } : null,
+                RandomGreeting = GetRandomGreeting()
             };
 
             return View(model);
         }
 
-
+        private string GetRandomGreeting()
+        {
+            return _greetings[_random.Next(0, _greetings.Count - 1)];
+        }
     }
 }
