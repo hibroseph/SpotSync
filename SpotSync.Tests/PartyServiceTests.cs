@@ -163,5 +163,32 @@ namespace SpotSync.Tests
             Assert.AreEqual(1, (await _partyService.GetPartyWithHostAsync(PartyHost2)).Attendees.Count);
             Assert.AreEqual(0, (await _partyService.GetPartyWithHostAsync(PartyHost3)).Attendees.Count);
         }
+
+        [Test]
+        public async Task PartyGoerAttendingFindsPartyWithAttendee()
+        {
+
+            string partyCode1 = _partyService.StartNewParty(PartyHost1);
+
+            PartyCodeDTO partyCodeDTO1 = new PartyCodeDTO { PartyCode = partyCode1 };
+
+            string partyCode3 = _partyService.StartNewParty(PartyHost2);
+
+            PartyCodeDTO partyCodeDTO3 = new PartyCodeDTO { PartyCode = partyCode3 };
+
+            string partyCode2 = _partyService.StartNewParty(PartyHost3);
+
+            PartyCodeDTO partyCodeDTO2 = new PartyCodeDTO { PartyCode = partyCode2 };
+
+            await _partyService.JoinPartyAsync(partyCodeDTO1, PartyAttendee1);
+            await _partyService.JoinPartyAsync(partyCodeDTO2, PartyAttendee2);
+            await _partyService.JoinPartyAsync(partyCodeDTO3, PartyAttendee3);
+
+            Domain.Party party = await _partyService.GetPartyWithAttendeeAsync(PartyAttendee3);
+
+            Assert.AreEqual(partyCodeDTO3.PartyCode, party.PartyCode);
+        }
+
+
     }
 }
