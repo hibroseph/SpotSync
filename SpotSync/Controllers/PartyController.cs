@@ -36,7 +36,7 @@ namespace SpotSync.Controllers
             }
             else if (await _partyService.IsUserPartyingAsync(user))
             {
-                Domain.Party party = await _partyService.GetPartyWithHostAsync(user);
+                Domain.Party party = await _partyService.GetPartyWithAttendeeAsync(user);
 
                 model.IsCurrentlyJoinedInAParty = true;
                 model.CurrentlyActiveParty = TranslateDomainPartyToPartyModel(party);
@@ -128,16 +128,16 @@ namespace SpotSync.Controllers
         }
 
         [Authorize]
-        [HttpGet]
-        public async Task<IActionResult> UpdateSongForParty()
+        [HttpPost]
+        public async Task<IActionResult> UpdateSongForParty([FromBody]PartyCodeDTO partyCode)
         {
-            PartyGoer host = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            if (_partyService.IsUserHostingAParty(host))
+            if (_partyService.IsUserHostingAParty(user))
             {
-                Domain.Party party = await _partyService.GetPartyWithHostAsync(host);
+                Domain.Party party = await _partyService.GetPartyWithHostAsync(user);
 
-                if (await _partyService.UpdateSongForEveryoneInPartyAsync(party, host))
+                if (await _partyService.UpdateSongForEveryoneInPartyAsync(party, user))
                 {
                     return Ok();
                 }
@@ -148,7 +148,7 @@ namespace SpotSync.Controllers
             }
             else
             {
-                return BadRequest("You are currently not hosting a party");
+                return BadRequest($"You are currently not hosting a party: {partyCode.PartyCode}");
             }
         }
     }
