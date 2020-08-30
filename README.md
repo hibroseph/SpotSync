@@ -1,4 +1,21 @@
 # SpotSync
 An application which lets you synchronize your spotify with others.
 
+## CI Builds
 [![Build Status](https://dev.azure.com/iwillridgley/iwillridgley/_apis/build/status/hibroseph.SpotSync?branchName=master)](https://dev.azure.com/iwillridgley/iwillridgley/_build/latest?definitionId=5&branchName=master)
+
+## Getting Setup
+1. Clone repository ```git clone https://github.com/hibroseph/SpotSync.git```
+1. Obtain Spotify Application Credientals
+    1. If you have confidence with project owner, ask for Client Secret and Client Id of project owners Spotify application
+    1. Create a Spotify application
+        1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/login) and Login and Create Application
+        1. Go to application dashboard and obtain Client ID and Client Secret 
+        **DO NOT SHARE THIS CLIENT SECRET WITH ANYONE**
+1. Add Spotify application credientals in ```appsettings.json```
+1. Determine what port your application will use when debugging (This can be determined by running the application and seeing what the URL is)
+1. Make sure the Redirect URL in the ```appsettings.json``` is using the port that your app uses by default
+1. Copy the Redirect URL and add it as a Redirect URL in your Spotify Application in the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/applications)
+    1. Click Edit Settings and scroll down to Redirect URIs
+    1. Enter in the Redirect URL as shown in the ```appsettings.json``` (this includes the /account/authorized)
+1. Running SpotSync you should see the main app page and be able to login.
