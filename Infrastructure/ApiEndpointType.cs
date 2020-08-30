@@ -4,11 +4,13 @@ using System.Text;
 
 namespace SpotSync.Infrastructure
 {
-    public enum SpotifyApiEndpointType
+    public enum ApiEndpointType
     {
         CurrentSong = 1,
         UserInformation = 2,
         PlaySong = 3,
-        Token = 4
+        Token = 4,
+        GetTopTracks = 5,
+        GetRecommendedTracks = 6
     }
 }

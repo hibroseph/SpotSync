@@ -45,7 +45,12 @@ namespace SpotSync.Tests.Unit_Tests
             };
             HttpResponseMessage responseMessage = new HttpResponseMessage { Content = new StringContent("", Encoding.UTF8, "application/json") };
             _spotifyAuthentication.Setup(p => p.GetAuthenticationHeaderForPartyGoerAsync(PARTY_GOER_ID)).Returns(Task.FromResult(new AuthenticationHeaderValue("Bearer")));
-            _httpClient.Setup(p => p.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(new HttpResponseMessage()));
+            _httpClient.Setup(p => p.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(new HttpResponseMessage
+            {
+                StatusCode = System.Net.HttpStatusCode.OK,
+                Content = new StringContent("")
+            }
+            ));
 
             //var currentSong = await _spotifyHttpClient.GetCurrentSongAsync(PARTY_GOER_ID);
 

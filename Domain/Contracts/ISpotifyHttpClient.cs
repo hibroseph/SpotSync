@@ -10,6 +10,8 @@ namespace SpotSync.Domain.Contracts
     {
         Task<CurrentSongDTO> GetCurrentSongAsync(string partyGoerId);
         Task<string> RequestAccessAndRefreshTokenFromSpotifyAsync(string code);
-        Task<bool> UpdateSongForPartyGoerAsync(string partyGoerId, CurrentSongDTO currentSong);
+        Task<bool> UpdateSongForPartyGoerAsync(string partyGoerId, List<string> songUris, int currentSongProgressInMs);
+        Task<List<string>> GetUserTopTrackIdsAsync(string spotifyId, int count = 10);
+        Task<List<string>> GetRecommendedTrackUrisAsync(string spotifyId, List<string> seedTrackUris);
     }
 }

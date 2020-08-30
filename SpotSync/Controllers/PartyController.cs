@@ -139,13 +139,13 @@ namespace SpotSync.Controllers
             {
                 Domain.Party party = await _partyService.GetPartyWithHostAsync(user);
 
-                return await UpdateSongForEveryoneInPartyAsync(party, user);
+                return await UpdatePlaylistForEveryoneInPartyAsync(party, user);
             }
             else if (await _partyService.IsUserPartyingAsync(user))
             {
                 Domain.Party party = await _partyService.GetPartyWithAttendeeAsync(user);
 
-                return await UpdateSongForEveryoneInPartyAsync(party, user);
+                return await UpdatePlaylistForEveryoneInPartyAsync(party, user);
             }
             else
             {
@@ -153,9 +153,9 @@ namespace SpotSync.Controllers
             }
         }
 
-        private async Task<IActionResult> UpdateSongForEveryoneInPartyAsync(Domain.Party party, PartyGoer partyGoer)
+        private async Task<IActionResult> UpdatePlaylistForEveryoneInPartyAsync(Domain.Party party, PartyGoer partyGoer)
         {
-            if (await _partyService.UpdateSongForEveryoneInPartyAsync(party, partyGoer))
+            if (await _partyService.UpdatePartyPlaylistForEveryoneInPartyAsync(party, partyGoer))
             {
                 return Ok();
             }
