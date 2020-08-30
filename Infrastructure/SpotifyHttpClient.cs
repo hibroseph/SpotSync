@@ -146,15 +146,22 @@ namespace SpotSync.Infrastructure
 
             JObject currentSong = JObject.Parse(responseContent);
 
-            return new CurrentSongDTO
+            if (currentSong["currently_playing_type"].ToString().Equals("track", StringComparison.OrdinalIgnoreCase))
             {
-                Artist = currentSong["item"]["artists"][0]["name"].ToString(),
-                Album = currentSong["item"]["album"]["name"].ToString(),
-                ProgressMs = Convert.ToInt32(currentSong["progress_ms"].ToString()),
-                Title = currentSong["item"]["name"].ToString(),
-                TrackUri = currentSong["item"]["uri"].ToString(),
-                AlbumArtUrl = currentSong["item"]["album"]["images"][0]["url"].ToString()
-            };
+                return new CurrentSongDTO
+                {
+                    Artist = currentSong["item"]["artists"][0]["name"].ToString(),
+                    Album = currentSong["item"]["album"]["name"].ToString(),
+                    ProgressMs = Convert.ToInt32(currentSong["progress_ms"].ToString()),
+                    Title = currentSong["item"]["name"].ToString(),
+                    TrackUri = currentSong["item"]["uri"].ToString(),
+                    AlbumArtUrl = currentSong["item"]["album"]["images"][0]["url"].ToString()
+                };
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public async Task<List<string>> GetUserTopTrackIdsAsync(string spotifyId, int count = 10)

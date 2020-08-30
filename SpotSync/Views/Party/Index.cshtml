@@ -42,33 +42,33 @@
     }
     else if (Model.IsCurrentlyJoinedInAParty)
     {
-<div class="box-inner">
-    <h4>You are currently attending a party</h4>
-    <p>Share the code: <b>@Model.CurrentlyActiveParty.PartyCode</b> with your friends to join your party</p>
-    @if (Model.CurrentlyActiveParty.Attendees.Count > 0)
-    {
-        <h4>People Partying With You:</h4>
-        @foreach (string attendee in Model.CurrentlyActiveParty.Attendees)
-        {
-            <p>@attendee</p>
-        }
-    }
-    else
-    {
-        <p>Looks like no one is partying with you. You should invite some friends with the party code: <b>@Model.CurrentlyActiveParty.PartyCode</b></p>
-    }
+        <div class="box-inner">
+            <h4>You are currently attending a party</h4>
+            <p>Share the code: <b>@Model.CurrentlyActiveParty.PartyCode</b> with your friends to join your party</p>
+            @if (Model.CurrentlyActiveParty.Attendees.Count > 0)
+            {
+                <h4>People Partying With You:</h4>
+                @foreach (string attendee in Model.CurrentlyActiveParty.Attendees)
+                {
+                    <p>@attendee</p>
+                }
+            }
+            else
+            {
+                <p>Looks like no one is partying with you. You should invite some friends with the party code: <b>@Model.CurrentlyActiveParty.PartyCode</b></p>
+            }
 
-    <button class="btn btn-primary sync-btn" onclick="UpdateSongForParty()">
-        Sync Current Song <i class="material-icons btn-icon">sync</i>
-    </button>
-    <button class="btn btn-primary" onclick="UpdateQueueForParty()">
-        Generate New Queue <i class="material-icons btn-icon">playlist_add_check</i>
-    </button>
-    <button class="btn btn-danger" onclick="LeaveParty()">
-        Leave Party <i class="material-icons btn-icon">delete</i>
-    </button>
-    <div id="party-controls-message"></div>
-</div>
+            <button class="btn btn-primary sync-btn" onclick="UpdateSongForParty()">
+                Sync Current Song <i class="material-icons btn-icon">sync</i>
+            </button>
+            <button class="btn btn-primary" onclick="UpdateQueueForParty()">
+                Generate New Queue <i class="material-icons btn-icon">playlist_add_check</i>
+            </button>
+            <button class="btn btn-danger" onclick="LeaveParty()">
+                Leave Party <i class="material-icons btn-icon">delete</i>
+            </button>
+            <div id="party-controls-message"></div>
+        </div>
     }
     else
     {
