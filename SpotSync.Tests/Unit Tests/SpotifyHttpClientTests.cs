@@ -31,7 +31,7 @@ namespace SpotSync.Tests.Unit_Tests
         }
 
         [Test]
-        public async void GetCurrentSong()
+        public async Task GetCurrentSong()
         {
             //  TODO: Finish figuring out best way to unit test the third party api
             CurrentSongDTO currentSongDto = new CurrentSongDTO
@@ -47,7 +47,7 @@ namespace SpotSync.Tests.Unit_Tests
             _spotifyAuthentication.Setup(p => p.GetAuthenticationHeaderForPartyGoerAsync(PARTY_GOER_ID)).Returns(Task.FromResult(new AuthenticationHeaderValue("Bearer")));
             _httpClient.Setup(p => p.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(new HttpResponseMessage()));
 
-            var currentSong = await _spotifyHttpClient.GetCurrentSongAsync(PARTY_GOER_ID);
+            //var currentSong = await _spotifyHttpClient.GetCurrentSongAsync(PARTY_GOER_ID);
 
             Assert.Inconclusive();
         }
