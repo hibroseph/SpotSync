@@ -28,10 +28,6 @@ namespace SpotSync.Controllers
 
             PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            // test code to test user partying screen
-            string partyCode = _partyService.StartNewParty(user);
-            await _partyService.JoinPartyAsync(new PartyCodeDTO { PartyCode = partyCode }, user);
-
             if (await _partyService.IsUserPartyingAsync(user))
             {
                 Domain.Party party = await _partyService.GetPartyWithAttendeeAsync(user);

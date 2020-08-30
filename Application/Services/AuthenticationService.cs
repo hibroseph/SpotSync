@@ -27,5 +27,7 @@ namespace SpotSync.Application.Services
         {
             await _spotifyAuthentication.RemoveAuthenticatedPartyGoerAsync(userId);
         }
+
+
     }
 }

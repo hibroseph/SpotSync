@@ -1,4 +1,5 @@
 ﻿using SpotSync.Domain;
+using SpotSync.Domain.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SpotSync.Application.Authentication
 {
-    public class SpotifyAuthentication
+    public class SpotifyAuthentication : ISpotifyAuthentication
     {
         public SpotifyAuthentication(string clientId, string clientSecret, string redirectUrl)
         {

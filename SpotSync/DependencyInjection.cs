@@ -20,7 +20,7 @@ namespace SpotSync
         {
             SpotifyAuthentication spotifyAuthentication = new SpotifyAuthentication(configuration["Spotify:ClientId"], configuration["Spotify:ClientSecret"], configuration["Spotify:RedirectUrl"]);
 
-            ISpotifyHttpClient spotifyHttpClient = new SpotifyHttpClient(spotifyAuthentication);
+            ISpotifyHttpClient spotifyHttpClient = new SpotifyHttpClient(spotifyAuthentication, new HttpClient());
             IPartyRepository partyRepository = new PartyRepository();
             IPartyGoerService partyGoerService = new PartyGoerService(spotifyHttpClient);
 

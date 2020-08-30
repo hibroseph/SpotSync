@@ -17,13 +17,13 @@ namespace SpotSync.Infrastructure
 {
     public class SpotifyHttpClient : ISpotifyHttpClient
     {
-        private HttpClient _httpClient;
-        private SpotifyAuthentication _spotifyAuthentication;
+        private IHttpClient _httpClient;
+        private ISpotifyAuthentication _spotifyAuthentication;
         private Dictionary<SpotifyApiEndpointType, string> _spotifyApiEndpoints;
 
-        public SpotifyHttpClient(SpotifyAuthentication spotifyAuthentication)
+        public SpotifyHttpClient(ISpotifyAuthentication spotifyAuthentication, IHttpClient httpClient)
         {
-            _httpClient = new HttpClient();
+            _httpClient = httpClient;
             _spotifyAuthentication = spotifyAuthentication;
             _spotifyApiEndpoints = new Dictionary<SpotifyApiEndpointType, string>
             {

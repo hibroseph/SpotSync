@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace SpotSync.Tests
 {
-    class PartyServiceTests
+    class PartyServiceIntegrationTests
     {
         IPartyService _partyService;
         IPartyRepository _partyRepository;
