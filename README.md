@@ -19,3 +19,15 @@ An application which lets you synchronize your spotify with others.
     1. Click Edit Settings and scroll down to Redirect URIs
     1. Enter in the Redirect URL as shown in the ```appsettings.json``` (this includes the /account/authorized)
 1. Running SpotSync you should see the main app page and be able to login.
+
+## Helpful Development/Debugging Techniques
+### Debugging/Debugging Party Commands
+If you would like to debug how other users will be affected by party commands (such as Sync Current Song), you can create a party and add yourself to that party with the following code added into the PartyController in the Index action after the User is found
+```csharp
+/******************* DEBUGGING CODE TO TEST PARTIES (do not send this to production) ******************************/
+    var partyCode = _partyService.StartNewParty(user);
+
+    await _partyService.JoinPartyAsync(new PartyCodeDTO { PartyCode = partyCode }, user);
+/******************************************************************************************************************/
+```
+Any action you do that affects the party will affect your own Spotify so you can see what it does to your playback (and queue etc)
