@@ -28,6 +28,12 @@ namespace SpotSync.Controllers
 
             PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
+            /******************* DEBUGGING CODE TO TEST PARTIES (do not send this to production) ******************************/
+            var partyCode = _partyService.StartNewParty(user);
+
+            await _partyService.JoinPartyAsync(new PartyCodeDTO { PartyCode = partyCode }, user);
+            /******************************************************************************************************************/
+
             if (await _partyService.IsUserPartyingAsync(user))
             {
                 Domain.Party party = await _partyService.GetPartyWithAttendeeAsync(user);
@@ -139,6 +145,30 @@ namespace SpotSync.Controllers
             {
                 Domain.Party party = await _partyService.GetPartyWithHostAsync(user);
 
+                return await UpdateCurrentSongForEveryoneInPartyAsync(party, user);
+            }
+            else if (await _partyService.IsUserPartyingAsync(user))
+            {
+                Domain.Party party = await _partyService.GetPartyWithAttendeeAsync(user);
+
+                return await UpdateCurrentSongForEveryoneInPartyAsync(party, user);
+            }
+            else
+            {
+                return BadRequest($"You are currently not hosting a party or attending a party: {partyCode.PartyCode}");
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> UpdateQueueForParty([FromBody]PartyCodeDTO partyCode)
+        {
+            PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            if (_partyService.IsUserHostingAParty(user))
+            {
+                Domain.Party party = await _partyService.GetPartyWithHostAsync(user);
+
                 return await UpdatePlaylistForEveryoneInPartyAsync(party, user);
             }
             else if (await _partyService.IsUserPartyingAsync(user))
@@ -156,6 +186,18 @@ namespace SpotSync.Controllers
         private async Task<IActionResult> UpdatePlaylistForEveryoneInPartyAsync(Domain.Party party, PartyGoer partyGoer)
         {
             if (await _partyService.UpdatePartyPlaylistForEveryoneInPartyAsync(party, partyGoer))
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest("Unable to update song for everyone");
+            }
+
+        }
+        private async Task<IActionResult> UpdateCurrentSongForEveryoneInPartyAsync(Domain.Party party, PartyGoer partyGoer)
+        {
+            if (await _partyService.UpdateCurrentSongForEveryoneInPartyAsync(party, partyGoer))
             {
                 return Ok();
             }

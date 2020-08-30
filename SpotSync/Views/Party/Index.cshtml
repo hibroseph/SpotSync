@@ -26,6 +26,9 @@
                 <button class="btn btn-primary sync-btn" onclick="UpdateSongForParty()">
                     Sync Current Song <i class="material-icons btn-icon">sync</i>
                 </button>
+                <button class="btn btn-primary" onclick="UpdateQueueForParty()">
+                    Generate New Queue <i class="material-icons btn-icon">playlist_add_check</i>
+                </button>
                 <button class="btn btn-danger" onclick="EndParty()">
                     End Party <i class="material-icons btn-icon">delete</i>
                 </button>
@@ -57,6 +60,9 @@
 
     <button class="btn btn-primary sync-btn" onclick="UpdateSongForParty()">
         Sync Current Song <i class="material-icons btn-icon">sync</i>
+    </button>
+    <button class="btn btn-primary" onclick="UpdateQueueForParty()">
+        Generate New Queue <i class="material-icons btn-icon">playlist_add_check</i>
     </button>
     <button class="btn btn-danger" onclick="LeaveParty()">
         Leave Party <i class="material-icons btn-icon">delete</i>
@@ -145,6 +151,22 @@
                 $("#party-controls-message").html(`<p class="error">Error while updating all party goers with the new song: ${response.responseText}`)
             })
     }
+
+    function UpdateQueueForParty() {
+        $.ajax("/Party/UpdateQueueForParty", {
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ PartyCode: '@Model.CurrentlyActiveParty.PartyCode' })})
+            .done((response) =>
+             {
+                $("#party-controls-message").html('<p class="success">Successfully updated queue for all party goers.')
+            })
+            .fail((response) =>
+            {
+                $("#party-controls-message").html(`< p class="error">Error while updating all party goers with the new queue: ${response.responseText
+        }`)
+            })
+        }
     </text>
     }
 

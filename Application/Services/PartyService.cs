@@ -69,6 +69,49 @@ namespace SpotSync.Application.Services
             return party.PartyCode;
         }
 
+        public async Task<bool> UpdateCurrentSongForEveryoneInPartyAsync(Party party, PartyGoer user)
+        {
+            try
+            {
+                if (party is null)
+                {
+                    throw new Exception($"Obtaining a party with ID {party.Id} returned null from the database");
+                }
+
+                if (!party.Host.Id.Equals(user.Id, StringComparison.CurrentCultureIgnoreCase) &&
+                !party.Attendees.Exists(p => p.Id.Equals(user.Id, StringComparison.CurrentCultureIgnoreCase)))
+                {
+                    throw new Exception($"A non host or party attendee tried to change the song for the party with ID {party.Id}. Attempted user ID: {user.Id}");
+                }
+
+                // Get the current song from the host
+                CurrentSongDTO song = await _spotifyHttpClient.GetCurrentSongAsync(user.Id);
+
+                List<Task<bool>> updateSongForPartyTask = new List<Task<bool>>();
+                foreach (PartyGoer attendee in party.Attendees)
+                {
+                    updateSongForPartyTask.Add(_spotifyHttpClient.UpdateSongForPartyGoerAsync(attendee.Id, new List<string> { song.TrackUri }, song.ProgressMs));
+                }
+
+                await Task.WhenAll(updateSongForPartyTask);
+
+                // Verify all the updates worked
+                foreach (Task<bool> task in updateSongForPartyTask)
+                {
+                    if (!task.Result)
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
         public async Task<bool> UpdatePartyPlaylistForEveryoneInPartyAsync(Party party, PartyGoer user)
         {
             try
@@ -87,13 +130,10 @@ namespace SpotSync.Application.Services
                 var topTrackUris = await _spotifyHttpClient.GetUserTopTrackIdsAsync(user.Id, 5);
                 var recommendTrackUris = await _spotifyHttpClient.GetRecommendedTrackUrisAsync(user.Id, topTrackUris);
 
-                // Get the current song from the host
-                CurrentSongDTO song = await _spotifyHttpClient.GetCurrentSongAsync(user.Id);
-
                 List<Task<bool>> updateSongForPartyTask = new List<Task<bool>>();
                 foreach (PartyGoer attendee in party.Attendees)
                 {
-                    updateSongForPartyTask.Add(_spotifyHttpClient.UpdateSongForPartyGoerAsync(attendee.Id, recommendTrackUris, song.ProgressMs));
+                    updateSongForPartyTask.Add(_spotifyHttpClient.UpdateSongForPartyGoerAsync(attendee.Id, recommendTrackUris, 0));
                 }
 
                 await Task.WhenAll(updateSongForPartyTask);
