@@ -14,11 +14,13 @@ namespace SpotSync.Application.Services
     {
         IPartyRepository _partyRepository;
         ISpotifyHttpClient _spotifyHttpClient;
+        Random _random;
 
         public PartyService(IPartyRepository partyRepository, ISpotifyHttpClient spotifyHttpClient)
         {
             _partyRepository = partyRepository;
             _spotifyHttpClient = spotifyHttpClient;
+            _random = new Random();
         }
 
         public bool IsUserHostingAParty(PartyGoer host)
@@ -127,8 +129,16 @@ namespace SpotSync.Application.Services
                     throw new Exception($"A non host or party attendee tried to change the song for the party with ID {party.Id}. Attempted user ID: {user.Id}");
                 }
 
-                var topTrackUris = await _spotifyHttpClient.GetUserTopTrackIdsAsync(user.Id, 5);
-                var recommendTrackUris = await _spotifyHttpClient.GetRecommendedTrackUrisAsync(user.Id, topTrackUris);
+                List<Task<List<string>>> topTrackUrisTasks = new List<Task<List<string>>>();
+
+                topTrackUrisTasks.Add(_spotifyHttpClient.GetUserTopTrackIdsAsync(user.Id, 5));
+
+                foreach (PartyGoer attendee in party.Attendees)
+                {
+                    topTrackUrisTasks.Add(_spotifyHttpClient.GetUserTopTrackIdsAsync(attendee.Id, 5));
+                }
+
+                var recommendTrackUris = await _spotifyHttpClient.GetRecommendedTrackUrisAsync(user.Id, GetNNumberOfTrackUris(topTrackUrisTasks.SelectMany(p => p.Result).ToList(), 5));
 
                 List<Task<bool>> updateSongForPartyTask = new List<Task<bool>>();
                 foreach (PartyGoer attendee in party.Attendees)
@@ -186,6 +196,11 @@ namespace SpotSync.Application.Services
             {
                 return false;
             }
+        }
+
+        private List<string> GetNNumberOfTrackUris(List<string> topTrackUris, int selectNTracks)
+        {
+            return topTrackUris.OrderBy(p => _random.Next()).Take(selectNTracks).ToList();
         }
     }
 }

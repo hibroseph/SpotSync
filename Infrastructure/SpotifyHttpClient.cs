@@ -41,12 +41,15 @@ namespace SpotSync.Infrastructure
             };
         }
 
-        public async Task<List<string>> GetRecommendedTrackUrisAsync(string spotifyId, List<string> seedTrackIds)
+        public async Task<List<string>> GetRecommendedTrackUrisAsync(string spotifyId, List<string> seedTrackIds, float minimumEnergy)
         {
             if (seedTrackIds.Count > 5)
                 throw new ArgumentException("Seed tracks cannot exeed 5");
 
-            var response = await SendHttpRequestAsync(spotifyId, _apiEndpoints[ApiEndpointType.GetRecommendedTracks], $"seed_tracks={HttpUtility.UrlEncode(ConvertToCommaDelimitedString(seedTrackIds))}", true);
+            if (minimumEnergy > 1 && minimumEnergy < 0)
+                throw new ArgumentException("Minimum Energy must be between 0 and 1");
+
+            var response = await SendHttpRequestAsync(spotifyId, _apiEndpoints[ApiEndpointType.GetRecommendedTracks], $"seed_tracks={HttpUtility.UrlEncode(ConvertToCommaDelimitedString(seedTrackIds))}&min_energy={minimumEnergy}", true);
 
             JObject json = JObject.Parse(await response.Content.ReadAsStringAsync());
 

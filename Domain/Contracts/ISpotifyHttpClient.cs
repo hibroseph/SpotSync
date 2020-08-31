@@ -12,6 +12,6 @@ namespace SpotSync.Domain.Contracts
         Task<string> RequestAccessAndRefreshTokenFromSpotifyAsync(string code);
         Task<bool> UpdateSongForPartyGoerAsync(string partyGoerId, List<string> songUris, int currentSongProgressInMs);
         Task<List<string>> GetUserTopTrackIdsAsync(string spotifyId, int count = 10);
-        Task<List<string>> GetRecommendedTrackUrisAsync(string spotifyId, List<string> seedTrackUris);
+        Task<List<string>> GetRecommendedTrackUrisAsync(string spotifyId, List<string> seedTrackUris, float minimumEnergy = 0.0f);
     }
 }
