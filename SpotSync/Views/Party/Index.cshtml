@@ -94,7 +94,10 @@
     }
 </div>
 
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+
 <script>
+
     function CreateParty() {
         $.ajax("/Party/CreateParty")
             .done((response) => {
@@ -139,7 +142,25 @@
 
     @if (Model.IsCurrentlyHostingParty || Model.IsCurrentlyJoinedInAParty) {
      <text>
+
+        var connection = new signalR.HubConnectionBuilder().withUrl("/partyHub").build();
+
+    connection.start().then(() => {
+        console.log("You are connected baby");
+        connection.invoke("ConnectToParty", '@Model.CurrentlyActiveParty.PartyCode').catch(err => { console.log(err) });
+    }).catch(err => {
+        console.log(err);
+    })
+
+    connection.on("UpdateParty", (message) => {
+        console.log(message)
+    })
+
+
     function UpdateSongForParty() {
+
+        connection.invoke("UpdateParty", '@Model.CurrentlyActiveParty.PartyCode').catch(err => { console.log(err) });
+
         $.ajax("/Party/UpdateSongForParty", {
             type: "POST",
             contentType: "application/json; charset=utf-8",

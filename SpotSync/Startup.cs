@@ -2,12 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SpotSync.Classes.Hubs;
+using SpotSync.Domain.Events;
 
 namespace SpotSync
 {
@@ -26,11 +29,14 @@ namespace SpotSync
             services.AddControllersWithViews();
             services.AddSpotSyncServices(Configuration);
             services.AddSpotSyncAuthentication();
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            DomainEvents.Configure(app.ApplicationServices);
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -55,6 +61,7 @@ namespace SpotSync
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapHub<PartyHub>("/partyhub");
             });
         }
     }

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.DTO;
+using SpotSync.Domain.Events;
 using SpotSync.Models.Party;
 
 namespace SpotSync.Controllers
@@ -27,6 +28,12 @@ namespace SpotSync.Controllers
             PartyModel model = new PartyModel();
 
             PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            /******************* DEBUGGING CODE TO TEST PARTIES (do not send this to production) ******************************/
+            var partyCode = _partyService.StartNewParty(user);
+
+            await _partyService.JoinPartyAsync(new PartyCodeDTO { PartyCode = partyCode }, user);
+            /******************************************************************************************************************/
 
             if (await _partyService.IsUserPartyingAsync(user))
             {
@@ -179,7 +186,7 @@ namespace SpotSync.Controllers
 
         private async Task<IActionResult> UpdatePlaylistForEveryoneInPartyAsync(Domain.Party party, PartyGoer partyGoer)
         {
-            if (await _partyService.UpdatePartyPlaylistForEveryoneInPartyAsync(party, partyGoer))
+            if (await _partyService.CreatePartyPlaylistForEveryoneInPartyAsync(party, partyGoer))
             {
                 return Ok();
             }
@@ -191,7 +198,7 @@ namespace SpotSync.Controllers
         }
         private async Task<IActionResult> UpdateCurrentSongForEveryoneInPartyAsync(Domain.Party party, PartyGoer partyGoer)
         {
-            if (await _partyService.UpdateCurrentSongForEveryoneInPartyAsync(party, partyGoer))
+            if (await _partyService.CreatePartyPlaylistForEveryoneInPartyAsync(party, partyGoer))
             {
                 return Ok();
             }

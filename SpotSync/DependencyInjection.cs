@@ -6,6 +6,7 @@ using SpotSync.Application.Authentication;
 using SpotSync.Application.Services;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
+using SpotSync.Domain.Events;
 using SpotSync.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,8 @@ namespace SpotSync
             serviceCollection.AddSingleton<IPartyService>(new PartyService(partyRepository, spotifyHttpClient));
             serviceCollection.AddSingleton<IAuthenticationService>(new AuthenticationService(spotifyHttpClient, spotifyAuthentication));
             serviceCollection.AddSingleton<IPartyGoerService>(partyGoerService);
+
+            serviceCollection.AddSingleton<IHandles<ChangeSong>>(new ChangeSongHandler());
         }
 
         public static void AddSpotSyncAuthentication(this IServiceCollection serviceCollection)

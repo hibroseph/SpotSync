@@ -4,6 +4,7 @@ using SpotSync.Application.Authentication;
 using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.DTO;
+using SpotSync.Domain.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,6 +40,15 @@ namespace SpotSync.Infrastructure
                 { ApiEndpointType.GetRecommendedTracks, new SpotifyEndpoint { EndpointUrl = "https://api.spotify.com/v1/recommendations", HttpMethod = HttpMethod.Get} }
 
             };
+
+            DomainEvents.Register<ChangeSong>(p =>
+            {
+                foreach (var listener in p.Listeners)
+                {
+                    _ = UpdateSongForPartyGoerAsync(listener.Id, p.Song.TrackUri, p.ProgressMs);
+                };
+            }
+            );
         }
 
         public async Task<List<string>> GetRecommendedTrackUrisAsync(string spotifyId, List<string> seedTrackIds, float minimumEnergy)
@@ -60,6 +70,33 @@ namespace SpotSync.Infrastructure
             }
 
             return recommendedTrackUris;
+        }
+
+        public async Task<List<Song>> GetRecommendedSongsAsync(string spotifyId, List<string> seedTrackIds, float minimumEnergy)
+        {
+            if (seedTrackIds.Count > 5)
+                throw new ArgumentException("Seed tracks cannot exeed 5");
+
+            if (minimumEnergy > 1 && minimumEnergy < 0)
+                throw new ArgumentException("Minimum Energy must be between 0 and 1");
+
+            var response = await SendHttpRequestAsync(spotifyId, _apiEndpoints[ApiEndpointType.GetRecommendedTracks], $"seed_tracks={HttpUtility.UrlEncode(ConvertToCommaDelimitedString(seedTrackIds))}", true);
+
+            JObject json = JObject.Parse(await response.Content.ReadAsStringAsync());
+
+            List<Song> recommendedSongs = new List<Song>();
+            foreach (var item in json["tracks"])
+            {
+                recommendedSongs.Add(new Song
+                {
+                    TrackUri = item["uri"].ToString(),
+                    Title = item["name"].ToString(),
+                    Artist = item["artists"].First["name"].ToString(),
+                    Length = item["duration_ms"].Value<int>()
+                });
+            }
+
+            return recommendedSongs;
         }
 
         private string ConvertToCommaDelimitedString(List<string> items)
@@ -190,6 +227,24 @@ namespace SpotSync.Infrastructure
             HttpResponseMessage response = await SendHttpRequestAsync(partyGoerId, _apiEndpoints[ApiEndpointType.PlaySong], new StartUserPlaybackSong
             {
                 uris = songUris,
+                position_ms = currentSongProgressInMs
+            });
+
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateSongForPartyGoerAsync(string partyGoerId, string songUri, int currentSongProgressInMs)
+        {
+            HttpResponseMessage response = await SendHttpRequestAsync(partyGoerId, _apiEndpoints[ApiEndpointType.PlaySong], new StartUserPlaybackSong
+            {
+                uris = new List<string> { songUri },
                 position_ms = currentSongProgressInMs
             });
 

@@ -66,9 +66,18 @@ namespace SpotSync.Application.Services
         {
             Party party = new Party(partyHost);
 
+            /*party.CreatePlaylist(new Playlist(new List<Song> { new Song { Length = 4000 }, new Song { Length = 8000 }, new Song { Length = 1000 } }));
+            party.StartPlaylist();
+            */
             _partyRepository.CreateParty(party);
 
             return party.PartyCode;
+        }
+
+        public bool NextSong(Song song)
+        {
+
+            return true;
         }
 
         public async Task<bool> UpdateCurrentSongForEveryoneInPartyAsync(Party party, PartyGoer user)
@@ -165,6 +174,47 @@ namespace SpotSync.Application.Services
             }
 
         }
+
+        public async Task<bool> CreatePartyPlaylistForEveryoneInPartyAsync(Party party, PartyGoer user)
+        {
+            try
+            {
+                if (party is null)
+                {
+                    throw new Exception($"Obtaining a party with ID {party.Id} returned null from the database");
+                }
+
+                if (!party.Host.Id.Equals(user.Id, StringComparison.CurrentCultureIgnoreCase) &&
+                !party.Attendees.Exists(p => p.Id.Equals(user.Id, StringComparison.CurrentCultureIgnoreCase)))
+                {
+                    throw new Exception($"A non host or party attendee tried to change the song for the party with ID {party.Id}. Attempted user ID: {user.Id}");
+                }
+
+                List<Task<List<string>>> topTrackUrisTasks = new List<Task<List<string>>>();
+
+                topTrackUrisTasks.Add(_spotifyHttpClient.GetUserTopTrackIdsAsync(user.Id, 5));
+
+                foreach (PartyGoer attendee in party.Attendees)
+                {
+                    topTrackUrisTasks.Add(_spotifyHttpClient.GetUserTopTrackIdsAsync(attendee.Id, 5));
+                }
+
+                List<Song> recommendSongs = await _spotifyHttpClient.GetRecommendedSongsAsync(user.Id, GetNNumberOfTrackUris(topTrackUrisTasks.SelectMany(p => p.Result).ToList(), 5), 5);
+
+                party.CreatePlaylist(new Playlist(recommendSongs, party.Attendees));
+
+                /*TODO: REMOVE THIS FOR PRODUCTION THIS IS FOR TESTING */
+                party.StartPlaylist();
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+        }
+
         public async Task<Party> GetPartyAsync(PartyCodeDTO partyCode)
         {
             return await _partyRepository.GetAsync(partyCode);
@@ -202,5 +252,6 @@ namespace SpotSync.Application.Services
         {
             return topTrackUris.OrderBy(p => _random.Next()).Take(selectNTracks).ToList();
         }
+
     }
 }

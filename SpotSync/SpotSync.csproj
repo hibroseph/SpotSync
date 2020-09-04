@@ -6,7 +6,7 @@
 		<SignAssembly>false</SignAssembly>
 		<UserSecretsId>faf3a1a4-4c57-48a4-91df-e775496e02d5</UserSecretsId>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <LangVersion>latest</LangVersion>
+		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -16,14 +16,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Classes\" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\Application\Application.csproj" />
-	  <ProjectReference Include="..\Domain\Domain.csproj" />
-	  <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
-	  <ProjectReference Include="..\Persistence\Persistence.csproj" />
+		<ProjectReference Include="..\Application\Application.csproj" />
+		<ProjectReference Include="..\Domain\Domain.csproj" />
+		<ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
+		<ProjectReference Include="..\Persistence\Persistence.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -40,7 +40,14 @@ namespace SpotSync.Application.Authentication
         {
             try
             {
-                AuthenticationTokens.Add(partyGoerId, new AuthenticationToken(accessToken, refreshToken, secondsTillAccessTokenExpires));
+                if (!AuthenticationTokens.ContainsKey(partyGoerId))
+                {
+                    AuthenticationTokens.Add(partyGoerId, new AuthenticationToken(accessToken, refreshToken, secondsTillAccessTokenExpires));
+                }
+                else
+                {
+                    AuthenticationTokens[partyGoerId] = new AuthenticationToken(accessToken, refreshToken, secondsTillAccessTokenExpires);
+                }
 
                 return Task.CompletedTask;
             }

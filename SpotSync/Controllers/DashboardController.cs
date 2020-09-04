@@ -54,7 +54,7 @@ namespace SpotSync.Controllers
             DashboardModel model = new DashboardModel
             {
                 Name = User.FindFirstValue(ClaimTypes.NameIdentifier),
-                CurrentSong = currentSong != null ? new Song
+                CurrentSong = currentSong != null ? new Models.Dashboard.Song
                 {
                     Title = currentSong.Title,
                     Artist = currentSong.Artist,
