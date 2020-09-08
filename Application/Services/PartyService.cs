@@ -175,7 +175,7 @@ namespace SpotSync.Application.Services
 
         }
 
-        public async Task<bool> CreatePartyPlaylistForEveryoneInPartyAsync(Party party, PartyGoer user)
+        public async Task<List<Song>> CreatePartyPlaylistForEveryoneInPartyAsync(Party party, PartyGoer user)
         {
             try
             {
@@ -199,18 +199,15 @@ namespace SpotSync.Application.Services
                     topTrackUrisTasks.Add(_spotifyHttpClient.GetUserTopTrackIdsAsync(attendee.Id, 5));
                 }
 
-                List<Song> recommendSongs = await _spotifyHttpClient.GetRecommendedSongsAsync(user.Id, GetNNumberOfTrackUris(topTrackUrisTasks.SelectMany(p => p.Result).ToList(), 5), 5);
+                List<Song> playlist = await _spotifyHttpClient.GetRecommendedSongsAsync(user.Id, GetNNumberOfTrackUris(topTrackUrisTasks.SelectMany(p => p.Result).ToList(), 5), 5);
 
-                party.CreatePlaylist(new Playlist(recommendSongs, party.Attendees));
+                party.CreatePlaylist(new Playlist(playlist, party.Attendees, party.PartyCode));
 
-                /*TODO: REMOVE THIS FOR PRODUCTION THIS IS FOR TESTING */
-                party.StartPlaylist();
-
-                return true;
+                return playlist;
             }
             catch (Exception)
             {
-                return false;
+                return null;
             }
 
         }

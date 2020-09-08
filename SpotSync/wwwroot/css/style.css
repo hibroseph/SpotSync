@@ -177,6 +177,18 @@ i.btn-icon {
 #create-party-box {
   border-bottom: solid 1px gray; }
 
+.current-song {
+  outline: thin solid #ff430a; }
+
+td, th {
+  padding: 20px; }
+
+.responsive-icon {
+  transition: transform 0.2s; }
+
+.responsive-icon:hover {
+  transform: scale(1.2); }
+
 html, body {
   margin: 0;
   padding: 0;

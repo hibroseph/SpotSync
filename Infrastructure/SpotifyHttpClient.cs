@@ -92,7 +92,8 @@ namespace SpotSync.Infrastructure
                     TrackUri = item["uri"].ToString(),
                     Title = item["name"].ToString(),
                     Artist = item["artists"].First["name"].ToString(),
-                    Length = item["duration_ms"].Value<int>()
+                    Length = item["duration_ms"].Value<int>(),
+                    AlbumImageUrl = item["album"]["images"].First["url"].ToString()
                 });
             }
 
@@ -254,7 +255,7 @@ namespace SpotSync.Infrastructure
             }
             else
             {
-                return false;
+                throw new Exception($"Unable to update song for {partyGoerId}. Message from Spotify: {await response.Content.ReadAsStringAsync()}");
             }
         }
 

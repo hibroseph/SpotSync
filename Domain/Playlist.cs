@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -12,47 +13,59 @@ namespace SpotSync.Domain
 {
     public class Playlist
     {
-        private Queue<Song> _queue;
-        private Queue<Song> _history;
-        private Song _currentSong;
-        private DateTime _timeSongStarted;
+        public Song CurrentSong { get; private set; }
+        public Queue<Song> Queue { get; private set; }
+        public Queue<Song> History { get; private set; }
         private Timer _timer;
         private List<PartyGoer> _listeners;
+        private string _partyCode;
+        private Stopwatch _stopWatch;
 
-        public Playlist(List<Song> songs, List<PartyGoer> listeners)
+
+        public Playlist(List<Song> songs, List<PartyGoer> listeners, string partyCode)
         {
-            _queue = new Queue<Song>(songs);
-            _history = new Queue<Song>();
+            Queue = new Queue<Song>(songs);
+            History = new Queue<Song>();
             _listeners = listeners;
+            _partyCode = partyCode;
+            _stopWatch = new Stopwatch();
+            CurrentSong = null;
         }
 
         public void Start()
         {
-
-            if (_queue is null)
+            if (Queue is null || Queue.Count == 0)
                 throw new ArgumentNullException("Queue cannot be null");
 
-            if (_currentSong is null)
+            if (CurrentSong is null)
             {
-                _currentSong = _queue.First();
-                _timeSongStarted = DateTime.Now;
-                DomainEvents.Raise(new ChangeSong { Listeners = _listeners, Song = _currentSong, ProgressMs = 0 });
-                _timer = new Timer(state => NextSong(), null, _currentSong.Length, Timeout.Infinite);
+                CurrentSong = Queue.First();
+                DomainEvents.Raise(new ChangeSong { PartyCode = _partyCode, Listeners = _listeners, Song = CurrentSong, ProgressMs = 0 });
+                _timer = new Timer(state => NextSong(), null, CurrentSong.Length, Timeout.Infinite);
+                _stopWatch.Start();
             }
         }
 
         public void NextSong()
         {
-            _history.Enqueue(_queue.Dequeue());
-            if (_queue.Count > 0)
+            History.Enqueue(Queue.Dequeue());
+            if (Queue.Count > 0)
             {
-                _currentSong = _queue.First();
-                _timer.Change(_currentSong.Length, Timeout.Infinite);
-                _timeSongStarted = DateTime.Now;
-
+                CurrentSong = Queue.First();
+                _timer.Change(CurrentSong.Length, Timeout.Infinite);
+                _stopWatch.Restart();
                 // update song for all those in party
-                DomainEvents.Raise(new ChangeSong { Listeners = _listeners, Song = _currentSong, ProgressMs = 0 });
+                DomainEvents.Raise(new ChangeSong { PartyCode = _partyCode, Listeners = _listeners, Song = CurrentSong, ProgressMs = 0 });
             }
+            else
+            {
+                throw new ArgumentNullException("Queue has no more songs");
+            }
+        }
+
+        public int CurrentPositionInSong()
+        {
+            return (int)_stopWatch.ElapsedMilliseconds;
         }
     }
 }

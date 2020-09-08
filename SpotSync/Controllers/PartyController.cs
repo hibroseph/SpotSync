@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using SpotSync.Classes.Hubs;
 using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.DTO;
@@ -16,10 +20,21 @@ namespace SpotSync.Controllers
     public class PartyController : Controller
     {
         private readonly IPartyService _partyService;
-
-        public PartyController(IPartyService partyService)
+        private readonly IHubContext<PartyHub> _partyHubContext;
+        public PartyController(IPartyService partyService, IHubContext<PartyHub> hubContext)
         {
             _partyService = partyService;
+            _partyHubContext = hubContext;
+
+            DomainEvents.Register<ChangeSong>(p =>
+            {
+                UpdateSongForParty(p.PartyCode, p.Song, p.ProgressMs);
+            });
+        }
+
+        public void UpdateSongForParty(string partyCode, Song song, int progress)
+        {
+            _partyHubContext.Clients.Group(partyCode).SendAsync("UpdateSong", song, progress);
         }
 
         [Authorize]
@@ -166,45 +181,59 @@ namespace SpotSync.Controllers
         {
             PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
+            List<Song> playlist = null;
+
             if (_partyService.IsUserHostingAParty(user))
             {
                 Domain.Party party = await _partyService.GetPartyWithHostAsync(user);
 
-                return await UpdatePlaylistForEveryoneInPartyAsync(party, user);
+                playlist = await UpdatePlaylistForEveryoneInPartyAsync(party, user);
+
+                party.StartPlaylist();
+
+
+                // update the playlist for everyone
+                await _partyHubContext.Clients.Group(party.PartyCode).SendAsync("UpdatePlaylist", playlist);
             }
             else if (await _partyService.IsUserPartyingAsync(user))
             {
                 Domain.Party party = await _partyService.GetPartyWithAttendeeAsync(user);
 
-                return await UpdatePlaylistForEveryoneInPartyAsync(party, user);
+                playlist = await UpdatePlaylistForEveryoneInPartyAsync(party, user);
+
+                party.StartPlaylist();
+
+                // update the playlist for everyone
+                await _partyHubContext.Clients.Group(party.PartyCode).SendAsync("UpdatePlaylist", playlist, playlist.First());
             }
+
+            if (playlist != null)
+
+                return Ok();
             else
-            {
-                return BadRequest($"You are currently not hosting a party or attending a party: {partyCode.PartyCode}");
-            }
+                return BadRequest("Unable to create a new playlist");
         }
 
-        private async Task<IActionResult> UpdatePlaylistForEveryoneInPartyAsync(Domain.Party party, PartyGoer partyGoer)
+        private List<Song> CleansePlaylist(List<Song> playlist)
         {
-            if (await _partyService.CreatePartyPlaylistForEveryoneInPartyAsync(party, partyGoer))
-            {
-                return Ok();
-            }
-            else
-            {
-                return BadRequest("Unable to update song for everyone");
-            }
+            var newPlaylist = playlist.ToList();
+            return newPlaylist.Select(song => { song.TrackUri = song.TrackUri.Substring(14); return song; }).ToList();
+        }
+
+        private async Task<List<Song>> UpdatePlaylistForEveryoneInPartyAsync(Domain.Party party, PartyGoer partyGoer)
+        {
+            return await _partyService.CreatePartyPlaylistForEveryoneInPartyAsync(party, partyGoer);
 
         }
         private async Task<IActionResult> UpdateCurrentSongForEveryoneInPartyAsync(Domain.Party party, PartyGoer partyGoer)
         {
-            if (await _partyService.CreatePartyPlaylistForEveryoneInPartyAsync(party, partyGoer))
+            if (await _partyService.UpdateCurrentSongForEveryoneInPartyAsync(party, partyGoer))
             {
                 return Ok();
             }
             else
             {
-                return BadRequest("Unable to update song for everyone");
+                return BadRequest("Unable to update the current song for everyone in party");
             }
         }
     }

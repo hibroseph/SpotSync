@@ -92,6 +92,36 @@
             </div>
         </div>
     }
+
+    <div>
+        <div class="row current-song-box-flex">
+            <div class="col-md-7 current-song-box-item">
+                <a class="now-playing-art-link" href="https://open.spotify.com/" target="_blank">
+                    <div class="now-playing-art-container">
+                        <img class="now-playing-art" id="current-song-art" src="" />
+                        <i class="material-icons album-icon">open_in_new</i>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-5 current-song-box-item">
+                <p>Title: <b id="current-song-title"></b></p>
+                <p>Artist: <b id="current-song-artist"><span></span></b></p>
+                <p>Album: <b id="current-song-album"><span></span></b></p>
+            </div>
+        </div>
+        <div id="playlist" class="box-inner">
+            <table class="song-table">
+                <thead>
+                    <tr>
+                        <th>Song</th>
+                        <th>Artist</th>
+                    </tr>
+                </thead>
+                <tbody id="song-list">
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <script src="~/js/signalr/dist/browser/signalr.js"></script>
@@ -156,6 +186,33 @@
         console.log(message)
     })
 
+    connection.on("UpdatePlaylistForParty", (song, progressMs) => {
+        console.log(`You are now listening to ${song.title} that is ${progressMs} milliseconds long.`);
+    })
+
+    connection.on("UpdatePlaylist", (playlist, currentSong) => {
+        console.log("Rendering new playlist on UI");
+        playlist.map(song => {
+            console.log(song)
+            $('#song-list').append(`<tr id="${song.trackUri.substring(14)}"><td class="song-title">${song.title}</td><td>${song.artist}</td><td><i class="material-icons responsive-icon">thumb_up</i></td><td><i class="material-icons responsive-icon">thumb_down</i></td></tr>`)
+        })
+        UpdateSong(currentSong);
+    })
+
+    connection.on("UpdateSong", (song, progress) => {
+        UpdateSong(song);
+    })
+
+    function UpdateSong(song) {
+        console.log(`The current song is: ${song.title} at with id of ${song.trackUri.substring(14)}`)
+        $("#current-song-art").attr("src", song.albumImageUrl);
+        $("#current-song-title").html(song.title);
+        $("#current-song-artist").html(song.artist)
+        $("#current-song-album").html(song.album)
+        $('.current-song').removeClass("current-song");
+        $(`#${song.trackUri.substring(14)}`).addClass("current-song");
+    }
+
 
     function UpdateSongForParty() {
 
@@ -179,15 +236,14 @@
             contentType: "application/json; charset=utf-8",
             data: JSON.stringify({ PartyCode: '@Model.CurrentlyActiveParty.PartyCode' })})
             .done((response) =>
-             {
-                $("#party-controls-message").html('<p class="success">Successfully updated queue for all party goers.')
+            {
+                $("#party-controls-message").html('<p class="success">Successfully updated queue for all party goers.');
             })
             .fail((response) =>
             {
-                $("#party-controls-message").html(`< p class="error">Error while updating all party goers with the new queue: ${response.responseText
-        }`)
+                $("#party-controls-message").html(`< p class="error">Error while updating all party goers with the new queue: ${response.responseText}`)
             })
-        }
+    }
     </text>
     }
 

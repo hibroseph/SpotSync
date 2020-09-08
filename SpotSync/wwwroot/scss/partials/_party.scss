@@ -1,4 +1,6 @@
-﻿.sync-btn {
+﻿@import '_variables.scss';
+
+.sync-btn {
     &:hover i {
         transform: rotate(-360deg);
     }
@@ -11,4 +13,20 @@
 
 #create-party-box {
     border-bottom: solid 1px gray;
+}
+
+.current-song {
+    outline: thin solid $primary-accent-color;
+}
+
+td, th {
+    padding: 20px;
+}
+
+.responsive-icon {
+    transition: transform 0.2s;
+}
+
+.responsive-icon:hover {
+    transform: scale(1.2);
 }

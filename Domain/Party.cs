@@ -9,7 +9,7 @@ namespace SpotSync.Domain
     {
         private static Random Random = new Random();
         private const int LENGTH_OF_PARTY_CODE = 6;
-        private Playlist _playlist;
+        public Playlist Playlist;
         public Party(PartyGoer host)
         {
             Id = Guid.NewGuid();
@@ -20,14 +20,17 @@ namespace SpotSync.Domain
 
         public void CreatePlaylist(Playlist playlist)
         {
-            _playlist = playlist;
+            Playlist = playlist;
         }
 
         public void StartPlaylist()
         {
-            _playlist.Start();
+            Playlist.Start();
         }
 
+        public bool IsPartyPlayingMusic() => Playlist?.CurrentSong != null;
+        public int GetSongPosition() => Playlist.CurrentPositionInSong();
+        public Song GetSongPlaying() => Playlist?.CurrentSong;
         public Guid Id { get; }
         public PartyGoer Host { get; }
         public List<PartyGoer> Attendees { get; }

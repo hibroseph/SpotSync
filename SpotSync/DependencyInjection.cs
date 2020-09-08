@@ -27,8 +27,8 @@ namespace SpotSync
 
             serviceCollection.AddSingleton<IPartyService>(new PartyService(partyRepository, spotifyHttpClient));
             serviceCollection.AddSingleton<IAuthenticationService>(new AuthenticationService(spotifyHttpClient, spotifyAuthentication));
-            serviceCollection.AddSingleton<IPartyGoerService>(partyGoerService);
-
+            serviceCollection.AddSingleton(partyGoerService);
+            serviceCollection.AddSingleton(spotifyHttpClient);
             serviceCollection.AddSingleton<IHandles<ChangeSong>>(new ChangeSongHandler());
         }
 
