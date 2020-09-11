@@ -1,4 +1,5 @@
 # Starter pipeline
+
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
@@ -33,3 +34,8 @@ steps:
   inputs:
     command: 'test'
     projects: '**/SpotSync.Tests.csproj'
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'SpotSync-Server'
+    publishLocation: 'Container'
