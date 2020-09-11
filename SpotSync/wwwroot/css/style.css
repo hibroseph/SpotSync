@@ -189,6 +189,9 @@ td, th {
 .responsive-icon:hover {
   transform: scale(1.2); }
 
+.no-display {
+  display: none; }
+
 html, body {
   margin: 0;
   padding: 0;

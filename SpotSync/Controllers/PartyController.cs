@@ -191,9 +191,8 @@ namespace SpotSync.Controllers
 
                 party.StartPlaylist();
 
-
                 // update the playlist for everyone
-                await _partyHubContext.Clients.Group(party.PartyCode).SendAsync("UpdatePlaylist", playlist);
+                await _partyHubContext.Clients.Group(party.PartyCode).SendAsync("UpdatePlaylist", playlist, playlist.First());
             }
             else if (await _partyService.IsUserPartyingAsync(user))
             {
