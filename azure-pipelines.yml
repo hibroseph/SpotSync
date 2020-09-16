@@ -42,9 +42,4 @@ steps:
   inputs:
     command: 'build'
     Dockerfile: '**/Dockerfile'
-
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'SpotSync-Server'
-    publishLocation: 'Container'
+    buildContext: '.'
