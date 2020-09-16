@@ -144,13 +144,14 @@ namespace SpotSync.Tests
 
             PartyCodeDTO partyCodeDTO1 = new PartyCodeDTO { PartyCode = partyCode1 };
 
-            string partyCode3 = _partyService.StartNewParty(PartyHost2);
+            string partyCode2 = _partyService.StartNewParty(PartyHost2);
+
+            PartyCodeDTO partyCodeDTO2 = new PartyCodeDTO { PartyCode = partyCode2 };
+
+            string partyCode3 = _partyService.StartNewParty(PartyHost3);
 
             PartyCodeDTO partyCodeDTO3 = new PartyCodeDTO { PartyCode = partyCode3 };
 
-            string partyCode2 = _partyService.StartNewParty(PartyHost3);
-
-            PartyCodeDTO partyCodeDTO2 = new PartyCodeDTO { PartyCode = partyCode2 };
 
             await _partyService.JoinPartyAsync(partyCodeDTO1, PartyAttendee1);
             await _partyService.JoinPartyAsync(partyCodeDTO2, PartyAttendee2);
@@ -160,8 +161,8 @@ namespace SpotSync.Tests
             await _partyService.LeavePartyAsync(PartyAttendee2);
 
             Assert.AreEqual(0, (await _partyService.GetPartyWithHostAsync(PartyHost1)).Attendees.Count);
-            Assert.AreEqual(1, (await _partyService.GetPartyWithHostAsync(PartyHost2)).Attendees.Count);
-            Assert.AreEqual(0, (await _partyService.GetPartyWithHostAsync(PartyHost3)).Attendees.Count);
+            Assert.AreEqual(0, (await _partyService.GetPartyWithHostAsync(PartyHost2)).Attendees.Count);
+            Assert.AreEqual(1, (await _partyService.GetPartyWithHostAsync(PartyHost3)).Attendees.Count);
         }
 
         [Test]

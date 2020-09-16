@@ -61,22 +61,21 @@ namespace SpotSync.Classes.Hubs
 
             return;
         }
-    }
 
-    public async Task UpdateParty(string partyCode)
-    {
-        await Clients.Group(partyCode).SendAsync("UpdateParty", $"{Context.UserIdentifier} updated the party at {DateTime.UtcNow}");
-    }
+        public async Task UpdateParty(string partyCode)
+        {
+            await Clients.Group(partyCode).SendAsync("UpdateParty", $"{Context.UserIdentifier} updated the party at {DateTime.UtcNow}");
+        }
 
-    public async Task UpdateSongForParty(string partyCode, Song currentSong, int currentProgressInMs)
-    {
-        await Clients.Group(partyCode).SendAsync("UpdateSong", currentSong);
-    }
+        public async Task UpdateSongForParty(string partyCode, Song currentSong, int currentProgressInMs)
+        {
+            await Clients.Group(partyCode).SendAsync("UpdateSong", currentSong);
+        }
 
-    public async Task UpdatePlaylistForParty(string partyCode, List<Song> playlist)
-    {
-        await Clients.Group(partyCode).SendAsync("UpdatePlaylist", playlist, playlist.First());
-    }
+        public async Task UpdatePlaylistForParty(string partyCode, List<Song> playlist)
+        {
+            await Clients.Group(partyCode).SendAsync("UpdatePlaylist", playlist, playlist.First());
+        }
 
-}
+    }
 }

@@ -137,7 +137,7 @@ namespace Persistence
                     await parties.First().Playlist.RemoveListener(attendee);
                 }
 
-                _parties.Remove(parties.First());
+                parties.First().Attendees.RemoveAll(p => p.Id.Equals(attendee.Id, StringComparison.OrdinalIgnoreCase));
 
                 return true;
             }
