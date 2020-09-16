@@ -40,14 +40,7 @@ steps:
 
 - task: Docker@2
   inputs:
-    containerRegistry: 'Docker'
-    command: 'login'
-    
-- task: Docker@2
-  inputs:
-    containerRegistry: 'Docker'
-    repository: 'spotsync'
-    command: 'buildAndPush'
+    command: 'build'
     Dockerfile: '**/Dockerfile'
 
 - task: PublishBuildArtifacts@1
