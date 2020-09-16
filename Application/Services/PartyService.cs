@@ -201,7 +201,15 @@ namespace SpotSync.Application.Services
 
                 List<Song> playlist = await _spotifyHttpClient.GetRecommendedSongsAsync(user.Id, GetNNumberOfTrackUris(topTrackUrisTasks.SelectMany(p => p.Result).ToList(), 5), 5);
 
-                party.CreatePlaylist(new Playlist(playlist, party.Attendees, party.PartyCode));
+                List<PartyGoer> partyGoersWithHost = party.Attendees.Select(p => p).ToList();
+                partyGoersWithHost.Add(new PartyGoer(user.Id));
+
+                if (party.Playlist != null)
+                {
+                    await party.Playlist.DeleteAsync();
+                }
+
+                party.CreatePlaylist(new Playlist(playlist, partyGoersWithHost, party.PartyCode));
 
                 return playlist;
             }

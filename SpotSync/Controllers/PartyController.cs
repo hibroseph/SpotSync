@@ -44,12 +44,6 @@ namespace SpotSync.Controllers
 
             PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            /******************* DEBUGGING CODE TO TEST PARTIES (do not send this to production) ******************************/
-            var partyCode = _partyService.StartNewParty(user);
-
-            await _partyService.JoinPartyAsync(new PartyCodeDTO { PartyCode = partyCode }, user);
-            /******************************************************************************************************************/
-
             if (await _partyService.IsUserPartyingAsync(user))
             {
                 Domain.Party party = await _partyService.GetPartyWithAttendeeAsync(user);

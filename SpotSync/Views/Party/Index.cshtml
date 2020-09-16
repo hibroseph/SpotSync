@@ -109,6 +109,9 @@
                 <p>Album: <b id="current-song-album"><span></span></b></p>
             </div>
         </div>
+        <div class="progress">
+            <div id="song-progress-bar" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
         <div id="playlist" class="box-inner">
             <table class="song-table">
                 <thead>
@@ -126,7 +129,8 @@
 
 <script src="~/js/signalr/dist/browser/signalr.js"></script>
 
-<script>
+@section Scripts {
+    <script>
 
     function CreateParty() {
         $.ajax("/Party/CreateParty")
@@ -190,32 +194,49 @@
         console.log(`You are now listening to ${song.title} that is ${progressMs} milliseconds long.`);
     })
 
-    connection.on("UpdatePlaylist", (playlist, currentSong) => {
+    connection.on("UpdatePlaylist", (playlist, currentSong, progress) => {
         $("#player-container").removeClass("no-display");
+        // Remove all elements inside of #song-list
+        $("#song-list").empty();
         console.log("Rendering new playlist on UI");
         playlist.map(song => {
             console.log(song)
             $('#song-list').append(`<tr id="${song.trackUri.substring(14)}"><td class="song-title">${song.title}</td><td>${song.artist}</td><td><i class="material-icons responsive-icon">thumb_up</i></td><td><i class="material-icons responsive-icon">thumb_down</i></td></tr>`)
-        }) 
+        })
         console.log("Calling updatesong function");
-        console.log(currentSong);
-        UpdateSong(currentSong);
+        console.log(currentSong)
+        console.log(progress)
+        UpdateSong(currentSong, progress);
     })
 
     connection.on("UpdateSong", (song, progress) => {
         console.log("UpdateSong endpoint got called");
-        UpdateSong(song);
+        UpdateSong(song, progress);
     })
 
-    function UpdateSong(song) {
-        console.log(`The current song is: ${song.title} at with id of ${song.trackUri.substring(14)}`)
-        $("#current-song-art").attr("src", song.albumImageUrl);
-        $("#current-song-title").html(song.title);
-        $("#current-song-artist").html(song.artist)
-        $("#current-song-album").html(song.album)
-        $('.current-song').removeClass("current-song");
-        $(`#${song.trackUri.substring(14)}`).addClass("current-song");
-    }
+        var currentSongProgressTimer;
+
+        function UpdateSong(song, currentProgress) {
+            console.log("SONG");
+            console.log(song)
+            console.log(`The current song is: ${song.title} at with id of ${song.trackUri.substring(14)}`)
+            $("#current-song-art").attr("src", song.albumImageUrl);
+            $("#current-song-title").html(song.title);
+            $("#current-song-artist").html(song.artist)
+            $("#current-song-album").html(song.album)
+            $('.current-song').removeClass("current-song");
+            $(`#${song.trackUri.substring(14)}`).addClass("current-song");
+            console.log("PROGRESS");
+            console.log(currentProgress)
+            let currentPosition = currentProgress;
+            clearInterval(currentSongProgressTimer);
+
+            currentSongProgressTimer = setInterval(() => {
+                $("#song-progress-bar").css("width",
+                    (currentPosition / song.length) * 100 + "%")
+                currentPosition += 250;
+            }, 250)
+        }
 
 
     function UpdateSongForParty() {
@@ -241,6 +262,7 @@
             data: JSON.stringify({ PartyCode: '@Model.CurrentlyActiveParty.PartyCode' })})
             .done((response) =>
             {
+                $(".toast").toast('show')
                 $("#party-controls-message").html('<p class="success">Successfully updated queue for all party goers.');
             })
             .fail((response) =>
@@ -269,4 +291,5 @@
     }
     </text>
     }
-</script>
+    </script>
+}

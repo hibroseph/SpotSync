@@ -12,30 +12,30 @@ namespace Persistence
 {
     public class PartyRepository : IPartyRepository
     {
-        private List<Party> Parties = new List<Party>();
+        private List<Party> _parties = new List<Party>();
         public void CreateParty(Party item)
         {
-            Parties.Add(item);
+            _parties.Add(item);
         }
 
         public bool Exists(Party item)
         {
-            return Parties.Exists(party => party.Id == item.Id && party.PartyCode == item.PartyCode);
+            return _parties.Exists(party => party.Id == item.Id && party.PartyCode == item.PartyCode);
         }
 
         public Party Get(Party item)
         {
-            return Parties.Find(p => p.Id == item.Id);
+            return _parties.Find(p => p.Id == item.Id);
         }
 
         public Party Get(Guid partyId)
         {
-            return Parties.Find(p => p.Id == partyId);
+            return _parties.Find(p => p.Id == partyId);
         }
 
         public void Update(Party party)
         {
-            var parties = Parties.FindAll(p => p.Id == party.Id);
+            var parties = _parties.FindAll(p => p.Id == party.Id);
 
             if (parties.Count != 1)
             {
@@ -49,7 +49,7 @@ namespace Persistence
 
         public Task<Party> GetAsync(PartyCodeDTO partyCode)
         {
-            return Task.FromResult(Parties.Find(p => p.PartyCode == partyCode.PartyCode));
+            return Task.FromResult(_parties.Find(p => p.PartyCode.Equals(partyCode.PartyCode, StringComparison.OrdinalIgnoreCase)));
         }
 
         public void Remove(Party item)
@@ -59,25 +59,43 @@ namespace Persistence
 
         public bool IsUserHostingAParty(PartyGoer host)
         {
-            return Parties.Find(p => p.Host.Id == host.Id) != null;
+            return _parties.Find(p => p.Host.Id == host.Id) != null;
         }
 
         public Task<Party> GetPartyWithHostAsync(PartyGoer host)
         {
-            return Task.FromResult(Parties.Find(p => p.Host.Id == host.Id));
+            return Task.FromResult(_parties.Find(p => p.Host.Id == host.Id));
         }
 
-        public Task<bool> DeleteAsync(PartyGoer host)
+        public async Task<bool> DeleteAsync(PartyGoer host)
         {
             try
             {
-                Parties.RemoveAll(p => p.Host.Id.Equals(host.Id, StringComparison.CurrentCultureIgnoreCase));
+                //Parties.RemoveAll(p => p.Host.Id.Equals(host.Id, StringComparison.CurrentCultureIgnoreCase));
 
-                return Task.FromResult(true);
+                List<Party> parties = _parties.FindAll(p => p.Host.Id.Equals(host.Id, StringComparison.CurrentCultureIgnoreCase));
+
+                if (parties.Count > 1)
+                {
+                    throw new Exception($"Host: {host.Id} is hosting {parties.Count} parties. A host should only host 1 party at a time.");
+                }
+
+                if (parties == null)
+                {
+                    throw new Exception($"Host: {host.Id} is not hosting a party");
+                }
+
+                if (parties.First().Playlist != null)
+                {
+                    await parties.First().Playlist?.DeleteAsync();
+                }
+                _parties.Remove(parties.First());
+
+                return true;
             }
             catch (Exception)
             {
-                return Task.FromResult(false);
+                return false;
             }
         }
 
@@ -85,7 +103,7 @@ namespace Persistence
         {
             try
             {
-                return Task.FromResult(Parties.Find(p => p.Attendees.Exists(p => p.Id == attendee.Id)) != null);
+                return Task.FromResult(_parties.Find(p => p.Attendees.Exists(p => p.Id == attendee.Id)) != null);
             }
             catch (Exception)
             {
@@ -95,20 +113,37 @@ namespace Persistence
 
         public Task<Party> GetPartyWithAttendeeAsync(PartyGoer attendee)
         {
-            return Task.FromResult(Parties.Find(p => p.Attendees.Exists(p => p.Id == attendee.Id)));
+            return Task.FromResult(_parties.Find(p => p.Attendees.Exists(p => p.Id == attendee.Id)));
         }
 
-        public Task<bool> LeavePartyAsync(PartyGoer attendee)
+        public async Task<bool> LeavePartyAsync(PartyGoer attendee)
         {
             try
             {
-                Parties.ForEach(p => p.Attendees.RemoveAll(p => p.Id == attendee.Id));
+                List<Party> parties = _parties.FindAll(p => p.Attendees.Contains(attendee));
 
-                return Task.FromResult(true);
+                if (parties.Count > 1)
+                {
+                    throw new Exception($"The attendee: {attendee.Id} was in {parties.Count} parties");
+                }
+
+                if (parties == null || parties.Count == 0)
+                {
+                    throw new Exception($"The attendee: {attendee.Id} is not currently in a party");
+                }
+
+                if (parties.First().Playlist != null)
+                {
+                    await parties.First().Playlist.RemoveListener(attendee);
+                }
+
+                _parties.Remove(parties.First());
+
+                return true;
             }
             catch (Exception)
             {
-                return Task.FromResult(false);
+                return false;
             }
         }
     }

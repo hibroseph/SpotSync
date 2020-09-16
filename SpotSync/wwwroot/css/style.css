@@ -79,15 +79,15 @@ button {
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s;
-  color: lightgray; }
+  color: lightgrey; }
   .btn:hover, .btn:active {
-    color: lightgray; }
+    color: lightgrey; }
 
 .btn-primary,
 .btn-primary:not(:disabled):not(.disabled).active,
 .btn-primary:not(:disabled):not(.disabled):active,
 .show > .btn-primary.dropdown-toggle {
-  background-color: #ff430a;
+  background-color: #187ede;
   box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.2); }
   .btn-primary:hover, .btn-primary:active,
   .btn-primary:not(:disabled):not(.disabled).active:hover,
@@ -96,7 +96,7 @@ button {
   .btn-primary:not(:disabled):not(.disabled):active:active,
   .show > .btn-primary.dropdown-toggle:hover,
   .show > .btn-primary.dropdown-toggle:active {
-    background-color: #c7360a; }
+    background-color: #105ba1; }
 
 .btn-bold {
   font-weight: bold; }
@@ -159,12 +159,12 @@ i.btn-icon {
   align-items: center;
   padding: 10px 20px;
   margin: 0;
-  background-color: #ff430a;
-  color: lightgray;
+  background-color: #187ede;
+  color: lightgrey;
   border-radius: 100px; }
   .open-spotify-btn:hover {
-    color: lightgray;
-    background-color: #c7360a;
+    color: lightgrey;
+    background-color: #105ba1;
     text-decoration: none; }
 
 .sync-btn:hover i {
@@ -178,7 +178,7 @@ i.btn-icon {
   border-bottom: solid 1px gray; }
 
 .current-song {
-  outline: thin solid #ff430a; }
+  outline: thin solid #187ede; }
 
 td, th {
   padding: 20px; }
@@ -192,6 +192,9 @@ td, th {
 .no-display {
   display: none; }
 
+.progress {
+  margin: 20px; }
+
 html, body {
   margin: 0;
   padding: 0;
@@ -201,14 +204,14 @@ body {
   min-height: 100vh; }
 
 *, body, nav, footer {
-  color: lightgray; }
+  color: lightgrey; }
 
 body, nav, footer {
   background-color: #272727; }
 
 .spotsync-icon {
   margin-right: 5px;
-  background-color: #ff430a;
+  background-color: #187ede;
   line-height: 0;
   display: inline-flex;
   height: 25px;
@@ -228,7 +231,7 @@ nav {
   box-shadow: 0 3px 20px 0 rgba(0, 0, 0, 0.3); }
 
 a.navbar-brand {
-  color: #ff430a;
+  color: #187ede;
   white-space: normal;
   text-align: center;
   word-break: break-all;
@@ -236,14 +239,14 @@ a.navbar-brand {
   align-items: center; }
 
 nav a {
-  color: lightgray; }
+  color: lightgrey; }
 
 nav a, a.navbar-brand {
   transition: color 0.3s; }
   nav a:hover, a.navbar-brand:hover {
-    color: #c7360a; }
+    color: #105ba1; }
   nav a:hover .spotsync-icon, a.navbar-brand:hover .spotsync-icon {
-    background-color: #c7360a; }
+    background-color: #105ba1; }
 
 /* Sticky footer styles
 -------------------------------------------------- */
@@ -259,7 +262,7 @@ html {
   line-height: 60px;
   /* Vertically center the text there */ }
   .footer a {
-    color: #ff430a; }
+    color: #187ede; }
 
 /* Home page styles
 ------------------------------------------------*/
@@ -280,8 +283,8 @@ main {
   width: auto;
   max-width: 300px;
   min-width: 250px;
-  background-color: #ff430a;
-  color: lightgray;
+  background-color: #187ede;
+  color: lightgrey;
   font-size: 16px;
   border-radius: 500px;
   padding: 20px;
@@ -292,7 +295,17 @@ main {
   transition: all 0.3s;
   box-shadow: 0 5px 15px 0 rgba(0, 0, 0, 0.3); }
   .spotify-button:hover {
-    background-color: #c7360a;
-    color: lightgray;
+    background-color: #105ba1;
+    color: lightgrey;
     text-decoration: none;
     box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.2); }
+
+.notification-area {
+  position: fixed;
+  bottom: 20px;
+  right: 20px; }
+
+/* Toasts
+----------------------------------------------------*/
+.toast small, .toast strong, .toast .toast-body {
+  color: #000000; }

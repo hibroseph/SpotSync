@@ -32,22 +32,33 @@ namespace SpotSync.Classes.Hubs
 
         public async Task ConnectToParty(string partyCode)
         {
-            var userId = new PartyGoer(Context.UserIdentifier);
-            if (await _partyService.IsUserPartyingAsync(userId) || _partyService.IsUserHostingAParty(userId))
+            var partier = new PartyGoer(Context.UserIdentifier);
+            if (await _partyService.IsUserPartyingAsync(partier) || _partyService.IsUserHostingAParty(partier))
             {
-                await Groups.AddToGroupAsync(Context.ConnectionId, partyCode);
-                await Clients.Group(partyCode).SendAsync("UpdateParty", $"{Context.UserIdentifier} has joined the party {partyCode}");
+                if (!_hubConnectionManager.DoesPartyGoerExistInGroup(partyCode, partier))
+                {
+                    _hubConnectionManager.AddPartyGoerToGroup(partyCode, partier);
+                    await Groups.AddToGroupAsync(Context.ConnectionId, partyCode);
+                    await Clients.Group(partyCode).SendAsync("UpdateParty", $"{Context.UserIdentifier} has joined the party {partyCode}");
+                }
+                Party party = await _partyService.GetPartyWithAttendeeAsync(partier);
 
-                // TODO: Add code and logic to determine if a playlist is currently playing and to sync the current joining users spotify to where everyone is in the song
-
-                Party party = await _partyService.GetPartyWithAttendeeAsync(userId);
-
-                if (party.IsPartyPlayingMusic())
+                if (party != null && party.IsPartyPlayingMusic())
                 {
                     // update spotify to play current position 
-                    await _spotifyHttpClient.UpdateSongForPartyGoerAsync(userId.Id, new List<string> { party.GetSongPlaying().TrackUri }, party.GetSongPosition());
-                    await Clients.Client(Context.ConnectionId).SendAsync("UpdatePlaylist", party.Playlist.Queue);
-                    await Clients.Client(Context.ConnectionId).SendAsync("UpdateSong", party.GetSongPlaying());
+                    await _spotifyHttpClient.UpdateSongForPartyGoerAsync(partier.Id, new List<string> { party.GetSongPlaying().TrackUri }, party.GetSongPosition());
+                    await Clients.Client(Context.ConnectionId).SendAsync("UpdatePlaylist", party.Playlist.Queue, party.GetSongPosition());
+                    await Clients.Client(Context.ConnectionId).SendAsync("UpdateSong", party.GetSongPlaying(), party.GetSongPosition());
+                }
+
+                party = await _partyService.GetPartyWithHostAsync(partier);
+
+                if (party != null && party.IsPartyPlayingMusic())
+                {
+                    // update spotify to play current position 
+                    await _spotifyHttpClient.UpdateSongForPartyGoerAsync(partier.Id, new List<string> { party.GetSongPlaying().TrackUri }, party.GetSongPosition());
+                    await Clients.Client(Context.ConnectionId).SendAsync("UpdatePlaylist", party.Playlist.Queue, party.GetSongPosition());
+                    await Clients.Client(Context.ConnectionId).SendAsync("UpdateSong", party.GetSongPlaying(), party.GetSongPosition());
                 }
 
                 return;
@@ -66,7 +77,7 @@ namespace SpotSync.Classes.Hubs
 
         public async Task UpdatePlaylistForParty(string partyCode, List<Song> playlist)
         {
-            await Clients.Group(partyCode).SendAsync("UpdatePlaylist", playlist);
+            await Clients.Group(partyCode).SendAsync("UpdatePlaylist", playlist, playlist.First());
         }
 
     }

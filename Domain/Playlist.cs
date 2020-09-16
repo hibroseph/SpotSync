@@ -21,7 +21,6 @@ namespace SpotSync.Domain
         private string _partyCode;
         private Stopwatch _stopWatch;
 
-
         public Playlist(List<Song> songs, List<PartyGoer> listeners, string partyCode)
         {
             Queue = new Queue<Song>(songs);
@@ -30,6 +29,22 @@ namespace SpotSync.Domain
             _partyCode = partyCode;
             _stopWatch = new Stopwatch();
             CurrentSong = null;
+        }
+
+        public async Task RemoveListener(PartyGoer listener){
+            _listeners.RemoveAll(p => p.Id.Equals(listener.Id, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public async Task DeleteAsync()
+        {
+            _stopWatch.Stop();
+            _stopWatch = null;
+            await _timer.DisposeAsync();
+            _timer = null;
+            CurrentSong = null;
+            Queue = null;
+            History = null;
+            _partyCode = null;
         }
 
         public void Start()

@@ -136,3 +136,17 @@ main {
         box-shadow: 0 3px 10px 0 rgba(0,0,0,0.2);
     }
 }
+
+.notification-area {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+
+/* Toasts
+----------------------------------------------------*/
+.toast {
+    small, strong, .toast-body {
+        color: $primary-txt-color-drk;
+    }
+}

@@ -1,4 +1,4 @@
-﻿/// <binding BeforeBuild='build' ProjectOpened='build' />
+/// <binding ProjectOpened='build' />
 const { parallel, src, dest } = require('gulp'),
     sass = require('gulp-sass')
 var baseFilepath = "./wwwroot/";
