@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
+using SpotSync.Domain.Contracts.Services;
 using SpotSync.Models.Account;
 
 namespace SpotSync.Controllers
@@ -19,12 +20,15 @@ namespace SpotSync.Controllers
         private readonly IConfiguration _configuration;
         private readonly Domain.Contracts.IAuthenticationService _authenticationService;
         private readonly IPartyService _partyService;
+        private readonly ILogService _logService;
 
-        public AccountController(Domain.Contracts.IAuthenticationService authenticationService, IConfiguration configuration, IPartyService partyService)
+        public AccountController(Domain.Contracts.IAuthenticationService authenticationService, IConfiguration configuration, IPartyService partyService,
+        ILogService logService)
         {
             _authenticationService = authenticationService;
             _configuration = configuration;
             _partyService = partyService;
+            _logService = logService;
         }
 
         [HttpGet]
@@ -55,6 +59,8 @@ namespace SpotSync.Controllers
 
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
+                await _logService.LogUserActivityAsync(new PartyGoer(userId), "Successfully authenticated through Spotify");
+
                 return RedirectToAction("Index", "Dashboard");
             }
             catch (Exception)
@@ -70,19 +76,24 @@ namespace SpotSync.Controllers
             // If the user is joined in a party, REMOVE HIM
             if (await _partyService.IsUserPartyingAsync(user))
             {
+                Task logUserLeavingParty = _logService.LogUserActivityAsync(user, "Leaving party while logging out");
                 await _partyService.LeavePartyAsync(user);
+                await logUserLeavingParty;
             }
 
             // If the user is hosting a party, END IT
             if (_partyService.IsUserHostingAParty(user))
             {
+                Task logUserEndingParty = _logService.LogUserActivityAsync(user, "Ending party while logging out");
                 await _partyService.EndPartyAsync(user);
+                await logUserEndingParty;
             }
 
             await _authenticationService.LogOutUserAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             await HttpContext.SignOutAsync();
 
+            await _logService.LogUserActivityAsync(user, "Successfully logged out");
             return RedirectToAction("Index", "Home");
         }
 

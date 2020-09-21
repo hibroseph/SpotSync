@@ -9,6 +9,5 @@ namespace SpotSync.Models.Party
     {
         public string PartyCode { get; set; }
         public List<string> Attendees { get; set; }
-
     }
 }

@@ -3,10 +3,12 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - SpotSync</title>
+    <title>SpotSync</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     @*<link rel="stylesheet" href="~/css/site.css" />*@
     @*<link rel="stylesheet" href="~/css/SpotSync.css" />*@
+    <link rel="icon" href="~/favicon.ico" type="image/ico" />
+    <link rel="shortcut icon" href="~/favicon.ico" type="image/ico" />
     <link rel="stylesheet" href="~/css/style.css" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons&amp;style=round" rel="stylesheet">
 </head>
@@ -82,18 +84,7 @@
             &copy; 2020 - SpotSync - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
-    <div class="notification-area">
-        <div role="alert" aria-live="assertive" aria-atomic="true" class="toast" data-autohide="true" data-delay="2000">
-            <div class="toast-header">
-                <strong class="mr-auto">Success</strong>
-                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="toast-body">
-                We successfully updated everyones queue
-            </div>
-        </div>
+    <div id="notifications" class="notification-area">
     </div>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

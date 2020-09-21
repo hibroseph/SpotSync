@@ -31,7 +31,8 @@ namespace SpotSync.Domain
             CurrentSong = null;
         }
 
-        public async Task RemoveListener(PartyGoer listener){
+        public void RemoveListener(PartyGoer listener)
+        {
             _listeners.RemoveAll(p => p.Id.Equals(listener.Id, StringComparison.OrdinalIgnoreCase));
         }
 
@@ -55,7 +56,7 @@ namespace SpotSync.Domain
             if (CurrentSong is null)
             {
                 CurrentSong = Queue.First();
-                DomainEvents.Raise(new ChangeSong { PartyCode = _partyCode, Listeners = _listeners, Song = CurrentSong, ProgressMs = 0 });
+                DomainEvents.RaiseAsync(new ChangeSong { PartyCode = _partyCode, Listeners = _listeners, Song = CurrentSong, ProgressMs = 0 });
                 _timer = new Timer(state => NextSong(), null, CurrentSong.Length, Timeout.Infinite);
                 _stopWatch.Start();
             }
@@ -70,7 +71,7 @@ namespace SpotSync.Domain
                 _timer.Change(CurrentSong.Length, Timeout.Infinite);
                 _stopWatch.Restart();
                 // update song for all those in party
-                DomainEvents.Raise(new ChangeSong { PartyCode = _partyCode, Listeners = _listeners, Song = CurrentSong, ProgressMs = 0 });
+                DomainEvents.RaiseAsync(new ChangeSong { PartyCode = _partyCode, Listeners = _listeners, Song = CurrentSong, ProgressMs = 0 });
             }
             else
             {

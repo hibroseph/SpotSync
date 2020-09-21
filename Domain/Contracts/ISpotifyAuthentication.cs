@@ -17,5 +17,6 @@ namespace SpotSync.Domain.Contracts
         Task<bool> DoesAccessTokenNeedRefreshAsync(string partyGoerId);
         string GetRefreshTokenForPartyGoer(string partyGoerId);
         Task RefreshAccessTokenForPartyGoerAsync(string partyGoerId, string accessToken, int expiresInXSeconds);
+        Task RemoveAuthenticatedPartyGoerAsync(string partyGoerId);
     }
 }

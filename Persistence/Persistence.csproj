@@ -5,6 +5,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="Dapper" Version="2.0.35" />
+	  <PackageReference Include="Npgsql" Version="4.1.4" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\Application\Application.csproj" />
 		<ProjectReference Include="..\Domain\Domain.csproj" />
 	</ItemGroup>
