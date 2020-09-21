@@ -52,6 +52,16 @@ namespace SpotSync.Classes.Hubs
                 await Clients.Client(Context.ConnectionId).SendAsync("UpdateSong", party.GetSongPlaying(), party.GetSongPosition());
             }
 
+            party = await _partyService.GetPartyWithHostAsync(partier);
+
+            if (party != null && party.IsPartyPlayingMusic())
+            {
+                // update spotify to play current position 
+                await _spotifyHttpClient.UpdateSongForPartyGoerAsync(partier.Id, new List<string> { party.GetSongPlaying().TrackUri }, party.GetSongPosition());
+                await Clients.Client(Context.ConnectionId).SendAsync("UpdatePlaylist", party.Playlist.Queue, party.GetSongPosition());
+                await Clients.Client(Context.ConnectionId).SendAsync("UpdateSong", party.GetSongPlaying(), party.GetSongPosition());
+            }
+
             await _logService.LogUserActivityAsync(partier, $"Joined real time collobration in party with code {partyCode}");
             return;
         }
