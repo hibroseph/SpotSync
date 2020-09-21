@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SpotSync.Tests.Unit_Tests
 {
@@ -20,19 +21,19 @@ namespace SpotSync.Tests.Unit_Tests
         private const string PARTY_GOER_ID_1 = "ValidPartyId";
 
         [Test]
-        public void ClearDomainEventsCallback()
+        public async Task ClearDomainEventsCallback()
         {
             DomainEvents.Register<ChangeSong>(song => Assert.Fail());
 
             DomainEvents.ClearCallbacks();
 
-            DomainEvents.Raise(new ChangeSong());
+            await DomainEvents.RaiseAsync(new ChangeSong());
 
             Assert.Pass();
         }
 
         [Test]
-        public void DomainEventsSuccessfullyRaisesDomainEvent()
+        public async Task DomainEventsSuccessfullyRaisesDomainEvent()
         {
             Song song = new Song
             {
@@ -50,7 +51,7 @@ namespace SpotSync.Tests.Unit_Tests
                 Assert.Pass();
             });
 
-            DomainEvents.Raise(new ChangeSong
+            await DomainEvents.RaiseAsync(new ChangeSong
             {
                 PartyCode = PARTY_CODE,
                 ProgressMs = PROGRESS_MS,

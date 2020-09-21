@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SpotSync.Classes.Hubs;
 using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
+using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.DTO;
 using SpotSync.Domain.Events;
 using SpotSync.Models.Party;
@@ -21,21 +22,15 @@ namespace SpotSync.Controllers
     {
         private readonly IPartyService _partyService;
         private readonly IHubContext<PartyHub> _partyHubContext;
-        public PartyController(IPartyService partyService, IHubContext<PartyHub> hubContext)
+        private readonly ILogService _logService;
+
+        public PartyController(IPartyService partyService, IHubContext<PartyHub> hubContext, ILogService logService)
         {
             _partyService = partyService;
             _partyHubContext = hubContext;
-
-            DomainEvents.Register<ChangeSong>(p =>
-            {
-                UpdateSongForParty(p.PartyCode, p.Song, p.ProgressMs);
-            });
+            _logService = logService;
         }
 
-        public void UpdateSongForParty(string partyCode, Song song, int progress)
-        {
-            _partyHubContext.Clients.Group(partyCode).SendAsync("UpdateSong", song, progress);
-        }
 
         [Authorize]
         public async Task<IActionResult> Index()
@@ -73,7 +68,7 @@ namespace SpotSync.Controllers
         }
 
         [Authorize]
-        public IActionResult CreateParty()
+        public async Task<IActionResult> CreateParty()
         {
             PartyGoer host = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
             // See if the current user doesn't have any parties
@@ -83,6 +78,8 @@ namespace SpotSync.Controllers
             }
 
             string partyCode = _partyService.StartNewParty(host);
+            await _logService.LogUserActivityAsync(host.Id, $"Created a party with code {partyCode}");
+
             return Json(new PartyCodeDTO { PartyCode = partyCode });
         }
 
@@ -95,12 +92,16 @@ namespace SpotSync.Controllers
                 return BadRequest("The party code was empty");
             }
 
-            if (await _partyService.JoinPartyAsync(partyCode, new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier))))
+            PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            if (await _partyService.JoinPartyAsync(partyCode, user))
             {
+                await _logService.LogUserActivityAsync(user.Id, $"Joined a party with code {partyCode.PartyCode}");
                 return Ok();
             }
             else
             {
+                await _logService.LogUserActivityAsync(user.Id, $"Failed to join party with code {partyCode.PartyCode}");
                 return BadRequest($"Unable to join party {partyCode.PartyCode}");
             }
         }
@@ -114,10 +115,15 @@ namespace SpotSync.Controllers
                 return BadRequest("The party code was empty");
             }
 
-            if (!await _partyService.LeavePartyAsync(new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier))))
+            PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            if (!await _partyService.LeavePartyAsync(user))
             {
+                await _logService.LogUserActivityAsync(user.Id, $"User failed to leave party {partyCode.PartyCode}");
                 return BadRequest($"You are currently not joined with party: {partyCode.PartyCode}");
             }
+
+            await _logService.LogUserActivityAsync(user.Id, $"User successfully left party {partyCode.PartyCode}");
 
             return Ok();
         }
@@ -132,15 +138,18 @@ namespace SpotSync.Controllers
             {
                 if (await _partyService.EndPartyAsync(host))
                 {
+                    await _logService.LogUserActivityAsync(host.Id, $"User successfully ended party");
                     return Ok();
                 }
                 else
                 {
+                    await _logService.LogUserActivityAsync(host.Id, $"User failed to end party");
                     return BadRequest("There was an issue with deleting your party");
                 }
             }
             else
             {
+                await _logService.LogUserActivityAsync(host.Id, $"User failed to end party because they weren't the host");
                 return BadRequest("Unable to delete party. You are not hosting any parties");
             }
         }
@@ -155,16 +164,19 @@ namespace SpotSync.Controllers
             {
                 Domain.Party party = await _partyService.GetPartyWithHostAsync(user);
 
+                await _logService.LogUserActivityAsync(user.Id, $"User updated song for party with code {partyCode.PartyCode}");
                 return await UpdateCurrentSongForEveryoneInPartyAsync(party, user);
             }
             else if (await _partyService.IsUserPartyingAsync(user))
             {
                 Domain.Party party = await _partyService.GetPartyWithAttendeeAsync(user);
 
+                await _logService.LogUserActivityAsync(user.Id, $"User updated song for party with code {partyCode.PartyCode}");
                 return await UpdateCurrentSongForEveryoneInPartyAsync(party, user);
             }
             else
             {
+                await _logService.LogUserActivityAsync(user.Id, $"User failed tp update song for party with code {partyCode.PartyCode}");
                 return BadRequest($"You are currently not hosting a party or attending a party: {partyCode.PartyCode}");
             }
         }
@@ -201,10 +213,15 @@ namespace SpotSync.Controllers
             }
 
             if (playlist != null)
-
+            {
+                await _logService.LogUserActivityAsync(user.Id, $"User successfully updated playlist for party {partyCode.PartyCode}");
                 return Ok();
+            }
             else
+            {
+                await _logService.LogUserActivityAsync(user.Id, $"User failed to update playlist for party with code {partyCode.PartyCode}");
                 return BadRequest("Unable to create a new playlist");
+            }
         }
 
         private List<Song> CleansePlaylist(List<Song> playlist)

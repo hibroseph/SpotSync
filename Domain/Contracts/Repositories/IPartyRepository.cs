@@ -18,6 +18,6 @@ namespace SpotSync.Domain.Contracts
         Task<bool> IsUserInAPartyAsync(PartyGoer attendee);
         Task<Party> GetPartyWithAttendeeAsync(PartyGoer attendee);
         void CreateParty(Party item);
-        Task<bool> LeavePartyAsync(PartyGoer attendee);
+        bool LeaveParty(PartyGoer attendee);
     }
 }

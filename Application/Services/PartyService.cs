@@ -245,7 +245,7 @@ namespace SpotSync.Application.Services
             // Let's make sure he is part of the party
             if (await _partyRepository.IsUserInAPartyAsync(attendee))
             {
-                return await _partyRepository.LeavePartyAsync(attendee);
+                return _partyRepository.LeaveParty(attendee);
             }
             else
             {

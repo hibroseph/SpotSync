@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Text;
+using System.Threading.Tasks;
 
 /*
  This was implemented using Udi Dahan Domain Events blog post:
@@ -36,11 +37,11 @@ namespace SpotSync.Domain.Events
             _actions = null;
         }
 
-        public static void Raise<T>(T args) where T : IDomainEvent
+        public async static Task RaiseAsync<T>(T args) where T : IDomainEvent
         {
             if (_container != null)
             {
-                ((IHandles<T>)_container.GetService(typeof(IHandles<T>))).Handle(args);
+                await ((IHandles<T>)_container.GetService(typeof(IHandles<T>))).HandleAsync(args);
             }
 
             if (_actions != null)

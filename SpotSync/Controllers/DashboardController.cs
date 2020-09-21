@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.DTO;
@@ -21,10 +18,13 @@ namespace SpotSync.Controllers
         private readonly IPartyGoerService _partyGoerService;
         private readonly Random _random;
         private readonly List<string> _greetings;
-        public DashboardController(IPartyService partyService, IPartyGoerService partyGoerService)
+        private readonly ILogService _logService;
+
+        public DashboardController(IPartyService partyService, IPartyGoerService partyGoerService, ILogService logService)
         {
             _partyService = partyService;
             _partyGoerService = partyGoerService;
+            _logService = logService;
             _random = new Random();
             _greetings = new List<string>
             {

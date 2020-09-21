@@ -10,9 +10,9 @@ namespace SpotSync.Application.Services
     public class AuthenticationService : IAuthenticationService
     {
         ISpotifyHttpClient _spotifyHttpClient;
-        SpotifyAuthentication _spotifyAuthentication;
+        ISpotifyAuthentication _spotifyAuthentication;
 
-        public AuthenticationService(ISpotifyHttpClient spotifyHttpClient, SpotifyAuthentication spotifyAuthentication)
+        public AuthenticationService(ISpotifyHttpClient spotifyHttpClient, ISpotifyAuthentication spotifyAuthentication)
         {
             _spotifyHttpClient = spotifyHttpClient;
             _spotifyAuthentication = spotifyAuthentication;

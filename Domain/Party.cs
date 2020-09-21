@@ -7,9 +7,9 @@ namespace SpotSync.Domain
 {
     public class Party
     {
-        private static Random Random = new Random();
         private const int LENGTH_OF_PARTY_CODE = 6;
         public Playlist Playlist;
+
         public Party(PartyGoer host)
         {
             Id = Guid.NewGuid();

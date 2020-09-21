@@ -116,7 +116,7 @@ namespace Persistence
             return Task.FromResult(_parties.Find(p => p.Attendees.Exists(p => p.Id == attendee.Id)));
         }
 
-        public async Task<bool> LeavePartyAsync(PartyGoer attendee)
+        public bool LeaveParty(PartyGoer attendee)
         {
             try
             {
@@ -134,7 +134,7 @@ namespace Persistence
 
                 if (parties.First().Playlist != null)
                 {
-                    await parties.First().Playlist.RemoveListener(attendee);
+                    parties.First().Playlist.RemoveListener(attendee);
                 }
 
                 parties.First().Attendees.RemoveAll(p => p.Id.Equals(attendee.Id, StringComparison.OrdinalIgnoreCase));

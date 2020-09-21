@@ -1,17 +1,17 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Database;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Persistence;
 using SpotSync.Application.Authentication;
 using SpotSync.Application.Services;
+using SpotSync.Classes;
 using SpotSync.Domain.Contracts;
+using SpotSync.Domain.Contracts.Repositories;
 using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.Events;
 using SpotSync.Infrastructure;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SpotSync
 {
@@ -19,22 +19,31 @@ namespace SpotSync
     {
         public static void AddSpotSyncServices(this IServiceCollection serviceCollection, IConfiguration configuration)
         {
-            SpotifyAuthentication spotifyAuthentication = new SpotifyAuthentication(configuration["Spotify:ClientId"], configuration["Spotify:ClientSecret"], configuration["Spotify:RedirectUrl"]);
+            serviceCollection.AddSingleton<ISpotifyAuthentication>(new SpotifyAuthentication(configuration["Spotify:ClientId"], configuration["Spotify:ClientSecret"], configuration["Spotify:RedirectUrl"]));
+            serviceCollection.AddSingleton<IHttpClient>(new HttpClient());
 
-            ISpotifyHttpClient spotifyHttpClient = new SpotifyHttpClient(spotifyAuthentication, new HttpClient());
-            IPartyRepository partyRepository = new PartyRepository();
-            IPartyGoerService partyGoerService = new PartyGoerService(spotifyHttpClient);
+            serviceCollection.AddSingleton<ISpotifyHttpClient, SpotifyHttpClient>();
+            serviceCollection.AddSingleton<ILogRepository>(new LogRepository(configuration["DatabaseConnection"]));
 
-            serviceCollection.AddSingleton<IPartyService>(new PartyService(partyRepository, spotifyHttpClient));
-            serviceCollection.AddSingleton<IAuthenticationService>(new AuthenticationService(spotifyHttpClient, spotifyAuthentication));
-            serviceCollection.AddSingleton(partyGoerService);
-            serviceCollection.AddSingleton(spotifyHttpClient);
-            serviceCollection.AddSingleton<IHandles<ChangeSong>>(new ChangeSongHandler());
+            serviceCollection.AddSingleton<IPartyRepository, PartyRepository>();
+            serviceCollection.AddSingleton<IPartyGoerService, PartyGoerService>();
+            serviceCollection.AddSingleton<ILogService, LogService>();
+            serviceCollection.AddSingleton<IPartyService, PartyService>();
+            serviceCollection.AddSingleton<IAuthenticationService, AuthenticationService>();
+
+            serviceCollection.AddSingleton<IHandles<ChangeSong>, PartyHandler>();
         }
 
         public static void AddSpotSyncAuthentication(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
+        }
+
+        public static void AddAndStartDatabaseMigration(this IServiceCollection serviceCollection, IConfiguration configuration)
+        {
+            DatabaseMigration migration = new DatabaseMigration(new DatabaseMigrationConfig(configuration["DatabaseConnection"]));
+
+            migration.Update();
         }
     }
 }
