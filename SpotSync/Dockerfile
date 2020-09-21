@@ -13,6 +13,7 @@ COPY ["Domain/Domain.csproj", "Domain/"]
 COPY ["Application/Application.csproj", "Application/"]
 COPY ["Persistence/Persistence.csproj", "Persistence/"]
 COPY ["Infrastructure/Infrastructure.csproj", "Infrastructure/"]
+COPY ["Database/Database.csproj", "Database/"]
 RUN dotnet restore "SpotSync/SpotSync.csproj"
 COPY . .
 WORKDIR "/src/SpotSync"
