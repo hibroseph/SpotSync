@@ -41,7 +41,11 @@ namespace SpotSync.Domain.Events
         {
             if (_container != null)
             {
-                await ((IHandles<T>)_container.GetService(typeof(IHandles<T>))).HandleAsync(args);
+                IHandles<T> service = ((IHandles<T>)_container.GetService(typeof(IHandles<T>)));
+                if (service != null)
+                {
+                    await service.HandleAsync(args);
+                }
             }
 
             if (_actions != null)

@@ -37,10 +37,6 @@
                 <div id="party-controls-message"></div>
             </div>
         </div>
-        <div class="box-inner">
-            <h4>Kip Tip</h4>
-            <p>If you want to join a party, go ahead and end this party</p>
-        </div>
     }
     else if (Model.IsCurrentlyJoinedInAParty)
     {
@@ -112,9 +108,11 @@
                 <p>Album: <b id="current-song-album"><span></span></b></p>
             </div>
         </div>
+        <!--
         <div class="progress">
             <div id="song-progress-bar" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
         </div>
+            -->
         <div id="playlist" class="box-inner">
             <table class="song-table">
                 <thead>
@@ -160,7 +158,6 @@
             })
             .fail((response) => {
                 // unsuccessfully joined party
-                console.log(response)
                 $("#join-party-message").html(`<p class="error"> <b>An error occurred:</b> ${response.responseText}</p>`)
             })
     }
@@ -183,14 +180,13 @@
         var connection = new signalR.HubConnectionBuilder().withUrl("/partyHub").build();
 
     connection.start().then(() => {
-        console.log("You are connected baby");
         connection.invoke("ConnectToParty", '@Model.CurrentlyActiveParty.PartyCode').catch(err => { console.log(err) });
     }).catch(err => {
         console.log(err);
     })
 
-    connection.on("UpdateParty", (message) => {
-        console.log(message)
+    connection.on("PlaylistEnded", () => {
+         $("#player-container").addClass("no-display");
     })
 
     connection.on("UpdatePlaylistForParty", (song, progressMs) => {
@@ -203,42 +199,33 @@
         $("#song-list").empty();
         console.log("Rendering new playlist on UI");
         playlist.map(song => {
-            console.log(song)
             $('#song-list').append(`<tr id="${song.trackUri.substring(14)}"><td class="song-title">${song.title}</td><td>${song.artist}</td><td><i class="material-icons responsive-icon">thumb_up</i></td><td><i class="material-icons responsive-icon">thumb_down</i></td></tr>`)
         })
-        console.log("Calling updatesong function");
-        console.log(currentSong)
-        console.log(progress)
         UpdateSong(currentSong, progress);
     })
 
     connection.on("UpdateSong", (song, progress) => {
-        console.log("UpdateSong endpoint got called");
         UpdateSong(song, progress);
     })
 
-        var currentSongProgressTimer;
-
         function UpdateSong(song, currentProgress) {
-            console.log("SONG");
-            console.log(song)
-            console.log(`The current song is: ${song.title} at with id of ${song.trackUri.substring(14)}`)
             $("#current-song-art").attr("src", song.albumImageUrl);
             $("#current-song-title").html(song.title);
             $("#current-song-artist").html(song.artist)
             $("#current-song-album").html(song.album)
             $('.current-song').removeClass("current-song");
             $(`#${song.trackUri.substring(14)}`).addClass("current-song");
-            console.log("PROGRESS");
-            console.log(currentProgress)
-            let currentPosition = currentProgress;
-            clearInterval(currentSongProgressTimer);
 
-            currentSongProgressTimer = setInterval(() => {
-                $("#song-progress-bar").css("width",
-                    (currentPosition / song.length) * 100 + "%")
-                currentPosition += 250;
-            }, 250)
+            var percent = 100;
+            //$("#song-progress-bar").css("width", ( currentProgress/ 100 ));
+            $("#song-progress-bar")
+                .css("width", (50 + "%"))
+                .animate({
+                    "width": 100 + "%"
+                }, {
+                    duration: song.length,
+                    easing: 'linear'
+                });
         }
 
 

@@ -5,7 +5,9 @@ using SpotSync.Domain.Contracts.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Persistence
@@ -50,6 +52,7 @@ namespace Persistence
             string sql = @"INSERT INTO public.activitylog(record_time, user_action, username)
                            VALUES (NOW(), @Action, @Username)";
 
+
             using (var connection = new NpgsqlConnection(_connectionString))
             {
                 await connection.ExecuteAsync(sql, new
@@ -61,3 +64,4 @@ namespace Persistence
         }
     }
 }
+

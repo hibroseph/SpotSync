@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SpotSync.Tests.Unit_Tests
 {
@@ -34,9 +35,9 @@ namespace SpotSync.Tests.Unit_Tests
         {
 
             Playlist playlist = new Playlist(_songs, new List<PartyGoer>(), PARTY_CODE);
-            playlist.Start();
+            playlist.StartAsync();
 
-            playlist.NextSong();
+            playlist.NextSongAsync();
 
             Assert.AreEqual(_songs.ElementAt(1), playlist.CurrentSong);
         }
@@ -50,22 +51,14 @@ namespace SpotSync.Tests.Unit_Tests
         }
 
         [Test]
-        public void PlaylistNoSongs_StartThrowsException()
+        public async Task PlaylistNoSongs_StartThrowsException()
         {
             Playlist playlist = new Playlist(new List<Song>(), new List<PartyGoer>(), PARTY_CODE);
 
-            Assert.Throws<ArgumentNullException>(() => playlist.Start());
-        }
-
-        [Test]
-        public void PlaylistTwoSongs_NextSongTwiceThrowsException()
-        {
-            Playlist playlist = new Playlist(_songs, new List<PartyGoer>(), PARTY_CODE);
-
-            playlist.Start();
-            playlist.NextSong();
-
-            Assert.Throws<ArgumentNullException>(() => playlist.NextSong());
+            Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            {
+                await playlist.StartAsync();
+            });
         }
 
         [Test]
@@ -73,7 +66,7 @@ namespace SpotSync.Tests.Unit_Tests
         {
             Playlist playlist = new Playlist(_songs, new List<PartyGoer>(), PARTY_CODE);
 
-            playlist.Start();
+            playlist.StartAsync();
 
             Thread.Sleep(2000);
 

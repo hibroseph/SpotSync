@@ -14,7 +14,7 @@ namespace DatabaseUpdater
             .AddJsonFile("appSettings.json", optional: true, reloadOnChange: true)
             .Build();
 
-            if (string.IsNullOrWhiteSpace(configuration.GetConnectionString("SpotSyncDb")))
+            if (string.IsNullOrWhiteSpace(configuration["DatabaseConnection"]))
             {
                 throw new Exception("Database name is null");
             }
@@ -22,7 +22,7 @@ namespace DatabaseUpdater
             Console.WriteLine("Done building configuration");
             Console.WriteLine("Updating database");
 
-            DatabaseMigration migration = new DatabaseMigration(new DatabaseMigrationConfig(configuration.GetConnectionString("DatabaseConnection")));
+            DatabaseMigration migration = new DatabaseMigration(new DatabaseMigrationConfig(configuration["DatabaseConnection"]));
 
             migration.Update();
 

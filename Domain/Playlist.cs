@@ -48,7 +48,7 @@ namespace SpotSync.Domain
             _partyCode = null;
         }
 
-        public void Start()
+        public async Task StartAsync()
         {
             if (Queue is null || Queue.Count == 0)
                 throw new ArgumentNullException("Queue cannot be null");
@@ -56,13 +56,13 @@ namespace SpotSync.Domain
             if (CurrentSong is null)
             {
                 CurrentSong = Queue.First();
-                DomainEvents.RaiseAsync(new ChangeSong { PartyCode = _partyCode, Listeners = _listeners, Song = CurrentSong, ProgressMs = 0 });
-                _timer = new Timer(state => NextSong(), null, CurrentSong.Length, Timeout.Infinite);
+                await DomainEvents.RaiseAsync(new ChangeSong { PartyCode = _partyCode, Listeners = _listeners, Song = CurrentSong, ProgressMs = 0 });
+                _timer = new Timer(async state => await NextSongAsync(), null, CurrentSong.Length, Timeout.Infinite);
                 _stopWatch.Start();
             }
         }
 
-        public void NextSong()
+        public async Task NextSongAsync()
         {
             History.Enqueue(Queue.Dequeue());
             if (Queue.Count > 0)
@@ -71,11 +71,12 @@ namespace SpotSync.Domain
                 _timer.Change(CurrentSong.Length, Timeout.Infinite);
                 _stopWatch.Restart();
                 // update song for all those in party
-                DomainEvents.RaiseAsync(new ChangeSong { PartyCode = _partyCode, Listeners = _listeners, Song = CurrentSong, ProgressMs = 0 });
+                await DomainEvents.RaiseAsync(new ChangeSong { PartyCode = _partyCode, Listeners = _listeners, Song = CurrentSong, ProgressMs = 0 });
             }
             else
             {
-                throw new ArgumentNullException("Queue has no more songs");
+                CurrentSong = null;
+                await DomainEvents.RaiseAsync(new PlaylistEnded { PartyCode = _partyCode });
             }
         }
 

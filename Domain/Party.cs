@@ -23,9 +23,15 @@ namespace SpotSync.Domain
             Playlist = playlist;
         }
 
-        public void StartPlaylist()
+        public async Task StartPlaylistAsync()
         {
-            Playlist.Start();
+            await Playlist.StartAsync();
+        }
+
+        public async Task DeletePlaylistAsync()
+        {
+            await Playlist.DeleteAsync();
+            Playlist = null;
         }
 
         public bool IsPartyPlayingMusic() => Playlist?.CurrentSong != null;

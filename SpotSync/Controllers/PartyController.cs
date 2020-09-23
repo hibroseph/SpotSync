@@ -195,7 +195,7 @@ namespace SpotSync.Controllers
 
                 playlist = await UpdatePlaylistForEveryoneInPartyAsync(party, user);
 
-                party.StartPlaylist();
+                party.StartPlaylistAsync();
 
                 // update the playlist for everyone
                 await _partyHubContext.Clients.Group(party.PartyCode).SendAsync("UpdatePlaylist", playlist, playlist.First());
@@ -206,7 +206,7 @@ namespace SpotSync.Controllers
 
                 playlist = await UpdatePlaylistForEveryoneInPartyAsync(party, user);
 
-                party.StartPlaylist();
+                party.StartPlaylistAsync();
 
                 // update the playlist for everyone
                 await _partyHubContext.Clients.Group(party.PartyCode).SendAsync("UpdatePlaylist", playlist, playlist.First());

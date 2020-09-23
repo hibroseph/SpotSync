@@ -206,7 +206,7 @@ namespace SpotSync.Application.Services
 
                 if (party.Playlist != null)
                 {
-                    await party.Playlist.DeleteAsync();
+                    await party.DeletePlaylistAsync();
                 }
 
                 party.CreatePlaylist(new Playlist(playlist, partyGoersWithHost, party.PartyCode));
