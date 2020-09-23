@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SpotSync.Classes.Hubs;
+using SpotSync.Classes.Services;
 using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.Events;
 
@@ -24,7 +25,7 @@ namespace SpotSync
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddAndStartDatabaseMigration(Configuration);
-
+            services.AddHostedService<PlaylistBackgroundService>();
             services.AddControllersWithViews();
             services.AddSpotSyncServices(Configuration);
             services.AddSpotSyncAuthentication();
