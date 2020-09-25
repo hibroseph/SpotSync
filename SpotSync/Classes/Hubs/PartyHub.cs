@@ -36,7 +36,7 @@ namespace SpotSync.Classes.Hubs
         public async Task ConnectToParty(string partyCode)
         {
             var partier = new PartyGoer(Context.UserIdentifier);
-            if (await _partyService.IsUserPartyingAsync(partier) || _partyService.IsUserHostingAParty(partier))
+            if (await _partyService.IsUserPartyingAsync(partier) || await _partyService.IsUserHostingAPartyAsync(partier))
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, partyCode);
                 await Clients.Group(partyCode).SendAsync("UpdateParty", $"{Context.UserIdentifier} has joined the party {partyCode}");

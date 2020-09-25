@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +14,7 @@ using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.DTO;
+using SpotSync.Domain.Errors;
 using SpotSync.Domain.Events;
 using SpotSync.Models.Party;
 
@@ -47,7 +49,7 @@ namespace SpotSync.Controllers
                 model.CurrentlyActiveParty = TranslateDomainPartyToPartyModel(party);
 
             }
-            else if (_partyService.IsUserHostingAParty(user))
+            else if (await _partyService.IsUserHostingAPartyAsync(user))
             {
                 Domain.Party party = await _partyService.GetPartyWithHostAsync(user);
 
@@ -72,12 +74,12 @@ namespace SpotSync.Controllers
         {
             PartyGoer host = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
             // See if the current user doesn't have any parties
-            if (_partyService.IsUserHostingAParty(host))
+            if (await _partyService.IsUserHostingAPartyAsync(host))
             {
                 return BadRequest("You have already created a party. End the current one to create another.");
             }
 
-            string partyCode = _partyService.StartNewParty(host);
+            string partyCode = await _partyService.StartNewPartyAsync(host);
             await _logService.LogUserActivityAsync(host.Id, $"Created a party with code {partyCode}");
 
             return Json(new PartyCodeDTO { PartyCode = partyCode });
@@ -134,7 +136,7 @@ namespace SpotSync.Controllers
         {
             PartyGoer host = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            if (_partyService.IsUserHostingAParty(host))
+            if (await _partyService.IsUserHostingAPartyAsync(host))
             {
                 if (await _partyService.EndPartyAsync(host))
                 {
@@ -160,7 +162,7 @@ namespace SpotSync.Controllers
         {
             PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            if (_partyService.IsUserHostingAParty(user))
+            if (await _partyService.IsUserHostingAPartyAsync(user))
             {
                 Domain.Party party = await _partyService.GetPartyWithHostAsync(user);
 
@@ -189,13 +191,13 @@ namespace SpotSync.Controllers
 
             List<Song> playlist = null;
 
-            if (_partyService.IsUserHostingAParty(user))
+            if (await _partyService.IsUserHostingAPartyAsync(user))
             {
                 Domain.Party party = await _partyService.GetPartyWithHostAsync(user);
 
                 playlist = await UpdatePlaylistForEveryoneInPartyAsync(party, user);
 
-                party.StartPlaylistAsync();
+                await party.StartPlaylistAsync();
 
                 // update the playlist for everyone
                 await _partyHubContext.Clients.Group(party.PartyCode).SendAsync("UpdatePlaylist", playlist, playlist.First());
@@ -206,7 +208,7 @@ namespace SpotSync.Controllers
 
                 playlist = await UpdatePlaylistForEveryoneInPartyAsync(party, user);
 
-                party.StartPlaylistAsync();
+                await party.StartPlaylistAsync();
 
                 // update the playlist for everyone
                 await _partyHubContext.Clients.Group(party.PartyCode).SendAsync("UpdatePlaylist", playlist, playlist.First());
@@ -233,18 +235,38 @@ namespace SpotSync.Controllers
         private async Task<List<Song>> UpdatePlaylistForEveryoneInPartyAsync(Domain.Party party, PartyGoer partyGoer)
         {
             return await _partyService.CreatePartyPlaylistForEveryoneInPartyAsync(party, partyGoer);
-
         }
+
         private async Task<IActionResult> UpdateCurrentSongForEveryoneInPartyAsync(Domain.Party party, PartyGoer partyGoer)
         {
-            if (await _partyService.UpdateCurrentSongForEveryoneInPartyAsync(party, partyGoer))
+            var response = await _partyService.UpdateCurrentSongForEveryoneInPartyAsync(party, partyGoer);
+
+            if (response.Success)
             {
                 return Ok();
             }
             else
             {
-                return BadRequest("Unable to update the current song for everyone in party");
+                return BadRequest(ConstructFriendlyMessage(response.Errors));
             }
+        }
+
+        private string ConstructFriendlyMessage(List<UpdateSongError> errors)
+        {
+            if (errors.Count == 1)
+            {
+                return errors.First().FriendlyMessage;
+            }
+
+            StringBuilder builder = new StringBuilder(50);
+
+            foreach (var error in errors)
+            {
+                builder.Append(error.FriendlyMessage);
+                builder.Append(". ");
+            }
+
+            return builder.ToString();
         }
     }
 }

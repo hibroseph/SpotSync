@@ -82,7 +82,7 @@ namespace SpotSync.Controllers
             }
 
             // If the user is hosting a party, END IT
-            if (_partyService.IsUserHostingAParty(user))
+            if (await _partyService.IsUserHostingAPartyAsync(user))
             {
                 Task logUserEndingParty = _logService.LogUserActivityAsync(user, "Ending party while logging out");
                 await _partyService.EndPartyAsync(user);

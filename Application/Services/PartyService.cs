@@ -2,9 +2,11 @@
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.DTO;
+using SpotSync.Domain.Errors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,39 +14,65 @@ namespace SpotSync.Application.Services
 {
     public class PartyService : IPartyService
     {
-        IPartyRepository _partyRepository;
-        ISpotifyHttpClient _spotifyHttpClient;
-        Random _random;
+        private IPartyRepository _partyRepository;
+        private ISpotifyHttpClient _spotifyHttpClient;
+        private ILogService _logService;
+        private Random _random;
 
-        public PartyService(IPartyRepository partyRepository, ISpotifyHttpClient spotifyHttpClient)
+        public PartyService(IPartyRepository partyRepository, ISpotifyHttpClient spotifyHttpClient, ILogService logService)
         {
             _partyRepository = partyRepository;
             _spotifyHttpClient = spotifyHttpClient;
             _random = new Random();
+            _logService = logService;
         }
 
-        public bool IsUserHostingAParty(PartyGoer host)
+        public async Task<bool> IsUserHostingAPartyAsync(PartyGoer host)
         {
-            return _partyRepository.IsUserHostingAParty(host);
+            try
+            {
+                return _partyRepository.IsUserHostingAParty(host);
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, "Error occurred in IsUserHostiongAPartyAsync");
+                return false;
+            }
         }
 
         public async Task<bool> EndPartyAsync(PartyGoer host)
         {
-            return await _partyRepository.DeleteAsync(host);
+            try
+            {
+                return await _partyRepository.DeleteAsync(host);
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, "Error occurred in EndPartyAsync");
+                return false;
+            }
         }
 
         public async Task<bool> JoinPartyAsync(PartyCodeDTO partyCode, PartyGoer attendee)
         {
-            Party party = await _partyRepository.GetAsync(partyCode);
-
-            if (party == null)
+            try
             {
+                Party party = await _partyRepository.GetAsync(partyCode);
+
+                if (party == null)
+                {
+                    return false;
+                }
+
+                return await JoinPartyAsync(party.Id, attendee);
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, "Error occurred in JoinPartyAsync");
                 return false;
             }
-
-            return await JoinPartyAsync(party.Id, attendee);
         }
-        private Task<bool> JoinPartyAsync(Guid partyId, PartyGoer attendee)
+        private async Task<bool> JoinPartyAsync(Guid partyId, PartyGoer attendee)
         {
             try
             {
@@ -54,33 +82,41 @@ namespace SpotSync.Application.Services
 
                 _partyRepository.Update(party);
 
-                return Task.FromResult(true);
+                return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return Task.FromResult(false);
+                await _logService.LogExceptionAsync(ex, "Error occurred in JoinPartyAsync");
+                return false;
             }
         }
 
-        public string StartNewParty(PartyGoer partyHost)
+        public async Task<string> StartNewPartyAsync(PartyGoer partyHost)
         {
-            Party party = new Party(partyHost);
+            try
+            {
+                Party party = new Party(partyHost);
 
-            /*party.CreatePlaylist(new Playlist(new List<Song> { new Song { Length = 4000 }, new Song { Length = 8000 }, new Song { Length = 1000 } }));
-            party.StartPlaylist();
-            */
-            _partyRepository.CreateParty(party);
+                /*party.CreatePlaylist(new Playlist(new List<Song> { new Song { Length = 4000 }, new Song { Length = 8000 }, new Song { Length = 1000 } }));
+                party.StartPlaylist();
+                */
+                _partyRepository.CreateParty(party);
 
-            return party.PartyCode;
+                return party.PartyCode;
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, "Error occurred in StartNewPartyAsync");
+                return null;
+            }
         }
 
         public bool NextSong(Song song)
         {
-
             return true;
         }
 
-        public async Task<bool> UpdateCurrentSongForEveryoneInPartyAsync(Party party, PartyGoer user)
+        public async Task<ServiceResult<UpdateSongError>> UpdateCurrentSongForEveryoneInPartyAsync(Party party, PartyGoer user)
         {
             try
             {
@@ -98,7 +134,8 @@ namespace SpotSync.Application.Services
                 // Get the current song from the host
                 CurrentSongDTO song = await _spotifyHttpClient.GetCurrentSongAsync(user.Id);
 
-                List<Task<bool>> updateSongForPartyTask = new List<Task<bool>>();
+                List<Task<ServiceResult<UpdateSongError>>> updateSongForPartyTask = new List<Task<ServiceResult<UpdateSongError>>>();
+
                 foreach (PartyGoer attendee in party.Attendees)
                 {
                     updateSongForPartyTask.Add(_spotifyHttpClient.UpdateSongForPartyGoerAsync(attendee.Id, new List<string> { song.TrackUri }, song.ProgressMs));
@@ -106,20 +143,30 @@ namespace SpotSync.Application.Services
 
                 await Task.WhenAll(updateSongForPartyTask);
 
+                ServiceResult<UpdateSongError> errors = new ServiceResult<UpdateSongError>();
+
                 // Verify all the updates worked
-                foreach (Task<bool> task in updateSongForPartyTask)
+                foreach (Task<ServiceResult<UpdateSongError>> task in updateSongForPartyTask)
                 {
-                    if (!task.Result)
+                    if (task.IsCompletedSuccessfully && !task.Result.Success)
                     {
-                        return false;
+                        foreach (var error in task.Result.Errors)
+                        {
+                            errors.AddError(error);
+                        }
                     }
                 }
 
-                return true;
+                return errors;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return false;
+                await _logService.LogExceptionAsync(ex, "Error occurred in UpdateCurrentSongForEveryoneInPartyAsync");
+
+                ServiceResult<UpdateSongError> error = new ServiceResult<UpdateSongError>();
+                error.AddError(new UpdateSongError("Unable to update everyone's song."));
+
+                return error;
             }
         }
 
@@ -149,7 +196,7 @@ namespace SpotSync.Application.Services
 
                 var recommendTrackUris = await _spotifyHttpClient.GetRecommendedTrackUrisAsync(user.Id, GetNNumberOfTrackUris(topTrackUrisTasks.SelectMany(p => p.Result).ToList(), 5));
 
-                List<Task<bool>> updateSongForPartyTask = new List<Task<bool>>();
+                List<Task<ServiceResult<UpdateSongError>>> updateSongForPartyTask = new List<Task<ServiceResult<UpdateSongError>>>();
                 foreach (PartyGoer attendee in party.Attendees)
                 {
                     updateSongForPartyTask.Add(_spotifyHttpClient.UpdateSongForPartyGoerAsync(attendee.Id, recommendTrackUris, 0));
@@ -158,9 +205,9 @@ namespace SpotSync.Application.Services
                 await Task.WhenAll(updateSongForPartyTask);
 
                 // Verify all the updates worked
-                foreach (Task<bool> task in updateSongForPartyTask)
+                foreach (Task<ServiceResult<UpdateSongError>> task in updateSongForPartyTask)
                 {
-                    if (!task.Result)
+                    if (!task.Result.Success)
                     {
                         return false;
                     }
@@ -168,8 +215,9 @@ namespace SpotSync.Application.Services
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                await _logService.LogExceptionAsync(ex, "Error occurred in UpdatePartyPlaylistForEveryoneInPartyAsync");
                 return false;
             }
 
@@ -213,8 +261,9 @@ namespace SpotSync.Application.Services
 
                 return playlist;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                await _logService.LogExceptionAsync(ex, "Error occurred in CreatePartyPlaylistForEveryoneInPartyAsync");
                 return null;
             }
 
@@ -222,33 +271,73 @@ namespace SpotSync.Application.Services
 
         public async Task<Party> GetPartyAsync(PartyCodeDTO partyCode)
         {
-            return await _partyRepository.GetAsync(partyCode);
+            try
+            {
+                return await _partyRepository.GetAsync(partyCode);
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, "Error occurred in GetPartyAsync");
+                return null;
+            }
         }
 
         public async Task<Party> GetPartyWithHostAsync(PartyGoer host)
         {
-            return await _partyRepository.GetPartyWithHostAsync(host);
+            try
+            {
+                return await _partyRepository.GetPartyWithHostAsync(host);
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, "Error occurred in GetPartywithHostAsync");
+                return null;
+            }
         }
 
         public async Task<bool> IsUserPartyingAsync(PartyGoer user)
         {
-            return await _partyRepository.IsUserInAPartyAsync(user);
+            try
+            {
+                return await _partyRepository.IsUserInAPartyAsync(user);
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, "Error occurred in IsUserPartyingAsync");
+                return false;
+            }
         }
 
         public async Task<Party> GetPartyWithAttendeeAsync(PartyGoer attendee)
         {
-            return await _partyRepository.GetPartyWithAttendeeAsync(attendee);
+            try
+            {
+                return await _partyRepository.GetPartyWithAttendeeAsync(attendee);
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, "Error occurred in GetPartyWithAttendeeAsync");
+                return null;
+            }
         }
 
         public async Task<bool> LeavePartyAsync(PartyGoer attendee)
         {
-            // Let's make sure he is part of the party
-            if (await _partyRepository.IsUserInAPartyAsync(attendee))
+            try
             {
-                return _partyRepository.LeaveParty(attendee);
+                // Let's make sure he is part of the party
+                if (await _partyRepository.IsUserInAPartyAsync(attendee))
+                {
+                    return _partyRepository.LeaveParty(attendee);
+                }
+                else
+                {
+                    return false;
+                }
             }
-            else
+            catch (Exception ex)
             {
+                await _logService.LogExceptionAsync(ex, "Error occurred in LeavePartyAsync");
                 return false;
             }
         }

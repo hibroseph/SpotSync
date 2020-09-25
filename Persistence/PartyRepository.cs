@@ -6,13 +6,20 @@ using System.Text;
 using System.Threading.Tasks;
 using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
+using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.DTO;
 
 namespace Persistence
 {
     public class PartyRepository : IPartyRepository
     {
-        private List<Party> _parties = new List<Party>();
+        private List<Party> _parties;
+
+        public PartyRepository()
+        {
+            _parties = new List<Party>();
+        }
+
         public void CreateParty(Party item)
         {
             _parties.Add(item);
@@ -69,46 +76,30 @@ namespace Persistence
 
         public async Task<bool> DeleteAsync(PartyGoer host)
         {
-            try
+            List<Party> parties = _parties.FindAll(p => p.Host.Id.Equals(host.Id, StringComparison.CurrentCultureIgnoreCase));
+
+            if (parties.Count > 1)
             {
-                //Parties.RemoveAll(p => p.Host.Id.Equals(host.Id, StringComparison.CurrentCultureIgnoreCase));
-
-                List<Party> parties = _parties.FindAll(p => p.Host.Id.Equals(host.Id, StringComparison.CurrentCultureIgnoreCase));
-
-                if (parties.Count > 1)
-                {
-                    throw new Exception($"Host: {host.Id} is hosting {parties.Count} parties. A host should only host 1 party at a time.");
-                }
-
-                if (parties == null)
-                {
-                    throw new Exception($"Host: {host.Id} is not hosting a party");
-                }
-
-                if (parties.First().Playlist != null)
-                {
-                    await parties.First().Playlist?.DeleteAsync();
-                }
-                _parties.Remove(parties.First());
-
-                return true;
+                throw new Exception($"Host: {host.Id} is hosting {parties.Count} parties. A host should only host 1 party at a time.");
             }
-            catch (Exception)
+
+            if (parties == null)
             {
-                return false;
+                throw new Exception($"Host: {host.Id} is not hosting a party");
             }
+
+            if (parties.First().Playlist != null)
+            {
+                await parties.First().Playlist?.DeleteAsync();
+            }
+            _parties.Remove(parties.First());
+
+            return true;
         }
 
         public Task<bool> IsUserInAPartyAsync(PartyGoer attendee)
         {
-            try
-            {
-                return Task.FromResult(_parties.Find(p => p.Attendees.Exists(p => p.Id == attendee.Id)) != null);
-            }
-            catch (Exception)
-            {
-                return Task.FromResult(false);
-            }
+            return Task.FromResult(_parties.Find(p => p.Attendees.Exists(p => p.Id == attendee.Id)) != null);
         }
 
         public Task<Party> GetPartyWithAttendeeAsync(PartyGoer attendee)
@@ -118,33 +109,26 @@ namespace Persistence
 
         public bool LeaveParty(PartyGoer attendee)
         {
-            try
+            List<Party> parties = _parties.FindAll(p => p.Attendees.Contains(attendee));
+
+            if (parties.Count > 1)
             {
-                List<Party> parties = _parties.FindAll(p => p.Attendees.Contains(attendee));
-
-                if (parties.Count > 1)
-                {
-                    throw new Exception($"The attendee: {attendee.Id} was in {parties.Count} parties");
-                }
-
-                if (parties == null || parties.Count == 0)
-                {
-                    throw new Exception($"The attendee: {attendee.Id} is not currently in a party");
-                }
-
-                if (parties.First().Playlist != null)
-                {
-                    parties.First().Playlist.RemoveListener(attendee);
-                }
-
-                parties.First().Attendees.RemoveAll(p => p.Id.Equals(attendee.Id, StringComparison.OrdinalIgnoreCase));
-
-                return true;
+                throw new Exception($"The attendee: {attendee.Id} was in {parties.Count} parties");
             }
-            catch (Exception)
+
+            if (parties == null || parties.Count == 0)
             {
-                return false;
+                throw new Exception($"The attendee: {attendee.Id} is not currently in a party");
             }
+
+            if (parties.First().Playlist != null)
+            {
+                parties.First().Playlist.RemoveListener(attendee);
+            }
+
+            parties.First().Attendees.RemoveAll(p => p.Id.Equals(attendee.Id, StringComparison.OrdinalIgnoreCase));
+
+            return true;
         }
     }
 }

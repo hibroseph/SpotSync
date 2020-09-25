@@ -3,7 +3,9 @@ using Newtonsoft.Json.Linq;
 using SpotSync.Application.Authentication;
 using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
+using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.DTO;
+using SpotSync.Domain.Errors;
 using SpotSync.Domain.Events;
 using System;
 using System.Collections.Generic;
@@ -24,12 +26,14 @@ namespace SpotSync.Infrastructure
     {
         private IHttpClient _httpClient;
         private ISpotifyAuthentication _spotifyAuthentication;
+        private ILogService _logService;
         private Dictionary<ApiEndpointType, SpotifyEndpoint> _apiEndpoints;
 
-        public SpotifyHttpClient(ISpotifyAuthentication spotifyAuthentication, IHttpClient httpClient)
+        public SpotifyHttpClient(ISpotifyAuthentication spotifyAuthentication, IHttpClient httpClient, ILogService logService)
         {
             _httpClient = httpClient;
             _spotifyAuthentication = spotifyAuthentication;
+            _logService = logService;
             _apiEndpoints = new Dictionary<ApiEndpointType, SpotifyEndpoint>
             {
                 { ApiEndpointType.CurrentSong, new SpotifyEndpoint { EndpointUrl = "https://api.spotify.com/v1/me/player/currently-playing", HttpMethod = HttpMethod.Get } },
@@ -223,7 +227,7 @@ namespace SpotSync.Infrastructure
             return trackUris;
         }
 
-        public async Task<bool> UpdateSongForPartyGoerAsync(string partyGoerId, List<string> songUris, int currentSongProgressInMs)
+        public async Task<ServiceResult<UpdateSongError>> UpdateSongForPartyGoerAsync(string partyGoerId, List<string> songUris, int currentSongProgressInMs)
         {
             HttpResponseMessage response = await SendHttpRequestAsync(partyGoerId, _apiEndpoints[ApiEndpointType.PlaySong], new StartUserPlaybackSong
             {
@@ -231,13 +235,18 @@ namespace SpotSync.Infrastructure
                 position_ms = currentSongProgressInMs
             });
 
+            ServiceResult<UpdateSongError> error = new ServiceResult<UpdateSongError>();
+
             if (response.IsSuccessStatusCode)
             {
-                return true;
+                return error;
             }
             else
             {
-                return false;
+                await _logService.LogExceptionAsync(new Exception($"Unable to update song for {partyGoerId}"), await response.Content.ReadAsStringAsync());
+                // TODO: Check status codes and add specific messaging for status codes based on Spotifys API
+                error.AddError(new UpdateSongError($"Unable to update song for {partyGoerId}"));
+                return error;
             }
         }
 

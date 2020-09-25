@@ -4,6 +4,7 @@ using Persistence;
 using SpotSync.Application.Services;
 using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
+using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.DTO;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace SpotSync.Tests
         IPartyService _partyService;
         IPartyRepository _partyRepository;
         Mock<ISpotifyHttpClient> _spotifyHttpClient;
-
+        Mock<ILogService> _logService;
         PartyGoer PartyHost1 = new PartyGoer("Joe");
         PartyGoer PartyHost2 = new PartyGoer("Kip");
         PartyGoer PartyHost3 = new PartyGoer("Kipseph");
@@ -30,14 +31,18 @@ namespace SpotSync.Tests
         {
             _spotifyHttpClient = new Mock<ISpotifyHttpClient>();
             _partyRepository = new PartyRepository();
-            _partyService = new PartyService(_partyRepository, _spotifyHttpClient.Object);
+            _logService = new Mock<ILogService>();
+
+            _spotifyHttpClient.Setup(p => p.RequestAccessAndRefreshTokenFromSpotifyAsync(It.IsAny<string>())).Returns(Task.FromResult(It.IsAny<string>()));
+
+            _partyService = new PartyService(_partyRepository, _spotifyHttpClient.Object, _logService.Object);
         }
 
         [Test]
         public async Task NewPartyWithHostHasNoAttendeesEmpty()
         {
 
-            string partyCode = _partyService.StartNewParty(PartyHost1);
+            string partyCode = await _partyService.StartNewPartyAsync(PartyHost1);
 
             PartyCodeDTO partyCodeDTO = new PartyCodeDTO { PartyCode = partyCode };
             Assert.AreEqual(0, (await _partyService.GetPartyWithHostAsync(PartyHost1)).Attendees.Count);
@@ -46,7 +51,7 @@ namespace SpotSync.Tests
         [Test]
         public async Task SinglePartyHasCorrectNumberOfAttendees()
         {
-            string partyCode = _partyService.StartNewParty(PartyHost1);
+            string partyCode = await _partyService.StartNewPartyAsync(PartyHost1);
 
             PartyCodeDTO partyCodeDTO = new PartyCodeDTO { PartyCode = partyCode };
 
@@ -61,7 +66,7 @@ namespace SpotSync.Tests
         public async Task SinglePartyHasCorrectNumberOfAttendeesWithLeavingAttendees()
         {
 
-            string partyCode = _partyService.StartNewParty(PartyHost1);
+            string partyCode = await _partyService.StartNewPartyAsync(PartyHost1);
 
             PartyCodeDTO partyCodeDTO = new PartyCodeDTO { PartyCode = partyCode };
 
@@ -78,7 +83,7 @@ namespace SpotSync.Tests
         public async Task SinglePartyHasCorrectNumberOfAttendeesWithMultipleLeavingAttendees()
         {
 
-            string partyCode = _partyService.StartNewParty(PartyHost1);
+            string partyCode = await _partyService.StartNewPartyAsync(PartyHost1);
 
             PartyCodeDTO partyCodeDTO = new PartyCodeDTO { PartyCode = partyCode };
 
@@ -96,7 +101,7 @@ namespace SpotSync.Tests
         public async Task SinglePartyHasNoAttendeesWithAllLeavingAttendees()
         {
 
-            string partyCode = _partyService.StartNewParty(PartyHost1);
+            string partyCode = await _partyService.StartNewPartyAsync(PartyHost1);
 
             PartyCodeDTO partyCodeDTO = new PartyCodeDTO { PartyCode = partyCode };
 
@@ -115,15 +120,15 @@ namespace SpotSync.Tests
         public async Task MultiplePartyHasCorrectNumberAttendees()
         {
 
-            string partyCode1 = _partyService.StartNewParty(PartyHost1);
+            string partyCode1 = await _partyService.StartNewPartyAsync(PartyHost1);
 
             PartyCodeDTO partyCodeDTO1 = new PartyCodeDTO { PartyCode = partyCode1 };
 
-            string partyCode3 = _partyService.StartNewParty(PartyHost2);
+            string partyCode3 = await _partyService.StartNewPartyAsync(PartyHost2);
 
             PartyCodeDTO partyCodeDTO3 = new PartyCodeDTO { PartyCode = partyCode3 };
 
-            string partyCode2 = _partyService.StartNewParty(PartyHost3);
+            string partyCode2 = await _partyService.StartNewPartyAsync(PartyHost3);
 
             PartyCodeDTO partyCodeDTO2 = new PartyCodeDTO { PartyCode = partyCode2 };
 
@@ -140,15 +145,15 @@ namespace SpotSync.Tests
         public async Task MultiplePartyHasCorrectNumberAttendees_Leaving()
         {
 
-            string partyCode1 = _partyService.StartNewParty(PartyHost1);
+            string partyCode1 = await _partyService.StartNewPartyAsync(PartyHost1);
 
             PartyCodeDTO partyCodeDTO1 = new PartyCodeDTO { PartyCode = partyCode1 };
 
-            string partyCode2 = _partyService.StartNewParty(PartyHost2);
+            string partyCode2 = await _partyService.StartNewPartyAsync(PartyHost2);
 
             PartyCodeDTO partyCodeDTO2 = new PartyCodeDTO { PartyCode = partyCode2 };
 
-            string partyCode3 = _partyService.StartNewParty(PartyHost3);
+            string partyCode3 = await _partyService.StartNewPartyAsync(PartyHost3);
 
             PartyCodeDTO partyCodeDTO3 = new PartyCodeDTO { PartyCode = partyCode3 };
 
@@ -169,15 +174,15 @@ namespace SpotSync.Tests
         public async Task PartyGoerAttendingFindsPartyWithAttendee()
         {
 
-            string partyCode1 = _partyService.StartNewParty(PartyHost1);
+            string partyCode1 = await _partyService.StartNewPartyAsync(PartyHost1);
 
             PartyCodeDTO partyCodeDTO1 = new PartyCodeDTO { PartyCode = partyCode1 };
 
-            string partyCode3 = _partyService.StartNewParty(PartyHost2);
+            string partyCode3 = await _partyService.StartNewPartyAsync(PartyHost2);
 
             PartyCodeDTO partyCodeDTO3 = new PartyCodeDTO { PartyCode = partyCode3 };
 
-            string partyCode2 = _partyService.StartNewParty(PartyHost3);
+            string partyCode2 = await _partyService.StartNewPartyAsync(PartyHost3);
 
             PartyCodeDTO partyCodeDTO2 = new PartyCodeDTO { PartyCode = partyCode2 };
 
@@ -190,6 +195,10 @@ namespace SpotSync.Tests
             Assert.AreEqual(partyCodeDTO3.PartyCode, party.PartyCode);
         }
 
+        [Test]
+        public async Task PartyGoerCanAttendLate()
+        {
+        }
 
     }
 }
