@@ -8,13 +8,8 @@ namespace SpotSync.Models.Dashboard
     public class DashboardModel
     {
         public string Name { get; set; }
-        public Song CurrentSong { get; set; }
+        public List<PreviewPartyModel> AvailableParties { get; set; }
+        public List<PreviewPlaylistSong> SuggestedSongs { get; set; }
         public string RandomGreeting { get; set; }
-
-        public string PrintCurrentSong()
-        {
-            return $"You are listening to {CurrentSong.Title} by {CurrentSong.Artist}";
-        }
-
     }
 }

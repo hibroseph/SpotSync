@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.VisualStudio.Web.CodeGeneration.Templating;
+using SpotSync.Application.Services;
 using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
@@ -9,6 +11,7 @@ using SpotSync.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Threading.Tasks;
 
 namespace SpotSync.Classes.Hubs
@@ -27,43 +30,94 @@ namespace SpotSync.Classes.Hubs
             _logService = logService;
         }
 
-        public async Task SendMessage(string user, string message)
-        {
-            await Clients.All.SendAsync("ReceiveMessage", Context.UserIdentifier, message);
-
-        }
-
         public async Task ConnectToParty(string partyCode)
         {
             var partier = new PartyGoer(Context.UserIdentifier);
-            if (await _partyService.IsUserPartyingAsync(partier) || await _partyService.IsUserHostingAPartyAsync(partier))
+            if (!await _partyService.IsUserPartyingAsync(partier) && !await _partyService.IsUserHostingAPartyAsync(partier))
             {
+                await _partyService.JoinPartyAsync(new Domain.DTO.PartyCodeDTO { PartyCode = partyCode }, partier);
                 await Groups.AddToGroupAsync(Context.ConnectionId, partyCode);
                 await Clients.Group(partyCode).SendAsync("UpdateParty", $"{Context.UserIdentifier} has joined the party {partyCode}");
             }
 
+            // Add the partier to real-time connection group
+            await Groups.AddToGroupAsync(Context.ConnectionId, partyCode);
+            await Clients.Group(partyCode).SendAsync("UpdateParty", $"{Context.UserIdentifier} has joined the party {partyCode}");
+            await Clients.Group(partyCode).SendAsync("NewListener", Context.UserIdentifier);
+
             Party party = await _partyService.GetPartyWithAttendeeAsync(partier);
 
-            if (party != null && party.IsPartyPlayingMusic())
+            // Update the view of the partier to the current playlist
+            await Clients.Client(Context.ConnectionId).SendAsync("UpdatePartyView",
+            new
             {
-                // update spotify to play current position 
-                await _spotifyHttpClient.UpdateSongForPartyGoerAsync(partier.Id, new List<string> { party.GetSongPlaying().TrackUri }, party.GetSongPosition());
-                await Clients.Client(Context.ConnectionId).SendAsync("UpdatePlaylist", party.Playlist.Queue, party.GetSongPosition());
-                await Clients.Client(Context.ConnectionId).SendAsync("UpdateSong", party.GetSongPlaying(), party.GetSongPosition());
-            }
+                Song = party.Playlist.CurrentSong,
+                Position = party.Playlist.CurrentPositionInSong()
+            },
+            party.Playlist.History,
+            party.Playlist.Queue
+            );
 
-            party = await _partyService.GetPartyWithHostAsync(partier);
-
-            if (party != null && party.IsPartyPlayingMusic())
+            // make sure that the users spotify is connected
+            if (string.IsNullOrEmpty(await _spotifyHttpClient.GetUsersActiveDeviceAsync(partier.Id)))
             {
-                // update spotify to play current position 
-                await _spotifyHttpClient.UpdateSongForPartyGoerAsync(partier.Id, new List<string> { party.GetSongPlaying().TrackUri }, party.GetSongPosition());
-                await Clients.Client(Context.ConnectionId).SendAsync("UpdatePlaylist", party.Playlist.Queue, party.GetSongPosition());
-                await Clients.Client(Context.ConnectionId).SendAsync("UpdateSong", party.GetSongPlaying(), party.GetSongPosition());
+                await Clients.Client(Context.ConnectionId).SendAsync("ConnectSpotify", "");
             }
-
             await _logService.LogUserActivityAsync(partier, $"Joined real time collobration in party with code {partyCode}");
             return;
+
+        }
+
+        public async Task UserAddedSong(AddSongToQueueRequest request)
+        {
+            PartyGoer partier = new PartyGoer(Context.UserIdentifier);
+            bool successfullyAddedSongToQueue = await _partyService.AddNewSongToQueue(request);
+
+            if (successfullyAddedSongToQueue)
+            {
+                Party party = await _partyService.GetPartyWithAttendeeAsync(partier);
+
+                // Update the view of the partier to the current playlist
+                await Clients.Group(party.PartyCode).SendAsync("UpdatePartyView",
+                new
+                {
+                    Song = party.Playlist.CurrentSong,
+                    Position = party.Playlist.CurrentPositionInSong()
+                },
+                party.Playlist.History,
+                party.Playlist.Queue
+                );
+            }
+            else
+            {
+                await Clients.Client(Context.ConnectionId).SendAsync("UserModifiedPlaylist", new { error = true });
+            }
+        }
+
+        public async Task UserModifiedPlaylist(RearrangeQueueRequest queueRequest)
+        {
+            var partier = new PartyGoer(Context.UserIdentifier);
+            bool successfullyRearrangedQueue = await _partyService.RearrangeQueue(queueRequest);
+
+            if (successfullyRearrangedQueue)
+            {
+                Party party = await _partyService.GetPartyWithAttendeeAsync(partier);
+
+                // Update the view of the partier to the current playlist
+                await Clients.Group(party.PartyCode).SendAsync("UpdatePartyView",
+                new
+                {
+                    Song = party.Playlist.CurrentSong,
+                    Position = party.Playlist.CurrentPositionInSong()
+                },
+                party.Playlist.History,
+                party.Playlist.Queue
+                );
+            }
+            else
+            {
+                await Clients.Client(Context.ConnectionId).SendAsync("UserModifiedPlaylist", new { error = true });
+            }
         }
 
         public async Task UpdateParty(string partyCode)
@@ -80,6 +134,5 @@ namespace SpotSync.Classes.Hubs
         {
             await Clients.Group(partyCode).SendAsync("UpdatePlaylist", playlist, playlist.First());
         }
-
     }
 }

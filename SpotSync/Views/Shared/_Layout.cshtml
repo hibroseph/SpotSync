@@ -1,94 +1,96 @@
-﻿<!DOCTYPE html>
+﻿@model SpotSync.Models.Shared.BaseModel;
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SpotSync</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    @*<link rel="stylesheet" href="~/css/site.css" />*@
-    @*<link rel="stylesheet" href="~/css/SpotSync.css" />*@
+    <link rel="stylesheet" href="~/lib/bulma/css/bulma.min.css" />
     <link rel="icon" href="~/favicon.ico" type="image/ico" />
     <link rel="shortcut icon" href="~/favicon.ico" type="image/ico" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <link rel="stylesheet" href="~/css/style.css" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons&amp;style=round" rel="stylesheet">
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm mb-3">
-            <div class="container">
-                @if (User.Identity.IsAuthenticated)
-                {
-                    <a class="navbar-brand" asp-area="" asp-controller="Dashboard" asp-action="Index">
-                        <span class="spotsync-icon">
-                            <i class="material-icons">sync</i>
-                        </span> SpotSync
-                    </a>
-                }
-                else
-                {
-                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                        <span class="spotsync-icon">
-                            <i class="material-icons">sync</i>
-                        </span> SpotSync
-                    </a>
-                }
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <i class="material-icons md-36">menu</i>
-                </button>
+        <nav class="navbar has-background-white-ter">
+            <div class="navbar-brand">
+                <div class="navbar-item">
+                    <a href="/"> <img class="mt-2" style="width: 150px" src="~/assets/logo.svg" /></a>
+                </div>
+                <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample" onclick="toggleMenu()">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
 
-                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
-                    <ul class="navbar-nav mr-auto">
-                        @if (User.Identity.IsAuthenticated)
+            <div id="navbarBasicExample" class="navbar-menu">
+                <div class="navbar-start">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a class="navbar-item" href="@Url.Action("Index", "Dashboard")">
+                            Dashboard
+                        </a>
+                        @if (Model != null && Model.IsUserInParty && !string.IsNullOrWhiteSpace(Model?.PartyUrl))
                         {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Logout">Logout</a>
-                            </li>
+                            <a class="navbar-item" href="@Model.PartyUrl">Current Party</a>
                         }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
-                            </li>
-                        }
-                    </ul>
-                    <ul class="navbar-nav flex-grow-1">
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Party" asp-action="Index">Party</a>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                            </li>
-                        }
-                    </ul>
+                    }
+                </div>
+
+                <div class="navbar-end">
+                    <div class="navbar-item">
+                        <div class="buttons">
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <a class="button is-primary" href="@Url.Action("Logout","Account")">
+                                    Log Out
+                                </a>
+                            }
+                            else
+                            {
+                                <a class="button is-primary" href="@Url.Action("Login","Account")">
+                                    Log In
+                                </a>
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
         </nav>
     </header>
     <div class="container">
-        <main role="main" class="pb-3">
+        <main role="main">
             @RenderBody()
         </main>
     </div>
 
     <footer class="footer">
-        <div class="container">
-            &copy; 2020 - SpotSync - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        <div class="content has-text-centered">
+            &copy; 2020 - SpotSync - Created By Joseph Ridgley
         </div>
     </footer>
-    <div id="notifications" class="notification-area">
+
+    <div id="notifications" style="position: fixed; bottom: 0; right: 0; margin: 10px;">
+        @if (!string.IsNullOrWhiteSpace(Model?.ErrorMessage))
+        {
+            <div class="notification is-danger is-light">
+                <button onclick="DeleteNotification()" class="delete"></button>
+                @Model.ErrorMessage
+            </div>
+        }
     </div>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+
     @RenderSection("Scripts", required: false)
+    <script>
+        function DeleteNotification() {
+            u("#notifications").children().first().remove();
+        }
+
+        function toggleMenu() {
+            u("#navbarBasicExample").toggleClass("is-active")
+        }
+    </script>
 </body>
 </html>

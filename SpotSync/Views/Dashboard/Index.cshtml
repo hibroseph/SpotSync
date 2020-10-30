@@ -1,46 +1,140 @@
-﻿
+﻿@using SpotSync.Models.Shared;
+@using SpotSync.Models.Dashboard;
+@model BaseModel<DashboardModel>
 @{
     ViewData["Title"] = "Dashboard";
+    var DashboardModel = Model.PageModel;
 }
-@model SpotSync.Models.Dashboard.DashboardModel
+<script src="~/js/bundle.js"></script>
+<script src="~/lib/umbrellajs/umbrella.min.js"></script>
+<style>
+    .albumArtPreview {
+        width: 250px;
+    }
 
-<h1>@Model.RandomGreeting @Model.Name</h1>
+    .album-art-view {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+    }
 
-@if (Model.CurrentSong != null)
-{
-    <div class="current-song-box">
-        <h2>Now Playing:</h2>
-        <div class="row current-song-box-flex">
-            <div class="col-md-7 current-song-box-item">
-                <a class="now-playing-art-link" href="https://open.spotify.com/" target="_blank">
-                    <div class="now-playing-art-container">
-                        <img class="now-playing-art" src="@Model.CurrentSong.AlbumImageUrl" />
-                        <i class="material-icons album-icon">open_in_new</i>
+    .is-active {
+        display: flex !important;
+    }
+
+    #album-cover {
+        display:none;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.3);
+    }
+</style>
+<section class="section">
+    <h1 class="title">@DashboardModel.RandomGreeting @DashboardModel.Name</h1>
+
+    @if (DashboardModel.AvailableParties != null && DashboardModel.AvailableParties.Count > 0)
+    {
+        <div class="available-parties py-3">
+            <div class="box">
+
+                <h2 class="subtitle">Available Parties to Join</h2>
+                <div class="album-art-view">
+                    @foreach (var party in DashboardModel.AvailableParties)
+                    {
+                    <div class="px-6 has-text-centered">
+                        <div style="position:relative;">
+                            <img class="albumArtPreview" src="@party.AlbumArtUrl" />
+                            <!--
+                            <div class="is-active" id="album-cover">
+                            </div>
+                            -->
+                        </div>
+                        <p>@party.ListenerCount Listener</p>
+                        @if (Model.IsUserInParty && party.PartyCode.Equals(Model.PartyCode, StringComparison.OrdinalIgnoreCase))
+                        {
+                            <a class="button is-outlined is-danger" href="/party/leaveparty?partyCode=@party.PartyCode">Leave</a>
+                        }
+                        else
+                        {
+                            <a class="button is-outlined is-primary" href="/party/joinparty?partyCode=@party.PartyCode">Join</a>
+                        }
                     </div>
-                </a>
+                    }
+                </div>
             </div>
-            <div class="col-md-5 current-song-box-item">
-                <p>Title: <b>@Model.CurrentSong.Title</b></p>
-                <p>Artist: <b>@Model.CurrentSong.Artist</b></p>
-                <p>Album: <b>@Model.CurrentSong.Album</b></p>
+        </div>
+    }
+
+    <div class="columns py-2">
+        <div class="column is-one-third px-3">
+            <div class="box">
+                <h2 class="subtitle">Join a Party</h2>
+                <form asp-controller="Party" asp-action="JoinParty">
+                    <div class="field">
+                        <label class="label">Party Code</label>
+                        <div class="control">
+                            <input name="partyCode" class="input" type="text" placeholder="ex. B4A152">
+                        </div>
+                        <p class="help">This is a six alpha-numeric number that identifies the party you want to join. Contact someone in the party to send you the code.</p>
+                    </div>
+                    <div class="field">
+                        <div class="control">
+                            <button type="submit" class="button is-primary">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="column px-3">
+            <div class="box">
+                <div class="mb-4">
+                    <h2 class="subtitle mb-0">Suggested Playlist to Create</h2>
+                    <p class="is-size-7">
+                        These are your top suggested songs that will be used to create a party. A playlist will be generated from songs that are like the ones you have selected below.
+                    </p>
+                </div>
+                <form asp-controller="Party" asp-action="StartParty" method="post">
+                    <table class="table nolines is-fullwidth">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Artist</th>
+                                <th>Selected</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.PageModel.SuggestedSongs.Count; i++)
+                            {
+                                <tr>
+                                    <td>@Model.PageModel.SuggestedSongs[i].Title</td>
+                                    <td>@Model.PageModel.SuggestedSongs[i].Artist</td>
+                                    <td id="selected" style="padding-left:35px"><input asp-for="@Model.PageModel.SuggestedSongs[i].Selected" type="checkbox" checked="@Model.PageModel.SuggestedSongs[i].Selected" /> <input asp-for="@Model.PageModel.SuggestedSongs[i].TrackUri" type="hidden" /></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <input type="submit" class="button is-primary" value="Generate Playlist" />
+                </form>
             </div>
         </div>
     </div>
-}
-else
-{
-    <div class="row">
-        <div class="col-md-12 no-music">
-            <h4>It looks like you're not playing any music right now.</h4>
-            <h4>
-                <a class="open-spotify-btn" href="https://open.spotify.com/" target="_blank">
-                    Open Spotify <i class="material-icons">open_in_new</i>
-                </a> to start playing some music.
-            </h4>
-        </div>
-    </div>
-}
+</section>
 
+@section Scripts {
+    <script>
+        u("img").on("mouseenter", (event) => {
+            console.log(event.target);
+            u(event.target).siblings("#album-cover").addClass("is-active");
+        })
 
-
-
+        u("#album-cover").on("mouseleave", (event) => {
+            u(event.target).removeClass("is-active");
+        })
+    </script>
+} 

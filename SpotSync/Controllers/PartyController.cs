@@ -16,118 +16,156 @@ using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.DTO;
 using SpotSync.Domain.Errors;
 using SpotSync.Domain.Events;
+using SpotSync.Models.Dashboard;
 using SpotSync.Models.Party;
+using SpotSync.Models.Shared;
+using Song = SpotSync.Domain.Song;
 
 namespace SpotSync.Controllers
 {
     public class PartyController : Controller
     {
         private readonly IPartyService _partyService;
+        private readonly IPartyGoerService _partyGoerService;
         private readonly IHubContext<PartyHub> _partyHubContext;
         private readonly ILogService _logService;
 
-        public PartyController(IPartyService partyService, IHubContext<PartyHub> hubContext, ILogService logService)
+        public PartyController(IPartyService partyService, IHubContext<PartyHub> hubContext, ILogService logService, IPartyGoerService partyGoerService)
         {
             _partyService = partyService;
+            _partyGoerService = partyGoerService;
             _partyHubContext = hubContext;
             _logService = logService;
         }
 
-
         [Authorize]
-        public async Task<IActionResult> Index()
+        [HttpPost]
+        public async Task<IActionResult> StartParty(BaseModel<DashboardModel> model)
         {
-            PartyModel model = new PartyModel();
-
             PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            if (await _partyService.IsUserPartyingAsync(user))
+            if (await _partyService.GetPartyWithAttendeeAsync(user) != null)
             {
-                Domain.Party party = await _partyService.GetPartyWithAttendeeAsync(user);
-
-                model.IsCurrentlyJoinedInAParty = true;
-                model.CurrentlyActiveParty = TranslateDomainPartyToPartyModel(party);
-
-            }
-            else if (await _partyService.IsUserHostingAPartyAsync(user))
-            {
-                Domain.Party party = await _partyService.GetPartyWithHostAsync(user);
-
-                model.IsCurrentlyHostingParty = true;
-                model.CurrentlyActiveParty = TranslateDomainPartyToPartyModel(party);
+                return RedirectToAction("Index", "Dashboard", new { errorMessage = "Cannot create a party when you are joined in one. You need to leave the party you are currently in" });
             }
 
-            return View(model);
+            List<string> seedTrackUris = model.PageModel.SuggestedSongs.Where(p => p.Selected).Select(p => p.TrackUri).Take(5).ToList();
+
+            string partyCode = await _partyService.StartPartyWithSeedSongsAsync(seedTrackUris, user);
+
+            return RedirectToAction("Index", new { PartyCode = partyCode });
         }
 
-        private Models.Party.Party TranslateDomainPartyToPartyModel(Domain.Party party)
+
+        [Authorize]
+        public async Task<IActionResult> Index(string partyCode)
         {
-            return new Models.Party.Party
+            PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            Party party;
+
+            if (string.IsNullOrWhiteSpace(partyCode))
+            {
+                party = await _partyService.GetPartyWithAttendeeAsync(user);
+            }
+            else
+            {
+                party = await _partyService.GetPartyWithCodeAsync(partyCode);
+            }
+
+            if (party == null)
+            {
+                return RedirectToAction("Index", "Dashboard");
+            }
+
+            List<Song> usersSuggestedSongs = null;
+
+            bool isUserListening = party.Listeners.Contains(user);
+
+            if (party.Listeners.Contains(user))
+            {
+                usersSuggestedSongs = await _partyGoerService.GetRecommendedSongsAsync(user.Id);
+            }
+
+            PartyModel model = new PartyModel
             {
                 PartyCode = party.PartyCode,
-                Attendees = party.Attendees.Select(p => p.Id).ToList()
+                SuggestedSongs = usersSuggestedSongs?.Select(song => ConvertDomainSongToModelSong(song)).ToList(),
+                IsUserListening = isUserListening
+            };
+
+            BaseModel baseModel = new BaseModel(true, model.PartyCode);
+            return View(new BaseModel<PartyModel>(model, baseModel));
+        }
+
+        private SongModel ConvertDomainSongToModelSong(Song song)
+        {
+            return new SongModel
+            {
+                Title = song.Title,
+                Artist = song.Artist,
+                AlbumImageUrl = song.AlbumImageUrl,
+                Length = song.Length,
+                TrackUri = song.TrackUri
             };
         }
 
         [Authorize]
-        public async Task<IActionResult> CreateParty()
+        public async Task<IActionResult> JoinParty(string partyCode)
         {
-            PartyGoer host = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            // See if the current user doesn't have any parties
-            if (await _partyService.IsUserHostingAPartyAsync(host))
+
+            PartyCodeDTO partyCodeDto = new PartyCodeDTO
             {
-                return BadRequest("You have already created a party. End the current one to create another.");
-            }
-
-            string partyCode = await _partyService.StartNewPartyAsync(host);
-            await _logService.LogUserActivityAsync(host.Id, $"Created a party with code {partyCode}");
-
-            return Json(new PartyCodeDTO { PartyCode = partyCode });
-        }
-
-        [Authorize]
-        [HttpPost]
-        public async Task<IActionResult> JoinParty([FromBody]PartyCodeDTO partyCode)
-        {
-            if (partyCode == null)
-            {
-                return BadRequest("The party code was empty");
-            }
+                PartyCode = partyCode
+            };
 
             PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            if (await _partyService.JoinPartyAsync(partyCode, user))
+            if (partyCodeDto == null)
             {
-                await _logService.LogUserActivityAsync(user.Id, $"Joined a party with code {partyCode.PartyCode}");
-                return Ok();
+                await _logService.LogUserActivityAsync(user.Id, $"Failed to join party with null party code");
+                return RedirectToAction("Index", "Dashboard");
+            }
+
+            if (await _partyService.IsUserPartyingAsync(user))
+            {
+                // User can only join 1 party at a time
+                return RedirectToAction("Index", "Dashboard", new { ErrorMessage = "You cannot join 2 parties. You must leave the first to join another" });
+            }
+
+            if (await _partyService.JoinPartyAsync(partyCodeDto, user))
+            {
+                await _partyService.SyncUserWithSong(user);
+                await _logService.LogUserActivityAsync(user.Id, $"Joined a party with code {partyCodeDto.PartyCode}");
+
+                return RedirectToAction("Index", "Party", new { PartyCode = partyCode });
             }
             else
             {
-                await _logService.LogUserActivityAsync(user.Id, $"Failed to join party with code {partyCode.PartyCode}");
-                return BadRequest($"Unable to join party {partyCode.PartyCode}");
+                await _logService.LogUserActivityAsync(user.Id, $"Failed to join party with code {partyCodeDto.PartyCode}");
+
+                return RedirectToAction("Index", "Dashboard", new { ErrorMessage = $"A party does not exist with the party code {partyCode}" });
             }
         }
 
         [Authorize]
-        [HttpPost]
-        public async Task<IActionResult> LeaveParty([FromBody]PartyCodeDTO partyCode)
+        public async Task<IActionResult> LeaveParty(string partyCode)
         {
             if (partyCode == null)
             {
-                return BadRequest("The party code was empty");
+                RedirectToAction("Index", "Dashboard");
             }
 
             PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             if (!await _partyService.LeavePartyAsync(user))
             {
-                await _logService.LogUserActivityAsync(user.Id, $"User failed to leave party {partyCode.PartyCode}");
-                return BadRequest($"You are currently not joined with party: {partyCode.PartyCode}");
+                await _logService.LogUserActivityAsync(user.Id, $"User failed to leave party {partyCode}");
+                return RedirectToAction("Index", "Dashboard");
             }
 
-            await _logService.LogUserActivityAsync(user.Id, $"User successfully left party {partyCode.PartyCode}");
+            await _logService.LogUserActivityAsync(user.Id, $"User successfully left party {partyCode}");
 
-            return Ok();
+            return RedirectToAction("Index", "Dashboard"); ;
         }
 
         [Authorize]
@@ -164,14 +202,14 @@ namespace SpotSync.Controllers
 
             if (await _partyService.IsUserHostingAPartyAsync(user))
             {
-                Domain.Party party = await _partyService.GetPartyWithHostAsync(user);
+                Party party = await _partyService.GetPartyWithHostAsync(user);
 
                 await _logService.LogUserActivityAsync(user.Id, $"User updated song for party with code {partyCode.PartyCode}");
                 return await UpdateCurrentSongForEveryoneInPartyAsync(party, user);
             }
             else if (await _partyService.IsUserPartyingAsync(user))
             {
-                Domain.Party party = await _partyService.GetPartyWithAttendeeAsync(user);
+                Party party = await _partyService.GetPartyWithAttendeeAsync(user);
 
                 await _logService.LogUserActivityAsync(user.Id, $"User updated song for party with code {partyCode.PartyCode}");
                 return await UpdateCurrentSongForEveryoneInPartyAsync(party, user);
@@ -180,6 +218,24 @@ namespace SpotSync.Controllers
             {
                 await _logService.LogUserActivityAsync(user.Id, $"User failed tp update song for party with code {partyCode.PartyCode}");
                 return BadRequest($"You are currently not hosting a party or attending a party: {partyCode.PartyCode}");
+            }
+        }
+
+        [Authorize]
+        public async Task<IActionResult> UpdateSongForUser()
+        {
+            try
+            {
+                PartyGoer listener = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+                await _partyService.SyncUserWithSong(listener);
+
+                return StatusCode(200);
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, "Error occurred in UpdateSongForUser()");
+                return StatusCode(500);
             }
         }
 
@@ -193,22 +249,22 @@ namespace SpotSync.Controllers
 
             if (await _partyService.IsUserHostingAPartyAsync(user))
             {
-                Domain.Party party = await _partyService.GetPartyWithHostAsync(user);
+                Party party = await _partyService.GetPartyWithHostAsync(user);
 
                 playlist = await UpdatePlaylistForEveryoneInPartyAsync(party, user);
 
-                await party.StartPlaylistAsync();
+                //await party.;
 
                 // update the playlist for everyone
                 await _partyHubContext.Clients.Group(party.PartyCode).SendAsync("UpdatePlaylist", playlist, playlist.First());
             }
             else if (await _partyService.IsUserPartyingAsync(user))
             {
-                Domain.Party party = await _partyService.GetPartyWithAttendeeAsync(user);
+                Party party = await _partyService.GetPartyWithAttendeeAsync(user);
 
                 playlist = await UpdatePlaylistForEveryoneInPartyAsync(party, user);
 
-                await party.StartPlaylistAsync();
+                //await party.StartPlaylistAsync();
 
                 // update the playlist for everyone
                 await _partyHubContext.Clients.Group(party.PartyCode).SendAsync("UpdatePlaylist", playlist, playlist.First());
@@ -232,12 +288,12 @@ namespace SpotSync.Controllers
             return newPlaylist.Select(song => { song.TrackUri = song.TrackUri.Substring(14); return song; }).ToList();
         }
 
-        private async Task<List<Song>> UpdatePlaylistForEveryoneInPartyAsync(Domain.Party party, PartyGoer partyGoer)
+        private async Task<List<Song>> UpdatePlaylistForEveryoneInPartyAsync(Party party, PartyGoer partyGoer)
         {
             return await _partyService.CreatePartyPlaylistForEveryoneInPartyAsync(party, partyGoer);
         }
 
-        private async Task<IActionResult> UpdateCurrentSongForEveryoneInPartyAsync(Domain.Party party, PartyGoer partyGoer)
+        private async Task<IActionResult> UpdateCurrentSongForEveryoneInPartyAsync(Party party, PartyGoer partyGoer)
         {
             var response = await _partyService.UpdateCurrentSongForEveryoneInPartyAsync(party, partyGoer);
 
