@@ -1,4 +1,5 @@
 ﻿
+using SpotSync.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +10,8 @@ namespace SpotSync.Models.Party
 {
     public class PartyModel
     {
-        public bool IsCurrentlyHostingParty { get; set; }
-        public bool IsCurrentlyJoinedInAParty { get; set; }
-        public Party CurrentlyActiveParty { get; set; }
+        public string PartyCode { get; set; }
+        public List<SongModel> SuggestedSongs { get; set; }
+        public bool IsUserListening { get; set; }
     }
 }

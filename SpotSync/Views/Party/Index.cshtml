@@ -1,285 +1,217 @@
-﻿@{
+﻿@using SpotSync.Models.Shared;
+@using SpotSync.Models.Party
+@model BaseModel<PartyModel>
+@{
+    var PartyModel = Model.PageModel;
     ViewData["Title"] = "Index";
 }
-@model SpotSync.Models.Party.PartyModel
-
-<div id="party-box" class="box">
-    @if (Model.IsCurrentlyHostingParty)
-    {
-        <div class="box-inner">
-            <h4>You are currently hosting a party</h4>
-            <p>Share the code: <b>@Model.CurrentlyActiveParty.PartyCode</b> with your friends to join your party</p>
-            @if (Model.CurrentlyActiveParty.Attendees.Count > 0)
-            {
-                <h4>People Partying With You:</h4>
-                @foreach (string attendee in Model.CurrentlyActiveParty.Attendees)
-                {
-                    <p>@attendee</p>
-                }
-            }
-            else
-            {
-                <p>Looks like no one is partying with you. You should invite some friends with the party code above.</p>
-            }
-
-            <div id="party-controls-box">
-                <!--
-                    <button class="btn btn-primary sync-btn" onclick="UpdateSongForParty()">
-                        Sync Current Song <i class="material-icons btn-icon">sync</i>
-                    </button>
-                -->
-                <button class="btn btn-primary" onclick="UpdateQueueForParty()">
-                    Generate New Queue <i class="material-icons btn-icon">playlist_add_check</i>
-                </button>
-                <button class="btn btn-danger" onclick="EndParty()">
-                    End Party <i class="material-icons btn-icon">delete</i>
-                </button>
-                <div id="party-controls-message"></div>
-            </div>
-        </div>
-    }
-    else if (Model.IsCurrentlyJoinedInAParty)
-    {
-        <div class="box-inner">
-            <h4>You are currently attending a party</h4>
-            <p>Share the code: <b>@Model.CurrentlyActiveParty.PartyCode</b> with your friends to join your party</p>
-            @if (Model.CurrentlyActiveParty.Attendees.Count > 0)
-            {
-                <h4>People Partying With You:</h4>
-                @foreach (string attendee in Model.CurrentlyActiveParty.Attendees)
-                {
-                    <p>@attendee</p>
-                }
-            }
-            else
-            {
-                <p>Looks like no one is partying with you. You should invite some friends with the party code: <b>@Model.CurrentlyActiveParty.PartyCode</b></p>
-            }
-            <!--
-                <button class="btn btn-primary sync-btn" onclick="UpdateSongForParty()">
-                    Sync Current Song <i class="material-icons btn-icon">sync</i>
-                </button>
-            -->
-            <button class="btn btn-primary" onclick="UpdateQueueForParty()">
-                Generate New Queue <i class="material-icons btn-icon">playlist_add_check</i>
-            </button>
-            <button class="btn btn-danger" onclick="LeaveParty()">
-                Leave Party <i class="material-icons btn-icon">delete</i>
-            </button>
-            <div id="party-controls-message"></div>
-        </div>
-    }
-    else
-    {
-        <div class="row">
-            <div class="col-md-6">
-                <div id="create-party-box" class="box-inner">
-                    <h4>Wanna start your own music party?</h4>
-                    <button class="btn btn-primary" onclick="CreateParty()">
-                        Create a Party <i class="material-icons btn-icon">add</i>
-                    </button>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div id="join-party-box" class="box-inner">
-                    <input id="partyCodeInput" class="input-text" placeholder="Party Code" />
-                    <button class="btn btn-primary" onclick="JoinParty()">
-                        Join Party <i class="material-icons btn-icon">login</i>
-                    </button>
-                    <div id="join-party-message"></div>
-                </div>
-            </div>
-        </div>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<style>
+    #is-now-playing-information > p {
+        display: inline-block;
     }
 
-    <div id="player-container" class="no-display">
-        <div class="row current-song-box-flex">
-            <div class="col-md-7 current-song-box-item">
-                <a class="now-playing-art-link" href="https://open.spotify.com/" target="_blank">
-                    <div class="now-playing-art-container">
-                        <img class="now-playing-art" id="current-song-art" src="" />
-                        <i class="material-icons album-icon">open_in_new</i>
+    .hidden {
+        display: none;
+    }
+
+    table.center {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .card {
+        max-width: 650px;
+    }
+
+    .spotify-search-results {
+        position: absolute;
+        width: 100%;
+    }
+
+    li:hover {
+        background-color: hsl(0, 0%, 96%);
+    }
+
+    li {
+        padding: 10px;
+    }
+
+    .spotify-search-results > .box {
+        padding: 0px;
+    }
+
+    .is-input-wrapper {
+        position: relative;
+    }
+
+    .artist {
+        float: right;
+    }
+
+    .loader {
+        height: 40px;
+        width: 40px;
+    }
+
+    .loader-wrapper {
+        display: none;
+    }
+
+        .loader-wrapper.is-active {
+            display: flex;
+            justify-content: center;
+            padding: 10px;
+        }
+
+    .increment-search-box {
+        width: 80%;
+    }
+
+    #search-spotify-input {
+        transition: width .3s ease-in-out;
+    }
+</style>
+
+<section class="section">
+    <div class="columns">
+        <div class="column">
+            <div class="box">
+                <h1 class="title">Now Playing</h1>
+                <div style="overflow:hidden">
+                    <div class="is-flex is-justify-content-center">
+                        <img style="max-width:340px; width: auto; height: auto;" id="albumArt" src="" />
+                        <div class="is-flex is-flex-direction-column is-justify-content-center">
+                            <div class="p-3" id="is-now-playing-information">
+                                <strong>Title: </strong><p id="track"></p>
+                                <br />
+                                <strong>Artist: </strong><p id="artist"></p>
+                                <p id="album"></p>
+                            </div>
+                        </div>
                     </div>
-                </a>
-            </div>
-            <div class="col-md-5 current-song-box-item">
-                <p>Title: <b id="current-song-title"></b></p>
-                <p>Artist: <b id="current-song-artist"><span></span></b></p>
-                <p>Album: <b id="current-song-album"><span></span></b></p>
+                </div>
             </div>
         </div>
-        <!--
-        <div class="progress">
-            <div id="song-progress-bar" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+        <div class="column">
+            <div class="box">
+                <h1 class="title">Listeners</h1>
+                <div id="listeners"></div>
+            </div>
+            <div class="box">
+                <h1 class="title">Controls</h1>
+                <p>Party Code: <strong>@PartyModel.PartyCode</strong></p>
+                <div class="container">
+                    <button class="button is-primary" onclick="Spotibro.SyncMusicForUser()">Sync Music</button>
+                    <a class="button is-danger" href="/party/leaveparty?partyCode=@PartyModel.PartyCode">Leave Party</a>
+                </div>
+            </div>
         </div>
-            -->
-        <div id="playlist" class="box-inner">
-            <table class="song-table">
-                <thead>
-                    <tr>
-                        <th>Song</th>
-                        <th>Artist</th>
-                    </tr>
-                </thead>
-                <tbody id="song-list">
-                </tbody>
-            </table>
+    </div>
+    <div class="columns pt-2">
+        <div class="column">
+            <div class="box">
+                <div>
+                    <div style="display: flex; justify-content: space-between">
+                        <h1 class="subtitle">Queue</h1>
+                        <div id="is-search-spotify-wrapper" class="is-input-wrapper">
+                            <input autocomplete=off id="search-spotify-input" class="input" type="text" placeholder="Search Spotify for Music to Add" />
+                            <div class="spotify-search-results">
+                                <div class="box">
+                                    <div id="loader" class="loader-wrapper">
+                                        <div class="loader is-loading"></div>
+                                    </div>
+                                    <ul id="results">
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table nolines center interactive is-fullwidth" id="queue"></table>
+                    <div id="loader" class="loader-wrapper is-active">
+                        <div class="loader is-loading"></div>
+                    </div>
+                </div>
+            </div>
         </div>
+        @if (PartyModel.IsUserListening && PartyModel.SuggestedSongs != null)
+        {
+            <div class="column">
+                <div class="box">
+                    <div>
+                        <h1 class="subtitle">Suggested Songs</h1>
+                        <table class="table nolines interactive center is-fullwidth">
+                            <tbody id="suggested-songs">
+                                @foreach (var song in PartyModel.SuggestedSongs)
+                                {
+                                    <tr data-trackuri="@song.TrackUri" data-artist="@song.Artist" data-title="@song.Title" data-albumimageurl="@song.AlbumImageUrl" data-length="@song.Length">
+                                        <td>@song.Title</td>
+                                        <td>@song.Artist</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="container pt-2" style="z-index: -1">
+        <div class="box">
+            <div>
+                <h1 class="subtitle">History</h1>
+                <table class="table center nolines is-fullwidth" id="history"></table>
+                <div id="loader" class="loader-wrapper is-active">
+                    <div class="loader is-loading"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal">
+    <div class="modal-background"></div>
+    <div class="card">
+        <header class="card-header">
+            <p class="card-header-title">
+                Where is your Spotify?
+            </p>
+        </header>
+        <div class="card-content">
+            <div id="card-content" class="content">
+            </div>
+        </div>
+        <footer class="card-footer">
+            <a onclick="Spotibro.CheckForActiveSpotifyConnection()" class="card-footer-item">Sync</a>
+            <a onclick="Spotibro.CloseModal()" class="card-footer-item">Close</a>
+        </footer>
     </div>
 </div>
 
 <script src="~/js/signalr/dist/browser/signalr.js"></script>
-
+<script src="~/js/bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/umbrellajs"></script>
 @section Scripts {
     <script>
+        Spotibro.RealtimeFunctionality("@PartyModel.PartyCode");
 
-    function CreateParty() {
-        $.ajax("/Party/CreateParty")
-            .done((response) => {
-                // Add new party code to DOM
-                location.reload();
-            })
-            .fail((response) => {
-                $("#create-party-box").append(`<p class="error"> <b>An error occurred:</b> ${response.responseText}</p>`)
-            })
-    }
+        let suggestedSongsElement = document.getElementById("suggested-songs");
 
-    function JoinParty() {
-        let code = $("#partyCodeInput").val();
+        Sortable.create(suggestedSongsElement, {
+            group: {
+                name: 'shared',
+                put: false
+            },
+            animation: 300,
+            easing: "cubic-bezier(0.76, 0, 0.24, 1)",
+            ghostClass: "has-background-white-ter",
+            chosenClass: "has-background-info-light",
+            dragClass: "has-background-info-light"
+        });
 
-        $.ajax("/Party/JoinParty", {
-            type: "POST",
-            contentType: "application/json; charset=utf-8",
-            data: JSON.stringify({ PartyCode: code })
+
+        u("#results").children().on('click',(event) => {
+            console.log("clicked")
         })
-            .done((response) => {
-                // successfully joined party, update the DOM accordingly
-                $("#join-party-message").html(`<p class="success">You successfully joined the party ${code}`)
-            })
-            .fail((response) => {
-                // unsuccessfully joined party
-                $("#join-party-message").html(`<p class="error"> <b>An error occurred:</b> ${response.responseText}</p>`)
-            })
-    }
-
-    function EndParty() {
-        $.ajax("/Party/EndParty", {
-            type: "DELETE",
-        })
-            .done((response) => {
-                location.reload();
-            })
-            .fail((response) => {
-                $("#party-controls-message").html(`<p class="error"><b>An error occurred:</b> ${response.responseText}</p>`)
-            })
-    }
-
-    @if (Model.IsCurrentlyHostingParty || Model.IsCurrentlyJoinedInAParty) {
-     <text>
-
-        var connection = new signalR.HubConnectionBuilder().withUrl("/partyHub").build();
-
-    connection.start().then(() => {
-        connection.invoke("ConnectToParty", '@Model.CurrentlyActiveParty.PartyCode').catch(err => { console.log(err) });
-    }).catch(err => {
-        console.log(err);
-    })
-
-    connection.on("PlaylistEnded", () => {
-         $("#player-container").addClass("no-display");
-    })
-
-    connection.on("UpdatePlaylistForParty", (song, progressMs) => {
-        console.log(`You are now listening to ${song.title} that is ${progressMs} milliseconds long.`);
-    })
-
-    connection.on("UpdatePlaylist", (playlist, currentSong, progress) => {
-        $("#player-container").removeClass("no-display");
-        // Remove all elements inside of #song-list
-        $("#song-list").empty();
-        console.log("Rendering new playlist on UI");
-        playlist.map(song => {
-            $('#song-list').append(`<tr id="${song.trackUri.substring(14)}"><td class="song-title">${song.title}</td><td>${song.artist}</td><td><i class="material-icons responsive-icon">thumb_up</i></td><td><i class="material-icons responsive-icon">thumb_down</i></td></tr>`)
-        })
-        UpdateSong(currentSong, progress);
-    })
-
-    connection.on("UpdateSong", (song, progress) => {
-        UpdateSong(song, progress);
-    })
-
-        function UpdateSong(song, currentProgress) {
-            $("#current-song-art").attr("src", song.albumImageUrl);
-            $("#current-song-title").html(song.title);
-            $("#current-song-artist").html(song.artist)
-            $("#current-song-album").html(song.album)
-            $('.current-song').removeClass("current-song");
-            $(`#${song.trackUri.substring(14)}`).addClass("current-song");
-
-            var percent = 100;
-            //$("#song-progress-bar").css("width", ( currentProgress/ 100 ));
-            $("#song-progress-bar")
-                .css("width", (50 + "%"))
-                .animate({
-                    "width": 100 + "%"
-                }, {
-                    duration: song.length,
-                    easing: 'linear'
-                });
-        }
-
-
-    function UpdateSongForParty() {
-
-        connection.invoke("UpdateParty", '@Model.CurrentlyActiveParty.PartyCode').catch(err => { console.log(err) });
-
-        $.ajax("/Party/UpdateSongForParty", {
-            type: "POST",
-            contentType: "application/json; charset=utf-8",
-            data: JSON.stringify({ PartyCode: '@Model.CurrentlyActiveParty.PartyCode' })})
-            .done((response) => {
-                $("#party-controls-message").html('<p class="success">Successfully updated song for all party goers.')
-            })
-            .fail((response) => {
-                $("#party-controls-message").html(`<p class="error">Error while updating all party goers with the new song: ${response.responseText}`)
-            })
-    }
-
-    function UpdateQueueForParty() {
-        $.ajax("/Party/UpdateQueueForParty", {
-            type: "POST",
-            contentType: "application/json; charset=utf-8",
-            data: JSON.stringify({ PartyCode: '@Model.CurrentlyActiveParty.PartyCode' })})
-            .done((response) =>
-            {
-                //$(".toast").toast('show');
-                ShowToast("Success", "Successfully updated playlist for everyone in the party")
-            })
-            .fail((response) =>
-            {
-                ShowToast("Failure", "Failed to update playlist for everyone in the party");
-            })
-    }
-    </text>
-    }
-
-    @if (Model.IsCurrentlyJoinedInAParty)
-    {
-     <text>
-    function LeaveParty() {
-        $.ajax("/Party/LeaveParty", {
-            type: "POST",
-            contentType: "application/json; charset=utf-8",
-            data: JSON.stringify({ PartyCode: '@Model.CurrentlyActiveParty.PartyCode' })
-        })
-            .done(response => {
-                location.reload();
-            })
-            .fail(response => {
-                $("#party-controls-message").html(`<p class="error">Error while trying to leave party: ${response.responseText}`)
-            })
-    }
-    </text>
-    }
     </script>
 }

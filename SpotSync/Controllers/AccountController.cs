@@ -65,35 +65,45 @@ namespace SpotSync.Controllers
             }
             catch (Exception)
             {
-                return RedirectToAction("Index", "Home");
+                //  TODO: CHANGE THIS TO THE IDNEX PAGE ON HOME
+                return RedirectToAction("Index", "Dashboard");
             }
         }
 
         public async Task<IActionResult> Logout()
         {
-            PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-            // If the user is joined in a party, REMOVE HIM
-            if (await _partyService.IsUserPartyingAsync(user))
+            try
             {
-                Task logUserLeavingParty = _logService.LogUserActivityAsync(user, "Leaving party while logging out");
-                await _partyService.LeavePartyAsync(user);
-                await logUserLeavingParty;
+                PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+                // If the user is joined in a party, REMOVE HIM
+                if (await _partyService.IsUserPartyingAsync(user))
+                {
+                    Task logUserLeavingParty = _logService.LogUserActivityAsync(user, "Leaving party while logging out");
+                    await _partyService.LeavePartyAsync(user);
+                    await logUserLeavingParty;
+                }
+
+                // If the user is hosting a party, END IT
+                if (await _partyService.IsUserHostingAPartyAsync(user))
+                {
+                    Task logUserEndingParty = _logService.LogUserActivityAsync(user, "Ending party while logging out");
+                    await _partyService.EndPartyAsync(user);
+                    await logUserEndingParty;
+                }
+
+                await _authenticationService.LogOutUserAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+                await HttpContext.SignOutAsync();
+
+                await _logService.LogUserActivityAsync(user, "Successfully logged out");
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, "Error occurred in Logout()");
+
             }
 
-            // If the user is hosting a party, END IT
-            if (await _partyService.IsUserHostingAPartyAsync(user))
-            {
-                Task logUserEndingParty = _logService.LogUserActivityAsync(user, "Ending party while logging out");
-                await _partyService.EndPartyAsync(user);
-                await logUserEndingParty;
-            }
-
-            await _authenticationService.LogOutUserAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-            await HttpContext.SignOutAsync();
-
-            await _logService.LogUserActivityAsync(user, "Successfully logged out");
             return RedirectToAction("Index", "Home");
         }
 
