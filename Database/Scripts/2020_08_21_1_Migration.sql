@@ -3,7 +3,7 @@
 	record_time TIMESTAMP NOT NULL,
 	exception_message VARCHAR(500),
 	stack_trace VARCHAR(3000),
-	customer_message VARCHAR(2000),
+	custom_message VARCHAR(2000),
 	reference_id VARCHAR(50)
 );
 

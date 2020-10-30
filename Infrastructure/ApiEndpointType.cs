@@ -11,6 +11,8 @@ namespace SpotSync.Infrastructure
         PlaySong = 3,
         Token = 4,
         GetTopTracks = 5,
-        GetRecommendedTracks = 6
+        GetRecommendedTracks = 6,
+        GetUserDevices = 7,
+        SearchSpotify = 8
     }
 }

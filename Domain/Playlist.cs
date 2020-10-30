@@ -14,20 +14,30 @@ namespace SpotSync.Domain
     public class Playlist
     {
         public Song CurrentSong { get; private set; }
-        public Queue<Song> Queue { get; private set; }
+        public List<Song> Queue { get; private set; }
         public Queue<Song> History { get; private set; }
-        private Timer _timer;
+        private Timer _nextSongTimer;
         private List<PartyGoer> _listeners;
         private string _partyCode;
-        private Stopwatch _stopWatch;
+        private Stopwatch _songPositionTime;
 
         public Playlist(List<Song> songs, List<PartyGoer> listeners, string partyCode)
         {
-            Queue = new Queue<Song>(songs);
+            Queue = new List<Song>(songs);
             History = new Queue<Song>();
             _listeners = listeners;
             _partyCode = partyCode;
-            _stopWatch = new Stopwatch();
+            _songPositionTime = new Stopwatch();
+            CurrentSong = null;
+        }
+
+        public Playlist(List<Song> songs, List<PartyGoer> listeners, string partyCode, Queue<Song> existingHistory)
+        {
+            Queue = new List<Song>(songs);
+            History = existingHistory;
+            _listeners = listeners;
+            _partyCode = partyCode;
+            _songPositionTime = new Stopwatch();
             CurrentSong = null;
         }
 
@@ -38,10 +48,10 @@ namespace SpotSync.Domain
 
         public async Task DeleteAsync()
         {
-            _stopWatch.Stop();
-            _stopWatch = null;
-            await _timer.DisposeAsync();
-            _timer = null;
+            _songPositionTime.Stop();
+            _songPositionTime = null;
+            await _nextSongTimer.DisposeAsync();
+            _nextSongTimer = null;
             CurrentSong = null;
             Queue = null;
             History = null;
@@ -57,19 +67,43 @@ namespace SpotSync.Domain
             {
                 CurrentSong = Queue.First();
                 await DomainEvents.RaiseAsync(new ChangeSong { PartyCode = _partyCode, Listeners = _listeners, Song = CurrentSong, ProgressMs = 0 });
-                _timer = new Timer(async state => await NextSongAsync(), null, CurrentSong.Length, Timeout.Infinite);
-                _stopWatch.Start();
+                _nextSongTimer = new Timer(async state => await NextSongAsync(), null, CurrentSong.Length, Timeout.Infinite);
+                _songPositionTime.Start();
             }
+        }
+
+        public Task ModifyQueueAsync(RearrangeQueueRequest request)
+        {
+            Song songToBeMoved = Queue[request.OldTrackIndex];
+            Queue.RemoveAt(request.OldTrackIndex);
+            Queue.Insert(request.NewTrackIndex, songToBeMoved);
+
+            return Task.CompletedTask;
+        }
+
+        public Task AddSongToQueueAsync(AddSongToQueueRequest request)
+        {
+            Queue.Insert(request.IndexToInsertSongAt, new Song
+            {
+                AlbumImageUrl = request.AlbumImageUrl,
+                Artist = request.Artist,
+                Length = request.Length,
+                Title = request.Title,
+                TrackUri = request.TrackUri
+            });
+
+            return Task.CompletedTask;
         }
 
         public async Task NextSongAsync()
         {
-            History.Enqueue(Queue.Dequeue());
+            History.Enqueue(Queue.First());
+            Queue.RemoveAt(0);
             if (Queue.Count > 0)
             {
                 CurrentSong = Queue.First();
-                _timer.Change(CurrentSong.Length, Timeout.Infinite);
-                _stopWatch.Restart();
+                _nextSongTimer.Change(CurrentSong.Length, Timeout.Infinite);
+                _songPositionTime.Restart();
                 // update song for all those in party
                 await DomainEvents.RaiseAsync(new ChangeSong { PartyCode = _partyCode, Listeners = _listeners, Song = CurrentSong, ProgressMs = 0 });
             }
@@ -77,12 +111,13 @@ namespace SpotSync.Domain
             {
                 CurrentSong = null;
                 await DomainEvents.RaiseAsync(new PlaylistEnded { PartyCode = _partyCode });
+                // lets generate 15 more songs
             }
         }
 
         public int CurrentPositionInSong()
         {
-            return (int)_stopWatch.ElapsedMilliseconds;
+            return (int)_songPositionTime.ElapsedMilliseconds;
         }
     }
 }

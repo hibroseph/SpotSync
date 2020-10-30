@@ -2,6 +2,7 @@
 using SpotSync.Domain.Errors;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,6 +12,7 @@ namespace SpotSync.Domain.Contracts
     {
         Task<string> StartNewPartyAsync(PartyGoer host);
         Task<bool> EndPartyAsync(PartyGoer host);
+        Task<bool> EndPartyAsync(string partyCode);
         Task<bool> UpdatePartyPlaylistForEveryoneInPartyAsync(Party party, PartyGoer host);
         Task<List<Song>> CreatePartyPlaylistForEveryoneInPartyAsync(Party party, PartyGoer user);
         Task<ServiceResult<UpdateSongError>> UpdateCurrentSongForEveryoneInPartyAsync(Party party, PartyGoer host);
@@ -19,6 +21,12 @@ namespace SpotSync.Domain.Contracts
         Task<Party> GetPartyWithHostAsync(PartyGoer host);
         Task<bool> IsUserPartyingAsync(PartyGoer user);
         Task<Party> GetPartyWithAttendeeAsync(PartyGoer attendee);
+        Task<Party> GetPartyWithCodeAsync(string partyCode);
         Task<bool> LeavePartyAsync(PartyGoer attendee);
+        Task<string> StartPartyWithSeedSongsAsync(List<string> seedTrackUris, PartyGoer host);
+        Task<List<Party>> GetTopParties(int count);
+        Task SyncUserWithSong(PartyGoer listener);
+        Task<bool> RearrangeQueue(RearrangeQueueRequest request);
+        Task<bool> AddNewSongToQueue(AddSongToQueueRequest request);
     }
 }

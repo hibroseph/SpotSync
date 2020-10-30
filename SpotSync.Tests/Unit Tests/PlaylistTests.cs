@@ -31,13 +31,13 @@ namespace SpotSync.Tests.Unit_Tests
         }
 
         [Test]
-        public void PlaylistTwoSongs_NextSongValid()
+        public async Task PlaylistTwoSongs_NextSongValid()
         {
 
             Playlist playlist = new Playlist(_songs, new List<PartyGoer>(), PARTY_CODE);
-            playlist.StartAsync();
+            await playlist.StartAsync();
 
-            playlist.NextSongAsync();
+            await playlist.NextSongAsync();
 
             Assert.AreEqual(_songs.ElementAt(1), playlist.CurrentSong);
         }
@@ -51,7 +51,7 @@ namespace SpotSync.Tests.Unit_Tests
         }
 
         [Test]
-        public async Task PlaylistNoSongs_StartThrowsException()
+        public void PlaylistNoSongs_StartThrowsException()
         {
             Playlist playlist = new Playlist(new List<Song>(), new List<PartyGoer>(), PARTY_CODE);
 
@@ -62,11 +62,11 @@ namespace SpotSync.Tests.Unit_Tests
         }
 
         [Test]
-        public void PlaylistTwoSongs_NextSongStarts()
+        public async Task PlaylistTwoSongs_NextSongStarts()
         {
             Playlist playlist = new Playlist(_songs, new List<PartyGoer>(), PARTY_CODE);
 
-            playlist.StartAsync();
+            await playlist.StartAsync();
 
             Thread.Sleep(2000);
 

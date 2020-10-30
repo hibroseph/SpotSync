@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SpotSync.Domain.Events;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,25 +8,29 @@ namespace SpotSync.Domain
 {
     public class Party
     {
-        private const int LENGTH_OF_PARTY_CODE = 6;
         public Playlist Playlist;
+        public Guid Id { get; }
+        public PartyGoer Host { get; }
+        public List<PartyGoer> Listeners { get; }
+        public string PartyCode { get; }
+        private const int LENGTH_OF_PARTY_CODE = 6;
 
         public Party(PartyGoer host)
         {
             Id = Guid.NewGuid();
             Host = host;
-            Attendees = new List<PartyGoer>();
+            Listeners = new List<PartyGoer>() { host };
             PartyCode = GeneratePartyCode();
         }
 
-        public void CreatePlaylist(Playlist playlist)
+        public async Task ModifyPlaylistAsync(RearrangeQueueRequest request)
         {
-            Playlist = playlist;
+            await Playlist.ModifyQueueAsync(request);
         }
 
-        public async Task StartPlaylistAsync()
+        public async Task ModifyPlaylistAsync(AddSongToQueueRequest request)
         {
-            await Playlist.StartAsync();
+            await Playlist.AddSongToQueueAsync(request);
         }
 
         public async Task DeletePlaylistAsync()
@@ -35,17 +40,12 @@ namespace SpotSync.Domain
         }
 
         public bool IsPartyPlayingMusic() => Playlist?.CurrentSong != null;
-        public int GetSongPosition() => Playlist.CurrentPositionInSong();
-        public Song GetSongPlaying() => Playlist?.CurrentSong;
-        public Guid Id { get; }
-        public PartyGoer Host { get; }
-        public List<PartyGoer> Attendees { get; }
-        public string PartyCode { get; }
 
         public void JoinParty(PartyGoer partyGoer)
         {
-            Attendees.Add(partyGoer);
+            Listeners.Add(partyGoer);
         }
+
         private static string GeneratePartyCode()
         {
             Random random = new Random();

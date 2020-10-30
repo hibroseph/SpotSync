@@ -32,7 +32,7 @@ namespace Persistence
             {
                 await connection.ExecuteAsync(sql, new
                 {
-                    ExceptionMsg = exception.Message,
+                    ExceptionMessage = exception.Message,
                     StackTrace = exception.StackTrace,
                     CustomMessage = customMessage,
                     ReferenceId = referenceId

@@ -33,7 +33,7 @@ namespace SpotSync.Tests.Unit_Tests
         }
 
         [Test]
-        public async Task GetCurrentSong()
+        public void GetCurrentSong()
         {
             //  TODO: Finish figuring out best way to unit test the third party api
             CurrentSongDTO currentSongDto = new CurrentSongDTO

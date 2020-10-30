@@ -8,6 +8,7 @@ using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.DTO;
+using SpotSync.Domain.Errors;
 
 namespace Persistence
 {
@@ -97,23 +98,32 @@ namespace Persistence
             return true;
         }
 
+        public Task<bool> DeleteAsync(string partyCode)
+        {
+            _parties.RemoveAll(p => p.PartyCode.Equals(partyCode, StringComparison.OrdinalIgnoreCase));
+
+            return Task.FromResult(true);
+        }
+
         public Task<bool> IsUserInAPartyAsync(PartyGoer attendee)
         {
-            return Task.FromResult(_parties.Find(p => p.Attendees.Exists(p => p.Id == attendee.Id)) != null);
+            return Task.FromResult(_parties.Find(p => p.Listeners.Exists(p => p.Id == attendee.Id)) != null);
         }
 
         public Task<Party> GetPartyWithAttendeeAsync(PartyGoer attendee)
         {
-            return Task.FromResult(_parties.Find(p => p.Attendees.Exists(p => p.Id == attendee.Id)));
+            return Task.FromResult(_parties.Find(p => p.Listeners.Exists(p => p.Id == attendee.Id)));
         }
 
         public bool LeaveParty(PartyGoer attendee)
         {
-            List<Party> parties = _parties.FindAll(p => p.Attendees.Contains(attendee));
+            List<Party> parties = _parties.FindAll(p => p.Listeners.Contains(attendee));
 
             if (parties.Count > 1)
             {
-                throw new Exception($"The attendee: {attendee.Id} was in {parties.Count} parties");
+                parties.ForEach(p => p.Listeners.RemoveAll(p => p == attendee));
+
+                throw new PartyGoerWasInMultiplePartiesException($"The user {attendee} was in {parties.Count} but was successfully removed from them");
             }
 
             if (parties == null || parties.Count == 0)
@@ -126,9 +136,33 @@ namespace Persistence
                 parties.First().Playlist.RemoveListener(attendee);
             }
 
-            parties.First().Attendees.RemoveAll(p => p.Id.Equals(attendee.Id, StringComparison.OrdinalIgnoreCase));
+            parties.First().Listeners.RemoveAll(p => p.Id.Equals(attendee.Id, StringComparison.OrdinalIgnoreCase));
 
             return true;
+        }
+
+        public Task<List<Party>> GetPartiesWithMostListenersAsync(int count)
+        {
+            _parties.Sort((r, l) => r.Listeners.Count > l.Listeners.Count ? 1 : 0);
+
+            return Task.FromResult(_parties.Take(count).ToList());
+        }
+
+        public Task<Party> GetPartyWithCode(string partyCode)
+        {
+            List<Party> parties = _parties.FindAll(p => p.PartyCode.Equals(partyCode, StringComparison.OrdinalIgnoreCase));
+
+            if (parties.Count > 1)
+            {
+                throw new Exception($"There is more than 1 party with the same party code of {partyCode}");
+            }
+
+            if (parties.Count == 1)
+            {
+                return Task.FromResult(parties.First());
+            }
+
+            return Task.FromResult<Party>(null);
         }
     }
 }
