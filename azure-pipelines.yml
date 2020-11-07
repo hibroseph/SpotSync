@@ -28,7 +28,7 @@ steps:
   displayName: "Publish SpotSync"
   inputs:
     command: 'publish'
-    publishWebProjects: true
+    projects: '**/SpotSync.csproj'
     arguments: '--output $(Build.ArtifactStagingDirectory)'
     modifyOutputPath: false
 
