@@ -1,0 +1,14 @@
+version: '3.4'
+
+services:
+  spotsync:
+    image: ${DOCKER_REGISTRY-}spotsync
+    build:
+      context: .
+      dockerfile: SpotSync/Dockerfile
+  database:
+    image: postgres
+    environment:
+      - "POSTGRES_PASSWORD=test12345"
+    ports:
+      - "5432:5432"
