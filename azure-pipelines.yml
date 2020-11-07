@@ -29,8 +29,6 @@ steps:
   inputs:
     command: 'publish'
     projects: '**/SpotSync.csproj'
-    arguments: '--output $(Build.ArtifactStagingDirectory)'
-    modifyOutputPath: false
 
 - task: DotNetCoreCLI@2
   displayName: "Test SpotSync"
