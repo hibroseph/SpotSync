@@ -83,6 +83,7 @@
     </div>
 
     @RenderSection("Scripts", required: false)
+    <script src="~/lib/umbrellajs/umbrella.min.js"></script>
     <script>
         function DeleteNotification() {
             u("#notifications").children().first().remove();
