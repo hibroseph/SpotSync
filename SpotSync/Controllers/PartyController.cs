@@ -1,21 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SpotSync.Classes.Hubs;
 using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.DTO;
 using SpotSync.Domain.Errors;
-using SpotSync.Domain.Events;
 using SpotSync.Models.Dashboard;
 using SpotSync.Models.Party;
 using SpotSync.Models.Shared;
@@ -60,6 +57,17 @@ namespace SpotSync.Controllers
         [Authorize]
         public async Task<IActionResult> Index(string partyCode)
         {
+            // TODO: REMOVE THIS, THIS IS TEMPORARY TEST CODE
+            try
+            {
+                throw new Exception("lol test exception in a try catch block");
+            }
+            catch (Exception ex)
+            {
+                string referenceId = await _logService.LogExceptionAsync(ex, "Don't worry about this. YOU SHOULD NOT SEE THIS IN PRODUCTION");
+                return RedirectToAction("Index", "Error", new { ExceptionId = referenceId });
+            }
+
             PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
             Party party;
 

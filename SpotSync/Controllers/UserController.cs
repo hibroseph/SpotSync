@@ -70,7 +70,7 @@ namespace SpotSync.Controllers
                     TrackUri = song.TrackUri
                 }).ToList());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(500);
             }

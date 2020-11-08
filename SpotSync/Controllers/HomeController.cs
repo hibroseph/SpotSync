@@ -41,13 +41,8 @@ namespace SpotSync.Controllers
 
         public IActionResult Privacy()
         {
+            throw new Exception("PRIVACY EXCEPTION, THIS SHOULD NOT SHOW UP IN PROD");
             return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

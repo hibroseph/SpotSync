@@ -1,0 +1,50 @@
+﻿@model SpotSync.Models.Shared.BaseModel<SpotSync.Models.Error.ErrorModel>
+@{
+    var ErrorModel = Model.PageModel;
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title></title>
+</head>
+<body>
+    <section class="section">
+        <div class="columns is-vcentered">
+            <div class="column">
+                <h1 class="title">An Error Happened!</h1>
+                <h2 class="subtitle">Looks like this one is on us, we're sorry! The error has already been reported but if you have a second to describe what happened, we will be able to fix it faster</h2>
+                <form asp-action="ReportError" asp-controller="Error">
+                    <div class="field">
+                        <label class="label">What Happened</label>
+                        <div class="control">
+                            <textarea name="UserErrorDescription" class="textarea" placeholder="Explain what you were doing to end up here"></textarea>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(ErrorModel.ExceptionId))
+                    {
+                        <div class="field">
+                            <label class="label">Error ID</label>
+                            <div class="control">
+                                <input class="input" type="text" value="@ErrorModel.ExceptionId" disabled />
+                            </div>
+                        </div>
+                    }
+                    <div class="field">
+                        <div class="control">
+                            <button class="button is-primary" type="submit">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="column" >
+                <div style=" display: flex; flex-direction: row; justify-content: center;">
+                    <img style="width: 50%" src="~/assets/Error502.svg" />
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
