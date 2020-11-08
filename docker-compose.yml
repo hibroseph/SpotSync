@@ -6,6 +6,8 @@ services:
     build:
       context: .
       dockerfile: SpotSync/Dockerfile
+    ports:
+        - "44346:443"
   database:
     image: postgres
     environment:

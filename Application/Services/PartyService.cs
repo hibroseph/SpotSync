@@ -3,6 +3,7 @@ using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.DTO;
 using SpotSync.Domain.Errors;
+using SpotSync.Domain.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -77,7 +78,9 @@ namespace SpotSync.Application.Services
         public async Task SyncUserWithSong(PartyGoer listener)
         {
             Party party = await _partyRepository.GetPartyWithAttendeeAsync(listener);
-            await _spotifyHttpClient.UpdateSongForPartyGoerAsync(listener.Id, party.Playlist.CurrentSong.TrackUri, party.Playlist.CurrentPositionInSong());
+
+            await DomainEvents.RaiseAsync(new ChangeSong { Listeners = new List<PartyGoer> { listener }, PartyCode = party.PartyCode, ProgressMs = party.Playlist.CurrentPositionInSong(), Song = party.Playlist.CurrentSong });
+            //await _spotifyHttpClient.UpdateSongForPartyGoerAsync(listener.Id, party.Playlist.CurrentSong.TrackUri, party.Playlist.CurrentPositionInSong());
         }
 
         public async Task<string> StartPartyWithSeedSongsAsync(List<string> seedTrackUris, PartyGoer host)
