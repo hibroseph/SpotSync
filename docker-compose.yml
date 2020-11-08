@@ -7,7 +7,9 @@ services:
       context: .
       dockerfile: SpotSync/Dockerfile
     ports:
-        - "44346:443"
+      - "44346:443"
+    environment:
+      - "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES=Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation"
   database:
     image: postgres
     environment:
