@@ -10,6 +10,7 @@ namespace SpotSync.Domain.Contracts.Repositories
         Task<string> LogExceptionAsync(Exception exception, string CustomMessage);
         Task LogUserActivityAsync(string username, string action);
         Task LogAppActivityAsync(string action);
+        Task AddDescriptionToExceptionAsync(string message, string referenceId, string userId);
 
     }
 }

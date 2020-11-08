@@ -27,13 +27,23 @@ namespace Persistence
 	                               VALUES (NOW(), @ExceptionMessage, @StackTrace, @CustomMessage, @ReferenceId);";
 
             string referenceId = Guid.NewGuid().ToString();
+            string stacktrace = null;
+
+            if (exception.StackTrace.Length > 3000)
+            {
+                stacktrace = exception.StackTrace.Substring(0, 2999);
+            }
+            else
+            {
+                stacktrace = exception.StackTrace;
+            }
 
             using (var connection = new NpgsqlConnection(_connectionString))
             {
                 await connection.ExecuteAsync(sql, new
                 {
                     ExceptionMessage = exception.Message,
-                    StackTrace = exception.StackTrace,
+                    StackTrace = stacktrace,
                     CustomMessage = customMessage,
                     ReferenceId = referenceId
                 });
@@ -59,6 +69,22 @@ namespace Persistence
                 {
                     Action = action,
                     Username = username
+                });
+            }
+        }
+
+        public async Task AddDescriptionToExceptionAsync(string message, string referenceId, string userId)
+        {
+            string sql = @"INSERT INTO public.usererrorlogs(record_time, reference_id, username, message)
+                           VALUES (NOW(), @ReferenceId, @Username, @Message)";
+
+            using (var connection = new NpgsqlConnection(_connectionString))
+            {
+                await connection.ExecuteAsync(sql, new
+                {
+                    ReferenceId = referenceId,
+                    Username = userId,
+                    Message = message
                 });
             }
         }

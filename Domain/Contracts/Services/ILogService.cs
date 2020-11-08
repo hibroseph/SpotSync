@@ -11,5 +11,6 @@ namespace SpotSync.Domain.Contracts.Services
         Task LogUserActivityAsync(string username, string action);
         Task LogUserActivityAsync(PartyGoer user, string action);
         Task LogAppActivityAsync(string activity);
+        Task AddDescriptionToExceptionAsync(string message, string referenceId, string userId);
     }
 }

@@ -25,10 +25,10 @@
 
                     @if (!string.IsNullOrWhiteSpace(ErrorModel.ExceptionId))
                     {
-                        <div class="field">
+                        <div style="display:none" class="field">
                             <label class="label">Error ID</label>
                             <div class="control">
-                                <input class="input" type="text" value="@ErrorModel.ExceptionId" disabled />
+                                <input name="referenceId" class="input" type="text" value="@ErrorModel.ExceptionId"/>
                             </div>
                         </div>
                     }
@@ -39,7 +39,7 @@
                     </div>
                 </form>
             </div>
-            <div class="column" >
+            <div class="column">
                 <div style=" display: flex; flex-direction: row; justify-content: center;">
                     <img style="width: 50%" src="~/assets/Error502.svg" />
                 </div>

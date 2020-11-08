@@ -34,5 +34,15 @@ namespace SpotSync.Application.Services
         {
             await _repository.LogAppActivityAsync(activity);
         }
+
+        public async Task AddDescriptionToExceptionAsync(string message, string referenceId, string userId)
+        {
+            if (message.Length > 2000)
+            {
+                message = message.Substring(0, 1999);
+            }
+
+            await _repository.AddDescriptionToExceptionAsync(message, referenceId, userId);
+        }
     }
 }

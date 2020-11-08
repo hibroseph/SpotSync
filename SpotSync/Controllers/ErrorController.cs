@@ -59,10 +59,14 @@ namespace SpotSync.Controllers
         }
 
         [HttpPost]
-        public IActionResult ReportError(string userErrorDescription)
+        public async Task<IActionResult> ReportError(string userErrorDescription, string referenceId)
         {
-            // log this error in the database
+            if (string.IsNullOrWhiteSpace(userErrorDescription))
+            {
 
+            }
+
+            await _logService.AddDescriptionToExceptionAsync(userErrorDescription, referenceId, User.FindFirstValue(ClaimTypes.NameIdentifier));
             return View("Reported");
         }
     }
