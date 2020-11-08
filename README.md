@@ -2,7 +2,7 @@
 An application which lets you synchronize your spotify with others.
 
 ## CI Builds
-[![Build Status](https://dev.azure.com/iwillridgley/iwillridgley/_apis/build/status/hibroseph.SpotSync?branchName=master)](https://dev.azure.com/iwillridgley/iwillridgley/_build/latest?definitionId=5&branchName=master)
+Master [![Build Status](https://dev.azure.com/Kipley/Spotibro/_apis/build/status/Spotibro?branchName=master)](https://dev.azure.com/Kipley/Spotibro/_build/latest?definitionId=5&branchName=master)
 
 ## Getting Setup
 1. Clone repository ```git clone https://github.com/hibroseph/SpotSync.git```
