@@ -41,11 +41,6 @@ steps:
 - task: Docker@2
   inputs:
     containerRegistry: 'Docker Hub'
-    command: 'login'
-
-- task: Docker@2
-  inputs:
-    containerRegistry: 'Docker Hub'
     repository: 'hibroseph/spotsync'
     command: 'buildAndPush'
     Dockerfile: '**/Dockerfile'
