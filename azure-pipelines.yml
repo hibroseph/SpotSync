@@ -10,6 +10,8 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
+name: $(Date:yyyyMMdd).$(Rev:r)
+
 steps:
 - task: DotNetCoreCLI@2
   displayName: "Restore SpotSync"
@@ -38,6 +40,7 @@ steps:
 
 - task: Docker@2
   inputs:
+    containerRegistry: 'Docker Hub'
     repository: 'spotsync'
     command: 'buildAndPush'
     Dockerfile: '**/Dockerfile'
