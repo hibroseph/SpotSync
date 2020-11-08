@@ -111,27 +111,35 @@
     <div class="columns pt-2">
         <div class="column">
             <div class="box">
-                <div>
-                    <div style="display: flex; justify-content: space-between">
-                        <h1 class="subtitle">Queue</h1>
-                        <div id="is-search-spotify-wrapper" class="is-input-wrapper">
-                            <input autocomplete=off id="search-spotify-input" class="input" type="text" placeholder="Search Spotify for Music to Add" />
-                            <div class="spotify-search-results">
-                                <div class="box">
-                                    <div id="loader" class="loader-wrapper">
-                                        <div class="loader is-loading"></div>
-                                    </div>
-                                    <ul id="results">
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                @if (true)
+                {
+                    <h1 class="subtitle">Queue</h1>
                     <table class="table nolines center interactive is-fullwidth" id="queue"></table>
                     <div id="loader" class="loader-wrapper is-active">
                         <div class="loader is-loading"></div>
                     </div>
-                </div>
+                }
+                else
+                {
+                    <div>
+                        <div style="display: flex; justify-content: space-between">
+
+                            <div id="is-search-spotify-wrapper" class="is-input-wrapper">
+                                <input autocomplete=off id="search-spotify-input" class="input" type="text" placeholder="Search Spotify for Music to Add" />
+                                <div class="spotify-search-results">
+                                    <div class="box">
+                                        <div id="loader" class="loader-wrapper">
+                                            <div class="loader is-loading"></div>
+                                        </div>
+                                        <ul id="results">
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
             </div>
         </div>
         @if (PartyModel.IsUserListening && PartyModel.SuggestedSongs != null)
