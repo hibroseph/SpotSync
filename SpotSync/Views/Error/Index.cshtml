@@ -2,49 +2,57 @@
 @{
     var ErrorModel = Model.PageModel;
 }
-<!DOCTYPE html>
-
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title></title>
-</head>
-<body>
-    <section class="section">
-        <div class="columns is-vcentered">
-            <div class="column">
-                <h1 class="title">An Error Happened!</h1>
-                <h2 class="subtitle">Looks like this one is on us, we're sorry! The error has already been reported but if you have a second to describe what happened, we will be able to fix it faster</h2>
-                <form asp-action="ReportError" asp-controller="Error">
-                    <div class="field">
-                        <label class="label">What Happened</label>
-                        <div class="control">
-                            <textarea name="UserErrorDescription" class="textarea" placeholder="Explain what you were doing to end up here"></textarea>
-                        </div>
+<section class="section">
+    <div class="columns is-vcentered">
+        <div class="column">
+            <h1 class="title">An Error Happened!</h1>
+            <h2 class="subtitle">Looks like this one is on us, we're sorry! The error has already been reported but if you have a second to describe what happened, we will be able to fix it faster</h2>
+            <form asp-action="ReportError" asp-controller="Error">
+                <div class="field">
+                    <label class="label">What Happened</label>
+                    <div class="control">
+                        <textarea id="UserErrorDescription" maxlength="2000" name="UserErrorDescription" class="textarea" placeholder="Explain what you were doing to end up here"></textarea>
                     </div>
-
-                    @if (!string.IsNullOrWhiteSpace(ErrorModel.ExceptionId))
-                    {
-                        <div style="display:none" class="field">
-                            <label class="label">Error ID</label>
-                            <div class="control">
-                                <input name="referenceId" class="input" type="text" value="@ErrorModel.ExceptionId"/>
-                            </div>
-                        </div>
-                    }
-                    <div class="field">
-                        <div class="control">
-                            <button class="button is-primary" type="submit">Submit</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="column">
-                <div style=" display: flex; flex-direction: row; justify-content: center;">
-                    <img style="width: 50%" src="~/assets/Error502.svg" />
+                    <p id="description-validation" class="help">2000 characters left</p>
                 </div>
+
+                @if (!string.IsNullOrWhiteSpace(ErrorModel.ExceptionId))
+                {
+                    <div style="display:none" class="field">
+                        <label class="label">Error ID</label>
+                        <div class="control">
+                            <input name="referenceId" class="input" type="text" value="@ErrorModel.ExceptionId" />
+                        </div>
+                    </div>
+                }
+                <div class="field">
+                    <div class="control">
+                        <button class="button is-primary" type="submit">Submit</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="column">
+            <div style=" display: flex; flex-direction: row; justify-content: center;">
+                <img style="width: 50%" src="~/assets/Error502.svg" />
             </div>
         </div>
-    </section>
-</body>
-</html>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        u("#UserErrorDescription").on('input', (event) => {
+            //console.log(event);
+            var charsLeft = 2000 - event.target.value.length;
+
+            if (charsLeft < 200) {
+                u("#description-validation").addClass("is-danger");
+            } else {
+                u("#description-validation").removeClass("is-danger");
+            } 
+
+            u("#description-validation").text(`${2000 - event.target.value.length} characters left`)
+        })
+    </script>
+}
