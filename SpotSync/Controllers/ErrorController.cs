@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -59,14 +60,20 @@ namespace SpotSync.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ReportError(string userErrorDescription, string referenceId)
+        public async Task<IActionResult> Index(BaseModel<ErrorModel> baseModel)
         {
-            if (string.IsNullOrWhiteSpace(userErrorDescription))
+            ErrorModel model = baseModel.PageModel;
+            if (!ModelState.IsValid)
             {
+                if (string.IsNullOrWhiteSpace(model.Description))
+                {
+                    ModelState.AddModelError(nameof(model.Description), "The error description cannot be empty");
+                }
 
+                return View(baseModel);
             }
 
-            await _logService.AddDescriptionToExceptionAsync(userErrorDescription, referenceId, User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _logService.AddDescriptionToExceptionAsync(model.Description, model.ExceptionId, User.FindFirstValue(ClaimTypes.NameIdentifier));
             return View("Reported");
         }
     }
