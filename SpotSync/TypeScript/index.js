@@ -62,7 +62,7 @@ module.exports = {
         */
         rxjs_1.fromEvent(document.getElementById("search-spotify-input"), 'input').pipe(operators_1.debounce(function () { return rxjs_1.interval(1500); })).subscribe(function (event) {
             console.log(event.target.value);
-            ajax_1.ajax.getJSON("/api/user/searchSpotify?query=" + event.target.value).pipe(operators_1.catchError(function (error) {
+            ajax_1.ajax.getJSON("/api/user/searchSpotify?query=" + event.target.value + "&queryType=0").pipe(operators_1.catchError(function (error) {
                 console.log('error: ', error);
                 return rxjs_1.of(error);
             })).subscribe(function (response) {

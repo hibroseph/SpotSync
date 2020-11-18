@@ -76,7 +76,7 @@ module.exports = {
         fromEvent(document.getElementById("search-spotify-input"), 'input').pipe(debounce(() => interval(1500))).subscribe(event => {
             console.log((<HTMLInputElement>event.target).value);
 
-            ajax.getJSON(`/api/user/searchSpotify?query=${(<HTMLInputElement>event.target).value}`).pipe(
+            ajax.getJSON(`/api/user/searchSpotify?query=${(<HTMLInputElement>event.target).value}&queryType=0`).pipe(
                 catchError(error => {
                     console.log('error: ', error);
                     return of(error);

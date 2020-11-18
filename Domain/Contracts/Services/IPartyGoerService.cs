@@ -1,4 +1,5 @@
 ﻿using SpotSync.Domain.DTO;
+using SpotSync.Domain.Types;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,6 +12,7 @@ namespace SpotSync.Domain.Contracts.Services
         Task<CurrentSongDTO> GetCurrentSongAsync(string partyGoerId);
         Task<List<Song>> GetRecommendedSongsAsync(string partyGoerId, int count = 10);
         Task<string> GetUsersActiveDeviceAsync(string partyGoerId);
-        Task<List<Song>> SearchSpotifyForSongs(string partyGoerId, string query);
+        Task<List<SpotifyQueryResult>> SearchSpotifyAsync(string query, SpotifyQueryType queryType, int limit = 10);
+        PartyGoer GetCurrentPartyGoer();
     }
 }

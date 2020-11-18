@@ -54,7 +54,7 @@ namespace SpotSync.Controllers
         {
             try
             {
-                PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                PartyGoer user = _partyGoerService.GetCurrentPartyGoer();
                 Party party = await _partyService.GetPartyWithAttendeeAsync(user);
 
                 List<Domain.Song> userRecommendedSongs = await _partyGoerService.GetRecommendedSongsAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -63,7 +63,7 @@ namespace SpotSync.Controllers
 
                 DashboardModel model = new DashboardModel
                 {
-                    Name = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                    Name = user.Id,
                     AvailableParties = topParties.Select(p => new PreviewPartyModel
                     {
                         AlbumArtUrl = p.Playlist?.CurrentSong?.AlbumImageUrl,
