@@ -66,8 +66,31 @@ module.exports = {
                 console.log('error: ', error);
                 return rxjs_1.of(error);
             })).subscribe(function (response) {
-                console.log("response");
-                console.log(response);
+                console.log("Track response");
+                // remove loading icon
+                u("#loader").removeClass("is-active");
+                u("#results").removeClass("hidden");
+                response.map(function (song) {
+                    u("#results").append("<li tabindex=\"\" data-albumimageurl=" + song.albumImageUrl + " data-title=" + song.title + " data-artist=" + song.artist + " data-length=" + song.length + " data-trackuri=" + song.trackUri + "> <span>" + song.title + " < /span><span class=\"artist\">" + song.artist + "</span > </li>");
+                });
+            });
+            ajax_1.ajax.getJSON("/api/user/searchSpotify?query=" + event.target.value + "&queryType=1").pipe(operators_1.catchError(function (error) {
+                console.log('error: ', error);
+                return rxjs_1.of(error);
+            })).subscribe(function (response) {
+                console.log("Artist response");
+                // remove loading icon
+                u("#loader").removeClass("is-active");
+                u("#results").removeClass("hidden");
+                response.map(function (song) {
+                    u("#results").append("<li tabindex=\"\" data-albumimageurl=" + song.albumImageUrl + " data-title=" + song.title + " data-artist=" + song.artist + " data-length=" + song.length + " data-trackuri=" + song.trackUri + "> <span>" + song.title + " < /span><span class=\"artist\">" + song.artist + "</span > </li>");
+                });
+            });
+            ajax_1.ajax.getJSON("/api/user/searchSpotify?query=" + event.target.value + "&queryType=2").pipe(operators_1.catchError(function (error) {
+                console.log('error: ', error);
+                return rxjs_1.of(error);
+            })).subscribe(function (response) {
+                console.log("Album response");
                 // remove loading icon
                 u("#loader").removeClass("is-active");
                 u("#results").removeClass("hidden");

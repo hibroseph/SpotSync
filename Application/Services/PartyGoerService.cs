@@ -39,9 +39,9 @@ namespace SpotSync.Application.Services
             return await _spotifyHttpClient.GetUsersActiveDeviceAsync(partyGoerId);
         }
 
-        public async Task<List<SpotifyQueryResult>> SearchSpotifyAsync(string query, SpotifyQueryType queryType, int limit = 10)
+        public async Task<IEnumerable<ISpotifyQueryResult>> SearchSpotifyAsync(string query, SpotifyQueryType queryType, int limit = 10)
         {
-            return (await _spotifyHttpClient.QuerySpotifyAsync(GetCurrentPartyGoer(), query, queryType, limit)).ToList();
+            return await _spotifyHttpClient.QuerySpotifyAsync(GetCurrentPartyGoer(), query, queryType, limit);
         }
 
         public PartyGoer GetCurrentPartyGoer()

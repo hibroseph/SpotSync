@@ -19,6 +19,6 @@ namespace SpotSync.Domain.Contracts
         Task<List<Song>> GetRecommendedSongsAsync(string spotifyId, List<string> seedTrackIds, float minimumEnergy);
         Task<List<Song>> GetUserTopTracksAsync(string spotifyId, int limit = 10);
         Task<string> GetUsersActiveDeviceAsync(string spotifyId);
-        Task<IEnumerable<SpotifyQueryResult>> QuerySpotifyAsync(PartyGoer user, string searchQuery, SpotifyQueryType queryType, int limit);
+        Task<IEnumerable<ISpotifyQueryResult>> QuerySpotifyAsync(PartyGoer user, string searchQuery, SpotifyQueryType queryType, int limit);
     }
 }

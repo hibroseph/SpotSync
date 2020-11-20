@@ -12,7 +12,7 @@ namespace SpotSync.Domain.Contracts.Services
         Task<CurrentSongDTO> GetCurrentSongAsync(string partyGoerId);
         Task<List<Song>> GetRecommendedSongsAsync(string partyGoerId, int count = 10);
         Task<string> GetUsersActiveDeviceAsync(string partyGoerId);
-        Task<List<SpotifyQueryResult>> SearchSpotifyAsync(string query, SpotifyQueryType queryType, int limit = 10);
+        Task<IEnumerable<ISpotifyQueryResult>> SearchSpotifyAsync(string query, SpotifyQueryType queryType, int limit = 10);
         PartyGoer GetCurrentPartyGoer();
     }
 }

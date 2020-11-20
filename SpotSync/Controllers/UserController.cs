@@ -58,9 +58,7 @@ namespace SpotSync.Controllers
                     return StatusCode(200);
                 }
 
-                var queryResults = await _partyGoerService.SearchSpotifyAsync(query, queryType ?? SpotifyQueryType.All);
-
-                return new JsonResult(queryResults);
+                return new JsonResult(await _partyGoerService.SearchSpotifyAsync(query, queryType ?? SpotifyQueryType.All));
             }
             catch (Exception ex)
             {

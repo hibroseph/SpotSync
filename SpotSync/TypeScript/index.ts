@@ -81,14 +81,46 @@ module.exports = {
                     console.log('error: ', error);
                     return of(error);
                 })).subscribe(response => {
-                    console.log("response");
+                    console.log("Track response");
                     console.log(response);
                     // remove loading icon
+                    /*
                     u("#loader").removeClass("is-active");
                     u("#results").removeClass("hidden");
                     (<SongModel[]>response).map(song => {
                         u("#results").append(`<li tabindex="" data-albumimageurl=${song.albumImageUrl} data-title=${song.title} data-artist=${song.artist} data-length=${song.length} data-trackuri=${song.trackUri}> <span>${song.title} < /span><span class="artist">${song.artist}</span > </li>`)
-                    })
+                    })*/
+                })
+
+            ajax.getJSON(`/api/user/searchSpotify?query=${(<HTMLInputElement>event.target).value}&queryType=1`).pipe(
+                catchError(error => {
+                    console.log('error: ', error);
+                    return of(error);
+                })).subscribe(response => {
+                    console.log("Artist response");
+                    console.log(response);
+                    /*
+                    u("#loader").removeClass("is-active");
+                    u("#results").removeClass("hidden");
+                    (<SongModel[]>response).map(song => {
+                        u("#results").append(`<li tabindex="" data-albumimageurl=${song.albumImageUrl} data-title=${song.title} data-artist=${song.artist} data-length=${song.length} data-trackuri=${song.trackUri}> <span>${song.title} < /span><span class="artist">${song.artist}</span > </li>`)
+                    })*/
+                })
+
+            ajax.getJSON(`/api/user/searchSpotify?query=${(<HTMLInputElement>event.target).value}&queryType=2`).pipe(
+                catchError(error => {
+                    console.log('error: ', error);
+                    return of(error);
+                })).subscribe(response => {
+                    console.log("Album response");
+                    console.log(response);
+                    // remove loading icon
+                    /*
+                    u("#loader").removeClass("is-active");
+                    u("#results").removeClass("hidden");
+                    (<SongModel[]>response).map(song => {
+                        u("#results").append(`<li tabindex="" data-albumimageurl=${song.albumImageUrl} data-title=${song.title} data-artist=${song.artist} data-length=${song.length} data-trackuri=${song.trackUri}> <span>${song.title} < /span><span class="artist">${song.artist}</span > </li>`)
+                    })*/
                 })
         });
 

@@ -11,6 +11,7 @@ namespace SpotSync.Domain
         public int Length { get; set; }
         public string TrackUri { get; set; }
         public string AlbumImageUrl { get; set; }
+        public bool Explicit { get; set; }
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Title;

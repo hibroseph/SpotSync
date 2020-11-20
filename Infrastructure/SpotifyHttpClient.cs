@@ -49,7 +49,7 @@ namespace SpotSync.Infrastructure
             };
         }
 
-        public async Task<IEnumerable<SpotifyQueryResult>> QuerySpotifyAsync(PartyGoer user, string searchQuery, SpotifyQueryType queryType, int limit)
+        public async Task<IEnumerable<ISpotifyQueryResult>> QuerySpotifyAsync(PartyGoer user, string searchQuery, SpotifyQueryType queryType, int limit)
         {
             try
             {
@@ -62,9 +62,9 @@ namespace SpotSync.Infrastructure
                     case SpotifyQueryType.Album:
                         return await QuerySpotifyForAlbumAsync(user, searchQuery, limit);
                     case SpotifyQueryType.Playlist:
-                        return await QuerySpotifyForPlaylistAsync(user, searchQuery, limit);
+                    //return await QuerySpotifyForPlaylistAsync(user, searchQuery, limit);
                     case SpotifyQueryType.All:
-                        return await QuerySpotifyAsync(user, searchQuery);
+                    //return await QuerySpotifyAsync<T>(user, searchQuery);
                     default:
                         throw new ArgumentException($"Argument SpotifyQuertyType of {queryType} not handled");
                 }
@@ -76,7 +76,7 @@ namespace SpotSync.Infrastructure
             }
         }
 
-        private async Task<IEnumerable<SpotifySongQueryResult>> QuerySpotifyForTrackAsync(PartyGoer user, string searchQuery, int limit)
+        private async Task<IEnumerable<SpotifyTrackQueryResult>> QuerySpotifyForTrackAsync(PartyGoer user, string searchQuery, int limit)
         {
             var response = await SendHttpRequestAsync(user, _apiEndpoints[ApiEndpointType.SearchSpotify], $"q={HttpUtility.UrlEncode(searchQuery)}&type=track&limit={limit}", true);
 
@@ -84,7 +84,7 @@ namespace SpotSync.Infrastructure
 
             List<Song> tracks = await ReadFullTrackJsonObjectFromResponseAsync(response);
 
-            return tracks.Select(p => new SpotifySongQueryResult { Uri = p.TrackUri, Artist = p.Artist, Length = p.Length, Name = p.Title });
+            return tracks.Select(p => new SpotifyTrackQueryResult { Uri = p.TrackUri, Artist = p.Artist, Length = p.Length, Name = p.Title });
         }
 
         private async Task<List<Song>> ReadFullTrackJsonObjectFromResponseAsync(HttpResponseMessage response)
@@ -99,16 +99,17 @@ namespace SpotSync.Infrastructure
                 {
                     Title = item["name"].ToString(),
                     Artist = item["artists"].First()["name"].ToString(),
-                    TrackUri = item["id"].ToString(),
+                    TrackUri = item["uri"].ToString(),
                     Length = item["duration_ms"].Value<int>(),
-                    AlbumImageUrl = item["album"]["images"].First["url"].ToString()
+                    AlbumImageUrl = item["album"]["images"].First["url"].ToString(),
+                    Explicit = item["explicit"].Value<bool>()
                 });
             }
 
             return tracks;
         }
 
-        private async Task<List<SpotifyArtistQueryResult>> QuerySpotifyForArtistAsync(PartyGoer user, string searchQuery, int limit)
+        private async Task<IEnumerable<SpotifyArtistQueryResult>> QuerySpotifyForArtistAsync(PartyGoer user, string searchQuery, int limit)
         {
             var response = await SendHttpRequestAsync(user, _apiEndpoints[ApiEndpointType.SearchSpotify], $"q={HttpUtility.UrlEncode(searchQuery)}&type=artist&limit={limit}", true);
 
@@ -129,7 +130,7 @@ namespace SpotSync.Infrastructure
             }
         }
 
-        private async Task<List<SpotifyArtistQueryResult>> ReadSimplifiedArtistJsonObjectFromResponseAsync(HttpResponseMessage response)
+        private async Task<IEnumerable<SpotifyArtistQueryResult>> ReadSimplifiedArtistJsonObjectFromResponseAsync(HttpResponseMessage response)
         {
             JObject json = await GetJObjectContentFromResponseAsync(response);
 
@@ -152,13 +153,32 @@ namespace SpotSync.Infrastructure
             return JObject.Parse(await response.Content.ReadAsStringAsync());
         }
 
-        private async Task<List<SpotifyAlbumQueryResult>> QuerySpotifyForAlbumAsync(PartyGoer user, string searchQuery, int limit)
+        private async Task<IEnumerable<SpotifyAlbumQueryResult>> QuerySpotifyForAlbumAsync(PartyGoer user, string searchQuery, int limit)
         {
-            var response = await SendHttpRequestAsync(user, _apiEndpoints[ApiEndpointType.SearchSpotify], $"q={HttpUtility.UrlEncode(searchQuery)}&type=album&limit={limit}");
+            var response = await SendHttpRequestAsync(user, _apiEndpoints[ApiEndpointType.SearchSpotify], $"q={HttpUtility.UrlEncode(searchQuery)}&type=album&limit={limit}", true);
 
             response.EnsureSuccessStatusCode();
 
-            throw new NotImplementedException();
+            return await ReadSimplifiedAlbumJsonObjectFromResponseAsync(response);
+        }
+
+        private async Task<IEnumerable<SpotifyAlbumQueryResult>> ReadSimplifiedAlbumJsonObjectFromResponseAsync(HttpResponseMessage response)
+        {
+            JObject json = await GetJObjectContentFromResponseAsync(response);
+
+            List<SpotifyAlbumQueryResult> results = new List<SpotifyAlbumQueryResult>();
+
+            foreach (var item in json["albums"]["items"])
+            {
+                results.Add(new SpotifyAlbumQueryResult
+                {
+                    Artist = item["artists"].First()["name"].ToString(),
+                    Name = item["name"].ToString(),
+                    Uri = item["uri"].ToString()
+                });
+            }
+
+            return results;
         }
 
         private async Task<List<SpotifyPlaylistQueryResult>> QuerySpotifyForPlaylistAsync(PartyGoer user, string searchQuery, int limit)
@@ -170,7 +190,7 @@ namespace SpotSync.Infrastructure
             throw new NotImplementedException();
         }
 
-        private Task<List<SpotifyQueryResult>> QuerySpotifyAsync(PartyGoer user, string searchQuery)
+        private Task<List<ISpotifyQueryResult>> QuerySpotifyAsync(PartyGoer user, string searchQuery)
         {
             throw new NotImplementedException();
         }
@@ -212,7 +232,7 @@ namespace SpotSync.Infrastructure
             List<string> recommendedTrackUris = new List<string>();
             foreach (var item in json["tracks"])
             {
-                recommendedTrackUris.Add(item["uri"].ToString());
+                recommendedTrackUris.Add(item["id"].ToString());
             }
 
             return recommendedTrackUris;
@@ -235,7 +255,7 @@ namespace SpotSync.Infrastructure
             {
                 recommendedSongs.Add(new Song
                 {
-                    TrackUri = item["uri"].ToString(),
+                    TrackUri = item["id"].ToString(),
                     Title = item["name"].ToString(),
                     Artist = item["artists"].First["name"].ToString(),
                     Length = item["duration_ms"].Value<int>(),

@@ -4,9 +4,7 @@ using System.Text;
 
 namespace SpotSync.Domain.DTO
 {
-    public class SpotifyQueryResult
+    public interface ISpotifyQueryResult
     {
-        public string Uri { get; set; }
-        public string Name { get; set; }
     }
 }
