@@ -72,6 +72,10 @@
         </div>
     </footer>
 
+    <div style="position: fixed; display: flex; flex-direction: row; justify-content: center; bottom: 50px; width: 100%;">
+        <div id="user-notifications" style="display: flex; flex-direction: column"></div>
+    </div>
+
     <div id="notifications" style="position: fixed; bottom: 0; right: 0; margin: 10px;">
         @if (!string.IsNullOrWhiteSpace(Model?.ErrorMessage))
         {

@@ -13,27 +13,61 @@ namespace SpotSync.Domain
 {
     public class Playlist
     {
-        public Song CurrentSong { get; private set; }
-        public List<Song> Queue { get; private set; }
-        public Queue<Song> History { get; private set; }
+        public Track CurrentSong { get; private set; }
+        public List<QueuedTrack> Queue { get; private set; }
+        public Queue<Track> History { get; private set; }
         private Timer _nextSongTimer;
         private List<PartyGoer> _listeners;
         private string _partyCode;
         private Stopwatch _songPositionTime;
 
-        public Playlist(List<Song> songs, List<PartyGoer> listeners, string partyCode)
+        public Playlist(List<PartyGoer> listeners, string partyCode)
         {
-            Queue = new List<Song>(songs);
-            History = new Queue<Song>();
+            Queue = new List<QueuedTrack>();
+            History = new Queue<Track>();
+            _songPositionTime = new Stopwatch();
+            _partyCode = partyCode;
+            _listeners = listeners;
+            CurrentSong = null;
+        }
+        public Playlist(List<Track> songs, List<PartyGoer> listeners, string partyCode)
+        {
+            Queue = songs.Select(track =>
+            {
+                return new QueuedTrack
+                {
+                    AlbumImageUrl = track.AlbumImageUrl,
+                    Artist = track.Artist,
+                    Explicit = track.Explicit,
+                    Length = track.Length,
+                    Name = track.Name,
+                    Uri = track.Uri,
+                    AddedBy = null
+                };
+            }).ToList();
+            History = new Queue<Track>();
             _listeners = listeners;
             _partyCode = partyCode;
             _songPositionTime = new Stopwatch();
             CurrentSong = null;
         }
 
-        public Playlist(List<Song> songs, List<PartyGoer> listeners, string partyCode, Queue<Song> existingHistory)
+        public Playlist(List<Track> songs, List<PartyGoer> listeners, string partyCode, Queue<Track> existingHistory)
         {
-            Queue = new List<Song>(songs);
+            Queue = songs.Select(track =>
+            {
+                return new QueuedTrack
+                {
+                    AlbumImageUrl = track.AlbumImageUrl,
+                    Artist = track.Artist,
+                    Explicit = track.Explicit,
+                    Length = track.Length,
+                    Name = track.Name,
+                    Uri = track.Uri,
+                    AddedBy = null
+                };
+            }).ToList();
+
             History = existingHistory;
             _listeners = listeners;
             _partyCode = partyCode;
@@ -48,9 +82,9 @@ namespace SpotSync.Domain
 
         public async Task DeleteAsync()
         {
-            _songPositionTime.Stop();
+            _songPositionTime?.Stop();
             _songPositionTime = null;
-            await _nextSongTimer.DisposeAsync();
+            _nextSongTimer?.DisposeAsync();
             _nextSongTimer = null;
             CurrentSong = null;
             Queue = null;
@@ -74,7 +108,7 @@ namespace SpotSync.Domain
 
         public Task ModifyQueueAsync(RearrangeQueueRequest request)
         {
-            Song songToBeMoved = Queue[request.OldTrackIndex];
+            QueuedTrack songToBeMoved = Queue[request.OldTrackIndex];
             Queue.RemoveAt(request.OldTrackIndex);
             Queue.Insert(request.NewTrackIndex, songToBeMoved);
 
@@ -83,14 +117,32 @@ namespace SpotSync.Domain
 
         public Task AddSongToQueueAsync(AddSongToQueueRequest request)
         {
-            Queue.Insert(request.IndexToInsertSongAt, new Song
+            if (request.IndexToInsertSongAt >= 0)
             {
-                AlbumImageUrl = request.AlbumImageUrl,
-                Artist = request.Artist,
-                Length = request.Length,
-                Title = request.Title,
-                TrackUri = request.TrackUri
-            });
+                Queue.Insert(request.IndexToInsertSongAt, new QueuedTrack
+                {
+                    AlbumImageUrl = request.AlbumImageUrl,
+                    Artist = request.Artist,
+                    Length = request.Length,
+                    Name = request.Name,
+                    Uri = request.TrackUri,
+                    AddedBy = request.AddedBy,
+                    Explicit = request.Explicit
+                });
+            }
+            else
+            {
+                Queue.Add(new QueuedTrack
+                {
+                    AlbumImageUrl = request.AlbumImageUrl,
+                    Artist = request.Artist,
+                    Length = request.Length,
+                    Name = request.Name,
+                    Uri = request.TrackUri,
+                    AddedBy = request.AddedBy,
+                    Explicit = request.Explicit
+                });
+            }
 
             return Task.CompletedTask;
         }

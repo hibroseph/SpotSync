@@ -20,19 +20,21 @@ namespace SpotSync.Classes.Hubs
     public class PartyHub : Hub
     {
         private IPartyService _partyService;
+        private IPartyGoerService _partyGoerService;
         private ISpotifyHttpClient _spotifyHttpClient;
         private ILogService _logService;
 
-        public PartyHub(IPartyService partyService, ISpotifyHttpClient spotifyHttpClient, ILogService logService)
+        public PartyHub(IPartyService partyService, ISpotifyHttpClient spotifyHttpClient, ILogService logService, IPartyGoerService partyGoerService)
         {
             _partyService = partyService;
             _spotifyHttpClient = spotifyHttpClient;
             _logService = logService;
+            _partyGoerService = partyGoerService;
         }
 
         public async Task ConnectToParty(string partyCode)
         {
-            var partier = new PartyGoer(Context.UserIdentifier);
+            PartyGoer partier = await _partyGoerService.GetCurrentPartyGoerAsync();
             if (!await _partyService.IsUserPartyingAsync(partier) && !await _partyService.IsUserHostingAPartyAsync(partier))
             {
                 await _partyService.JoinPartyAsync(new Domain.DTO.PartyCodeDTO { PartyCode = partyCode }, partier);
@@ -58,6 +60,12 @@ namespace SpotSync.Classes.Hubs
             party.Playlist.Queue
             );
 
+            // check for explicit music
+            if (partier.FilterExplicitSongs && party.HasExplicitSongs())
+            {
+                await Clients.Client(Context.ConnectionId).SendAsync("ExplicitSong", "You have filtering explicit music turned on in Spotify and there are explicit songs in the queue. We will not play the explicit song for you but continue playback when a non explicit song comes on.");
+            }
+
             // make sure that the users spotify is connected
             if (string.IsNullOrEmpty(await _spotifyHttpClient.GetUsersActiveDeviceAsync(partier.Id)))
             {
@@ -71,6 +79,7 @@ namespace SpotSync.Classes.Hubs
         public async Task UserAddedSong(AddSongToQueueRequest request)
         {
             PartyGoer partier = new PartyGoer(Context.UserIdentifier);
+            request.AddedBy = partier.Id;
             bool successfullyAddedSongToQueue = await _partyService.AddNewSongToQueue(request);
 
             if (successfullyAddedSongToQueue)
@@ -125,12 +134,12 @@ namespace SpotSync.Classes.Hubs
             await Clients.Group(partyCode).SendAsync("UpdateParty", $"{Context.UserIdentifier} updated the party at {DateTime.UtcNow}");
         }
 
-        public async Task UpdateSongForParty(string partyCode, Song currentSong, int currentProgressInMs)
+        public async Task UpdateSongForParty(string partyCode, Track currentSong, int currentProgressInMs)
         {
             await Clients.Group(partyCode).SendAsync("UpdateSong", currentSong);
         }
 
-        public async Task UpdatePlaylistForParty(string partyCode, List<Song> playlist)
+        public async Task UpdatePlaylistForParty(string partyCode, List<Track> playlist)
         {
             await Clients.Group(partyCode).SendAsync("UpdatePlaylist", playlist, playlist.First());
         }

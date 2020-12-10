@@ -35,12 +35,12 @@ namespace SpotSync.Tests.Unit_Tests
         [Test]
         public async Task DomainEventsSuccessfullyRaisesDomainEvent()
         {
-            Song song = new Song
+            Track song = new Track
             {
                 Artist = SONG_ARTIST,
                 Length = SONG_LENGTH,
-                Title = SONG_TITLE,
-                TrackUri = SONG_URI
+                Name = SONG_TITLE,
+                Uri = SONG_URI
             };
 
             DomainEvents.Register<ChangeSong>(changedSong =>

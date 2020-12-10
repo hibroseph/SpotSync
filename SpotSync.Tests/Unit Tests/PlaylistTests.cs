@@ -13,14 +13,14 @@ namespace SpotSync.Tests.Unit_Tests
     class PlaylistTests
     {
         private const string PARTY_CODE = "123ABC";
-        private List<Song> _songs;
+        private List<Track> _songs;
 
         public PlaylistTests()
         {
-            _songs = new List<Song>
+            _songs = new List<Track>
             {
-                new Song { Artist = "Artist1", Length = 1000, Title = "Title1", TrackUri = "TrackUri1"},
-                new Song { Artist = "Artist2", Length = 5000, Title = "Title2", TrackUri = "TrackUri2"}
+                new Track { Artist = "Artist1", Length = 1000, Name = "Title1", Uri = "TrackUri1"},
+                new Track { Artist = "Artist2", Length = 5000, Name = "Title2", Uri = "TrackUri2"}
             };
         }
 
@@ -53,7 +53,7 @@ namespace SpotSync.Tests.Unit_Tests
         [Test]
         public void PlaylistNoSongs_StartThrowsException()
         {
-            Playlist playlist = new Playlist(new List<Song>(), new List<PartyGoer>(), PARTY_CODE);
+            Playlist playlist = new Playlist(new List<Track>(), new List<PartyGoer>(), PARTY_CODE);
 
             Assert.ThrowsAsync<ArgumentNullException>(async () =>
             {

@@ -1,4 +1,5 @@
 ﻿using SpotSync.Application.Authentication;
+using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace SpotSync.Application.Services
             _spotifyAuthentication = spotifyAuthentication;
         }
 
-        public async Task<string> AuthenticateUserWithAccessCode(string code)
+        public async Task<PartyGoerDetails> AuthenticateUserWithAccessCodeAsync(string code)
         {
             return await _spotifyHttpClient.RequestAccessAndRefreshTokenFromSpotifyAsync(code);
         }

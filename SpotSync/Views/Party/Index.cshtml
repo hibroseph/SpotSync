@@ -11,6 +11,15 @@
         display: inline-block;
     }
 
+    #search-results-container {
+        position: absolute;
+        top: 45px;
+    }
+
+    #search-outline {
+        position: relative;
+    }
+
     .hidden {
         display: none;
     }
@@ -46,7 +55,6 @@
     }
 
     .artist {
-        float: right;
     }
 
     .loader {
@@ -72,6 +80,48 @@
         transition: width .3s ease-in-out;
         background-color: white;
     }
+
+    .track-view, #suggested-tracks {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+        .track-view .track-title, #suggested-tracks .track-title {
+        }
+
+        .track-view .artist, #suggested-tracks .artist {
+            color: #7d7d7d;
+        }
+
+    .track-item {
+        margin: 3px;
+        padding: 10px;
+        display: flex;
+        flex-direction: row;
+        width: 300px;
+        justify-content: space-between
+    }
+
+    .track-item:hover {
+        background-color: #ececec;
+        border-radius: 5px;
+    }
+
+    .add-icon {
+        display: flex; 
+        flex-direction: column; 
+        justify-content: center
+    }
+
+    .fas.fa-plus{
+        padding: 10px;
+    }
+
+    .fas.fa-plus:hover {
+        color: black;
+    }
+
 </style>
 
 <section class="section">
@@ -79,17 +129,29 @@
         <div class="column">
             <div class="box">
                 <h1 class="title">Now Playing</h1>
-                <div style="overflow:hidden">
-                    <div class="is-flex is-justify-content-center">
-                        <img style="max-width:340px; width: auto; height: auto;" id="albumArt" src="" />
-                        <div class="is-flex is-flex-direction-column is-justify-content-center">
-                            <div class="p-3" id="is-now-playing-information">
-                                <strong>Title: </strong><p id="track"></p>
-                                <br />
-                                <strong>Artist: </strong><p id="artist"></p>
-                                <p id="album"></p>
+                <div id="now-playing-container" class="hidden">
+                    <div style="overflow:hidden">
+                        <div class="is-flex is-justify-content-center">
+                            <img style="max-width:340px; width: auto; height: auto;" id="albumArt" src="" />
+                            <div class="is-flex is-flex-direction-column is-justify-content-center">
+                                <div class="p-3" id="is-now-playing-information">
+                                    <strong>Title: </strong><p id="track"></p>
+                                    <br />
+                                    <strong>Artist: </strong><p id="artist"></p>
+                                    <p id="album"></p>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+                <div id="now-playing-loader" class="loader-wrapper is-active">
+                    <div class="loader is-loading"></div>
+                </div>
+                <div id="no-songs-playing-container" class="hidden">
+                    <h2 class="subtitle">There are no songs currently playing in this party</h2>
+                    <div class="is-flex is-justify-content-center is-align-items-center">
+                        <button id="generate-playlist-button" class="button is-primary mr-5">Generate Playlist</button>
+                        <p>Or search a song below to add</p>
                     </div>
                 </div>
             </div>
@@ -109,30 +171,50 @@
             </div>
         </div>
     </div>
-    <div class="pb-4">
-        <input id="search-spotify-input" class="input" type="text" placeholder="Search for Tracks, Artists, Albums to Add to Queue" />
+    <div id="search-outline" class="pb-4">
+        <div class="">
+            <input id="search-spotify-input" class="input" type="text" placeholder="Search for Tracks, Artists, Albums to Add to Queue" />
+        </div>
+        <div id="search-results-container" class="box hidden">
+            <b>Suggested Tracks</b>
+            <div id="suggested-search-loader" class="loader-wrapper is-active">
+                <div class="loader is-loading"></div>
+            </div>
+            <div id="suggested-tracks">
+
+            </div>
+            <div id="track-search-loader" class="loader-wrapper">
+                <div class="loader is-loading"></div>
+            </div>
+            <div class="hidden" id="search-results">
+                <b>Tracks</b>
+                <div class="track-view">
+                </div>
+            </div>
+        </div>
     </div>
     <div class="box">
         @if (true)
         {
             <h1 class="subtitle">Queue</h1>
             <table class="table nolines center interactive is-fullwidth" id="queue"></table>
-            <div id="loader" class="loader-wrapper is-active">
+            <div id="queue-loader" class="loader-wrapper is-active">
                 <div class="loader is-loading"></div>
+            </div>
+            <div id="no-queue" class="hidden">
+                <div class="is-flex is-justify-content-center">
+                    <h2 class="subtitle">There is no queue. Search a track, artist, or album above to add it to the queue.</h2>
+                </div>
             </div>
         }
         else
         {
             <div>
                 <div style="display: flex; justify-content: space-between">
-
                     <div id="is-search-spotify-wrapper" class="is-input-wrapper">
                         <input autocomplete=off id="search-spotify-input" class="input" type="text" placeholder="Search Spotify for Music to Add" />
                         <div class="spotify-search-results">
                             <div class="box">
-                                <div id="loader" class="loader-wrapper">
-                                    <div class="loader is-loading"></div>
-                                </div>
                                 <ul id="results">
                                 </ul>
                             </div>
@@ -148,8 +230,13 @@
             <div>
                 <h1 class="subtitle">History</h1>
                 <table class="table center nolines is-fullwidth" id="history"></table>
-                <div id="loader" class="loader-wrapper is-active">
+                <div id="history-loader" class="loader-wrapper is-active">
                     <div class="loader is-loading"></div>
+                </div>
+                <div id="no-history" class="hidden">
+                    <div class="is-flex is-justify-content-center">
+                        <h2 class="subtitle">There is no history.</h2>
+                    </div>
                 </div>
             </div>
         </div>
@@ -160,17 +247,15 @@
     <div class="modal-background"></div>
     <div class="card">
         <header class="card-header">
-            <p class="card-header-title">
-                Where is your Spotify?
+            <p id="card-header" class="card-header-title">
             </p>
         </header>
         <div class="card-content">
             <div id="card-content" class="content">
             </div>
         </div>
-        <footer class="card-footer">
-            <a onclick="Spotibro.CheckForActiveSpotifyConnection()" class="card-footer-item">Sync</a>
-            <a onclick="Spotibro.CloseModal()" class="card-footer-item">Close</a>
+        <footer id="card-footer" class="card-footer">
+            
         </footer>
     </div>
 </div>
@@ -182,8 +267,7 @@
     <script>
         Spotibro.RealtimeFunctionality("@PartyModel.PartyCode");
 
-        let suggestedSongsElement = document.getElementById("suggested-songs");
-
+        /*
         Sortable.create(suggestedSongsElement, {
             group: {
                 name: 'shared',
@@ -195,7 +279,7 @@
             chosenClass: "has-background-info-light",
             dragClass: "has-background-info-light"
         });
-
+        */
 
         u("#results").children().on('click',(event) => {
             console.log("clicked")

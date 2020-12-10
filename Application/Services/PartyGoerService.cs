@@ -16,12 +16,15 @@ namespace SpotSync.Application.Services
 {
     public class PartyGoerService : IPartyGoerService
     {
-        ISpotifyHttpClient _spotifyHttpClient;
-        IHttpContextAccessor _httpContextAccessor;
+        private ISpotifyHttpClient _spotifyHttpClient;
+        private IHttpContextAccessor _httpContextAccessor;
+        private Dictionary<string, PartyGoer> _partyGoerCache;
+
         public PartyGoerService(ISpotifyHttpClient spotifyHttpClient, IHttpContextAccessor httpContextAccessor)
         {
             _spotifyHttpClient = spotifyHttpClient;
             _httpContextAccessor = httpContextAccessor;
+            _partyGoerCache = new Dictionary<string, PartyGoer>();
         }
 
         public async Task<CurrentSongDTO> GetCurrentSongAsync(string partyGoerId)
@@ -29,7 +32,7 @@ namespace SpotSync.Application.Services
             return await _spotifyHttpClient.GetCurrentSongAsync(partyGoerId);
         }
 
-        public Task<List<Song>> GetRecommendedSongsAsync(string partyGoerId, int count = 10)
+        public Task<List<Track>> GetRecommendedSongsAsync(string partyGoerId, int count = 10)
         {
             return _spotifyHttpClient.GetUserTopTracksAsync(partyGoerId, count);
         }
@@ -41,13 +44,38 @@ namespace SpotSync.Application.Services
 
         public async Task<IEnumerable<ISpotifyQueryResult>> SearchSpotifyAsync(string query, SpotifyQueryType queryType, int limit = 10)
         {
-            return await _spotifyHttpClient.QuerySpotifyAsync(GetCurrentPartyGoer(), query, queryType, limit);
+            return await _spotifyHttpClient.QuerySpotifyAsync(await GetCurrentPartyGoerAsync(), query, queryType, limit);
         }
 
-        public PartyGoer GetCurrentPartyGoer()
+        public void SavePartyGoer(PartyGoerDetails partyGoerDetails)
         {
-            // TODO: Cache party goers since a lot of them will be made
-            return new PartyGoer(_httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            if (_partyGoerCache.ContainsKey(partyGoerDetails.Id))
+            {
+                _partyGoerCache[partyGoerDetails.Id] = new PartyGoer(partyGoerDetails);
+            }
+            else
+            {
+                _partyGoerCache.Add(partyGoerDetails.Id, new PartyGoer(partyGoerDetails));
+            }
+        }
+
+        public async Task<PartyGoer> GetCurrentPartyGoerAsync()
+        {
+            string partyGoerId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            if (_partyGoerCache.ContainsKey(partyGoerId))
+            {
+                return _partyGoerCache[partyGoerId];
+            }
+            else
+            {
+                PartyGoerDetails partyGoerDetails = await _spotifyHttpClient.GetUserDetailsAsync(partyGoerId);
+
+                PartyGoer newPartyGoer = new PartyGoer(partyGoerDetails);
+                _partyGoerCache.Add(partyGoerId, newPartyGoer);
+
+                return newPartyGoer;
+            }
         }
     }
 }

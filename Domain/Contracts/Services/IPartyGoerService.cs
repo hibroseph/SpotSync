@@ -10,9 +10,10 @@ namespace SpotSync.Domain.Contracts.Services
     public interface IPartyGoerService
     {
         Task<CurrentSongDTO> GetCurrentSongAsync(string partyGoerId);
-        Task<List<Song>> GetRecommendedSongsAsync(string partyGoerId, int count = 10);
+        Task<List<Track>> GetRecommendedSongsAsync(string partyGoerId, int count = 10);
         Task<string> GetUsersActiveDeviceAsync(string partyGoerId);
         Task<IEnumerable<ISpotifyQueryResult>> SearchSpotifyAsync(string query, SpotifyQueryType queryType, int limit = 10);
-        PartyGoer GetCurrentPartyGoer();
+        Task<PartyGoer> GetCurrentPartyGoerAsync();
+        void SavePartyGoer(PartyGoerDetails partyGoerDetails);
     }
 }

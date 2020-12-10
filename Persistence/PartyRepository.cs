@@ -67,26 +67,26 @@ namespace Persistence
 
         public bool IsUserHostingAParty(PartyGoer host)
         {
-            return _parties.Find(p => p.Host.Id == host.Id) != null;
+            return _parties.Find(p => p.Host == host) != null;
         }
 
         public Task<Party> GetPartyWithHostAsync(PartyGoer host)
         {
-            return Task.FromResult(_parties.Find(p => p.Host.Id == host.Id));
+            return Task.FromResult(_parties.Find(p => p.Host == host));
         }
 
         public async Task<bool> DeleteAsync(PartyGoer host)
         {
-            List<Party> parties = _parties.FindAll(p => p.Host.Id.Equals(host.Id, StringComparison.CurrentCultureIgnoreCase));
+            List<Party> parties = _parties.FindAll(p => p.Host == host);
 
             if (parties.Count > 1)
             {
-                throw new Exception($"Host: {host.Id} is hosting {parties.Count} parties. A host should only host 1 party at a time.");
+                throw new Exception($"Host: {host?.Id} is hosting {parties.Count} parties. A host should only host 1 party at a time.");
             }
 
             if (parties == null)
             {
-                throw new Exception($"Host: {host.Id} is not hosting a party");
+                throw new Exception($"Host: {host?.Id} is not hosting a party");
             }
 
             if (parties.First().Playlist != null)
@@ -163,6 +163,23 @@ namespace Persistence
             }
 
             return Task.FromResult<Party>(null);
+        }
+
+        public Task RemoveHostFromPartyAsync(PartyGoer host)
+        {
+            _parties.ForEach(p =>
+            {
+                if (p.Host == host && p.Listeners.Count > 1)
+                {
+                    p.Host = p.Listeners.First();
+                }
+                else
+                {
+                    p.Host = null;
+                }
+            });
+
+            return Task.CompletedTask;
         }
     }
 }

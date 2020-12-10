@@ -4,8 +4,8 @@ using System.Text;
 
 namespace SpotSync.Domain
 {
-    public class RecommendedSong : Track
+    public class QueuedTrack : Track
     {
-        public bool Checked { get; set; }
+        public string AddedBy { get; set; }
     }
 }

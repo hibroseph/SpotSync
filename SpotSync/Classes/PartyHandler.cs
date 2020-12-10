@@ -31,15 +31,15 @@ namespace SpotSync.Classes
 
         public async Task HandleAsync(ChangeSong args)
         {
-            await _logService.LogAppActivityAsync($"Updating song for party with code {args.PartyCode}. New song artist: {args.Song.Artist}, title: {args.Song.Title}");
+            await _logService.LogAppActivityAsync($"Updating song for party with code {args.PartyCode}. New song artist: {args.Song.Artist}, title: {args.Song.Name}");
 
             // TODO: Make this a parallel
             foreach (PartyGoer listener in args.Listeners)
             {
                 try
                 {
-                    await _logService.LogAppActivityAsync($"Updating song for PartyGoer {listener.Id}. New song artist: {args.Song.Artist}, title: {args.Song.Title}");
-                    await _spotifyHttpClient.UpdateSongForPartyGoerAsync(listener.Id, args.Song.TrackUri, args.ProgressMs);
+                    await _logService.LogAppActivityAsync($"Updating song for PartyGoer {listener.Id}. New song artist: {args.Song.Artist}, title: {args.Song.Name}");
+                    await _spotifyHttpClient.UpdateSongForPartyGoerAsync(listener.Id, args.Song.Uri, args.ProgressMs);
                 }
                 catch (NoActiveDeviceException)
                 {
@@ -69,14 +69,7 @@ namespace SpotSync.Classes
                 return;
             }
 
-            List<Song> songs = new List<Song>();
-
-            foreach (PartyGoer listener in party.Listeners)
-            {
-                songs.AddRange(await _partyGoerService.GetRecommendedSongsAsync(listener.Id, 5));
-            }
-
-            List<Song> playlistSongs = await _spotifyHttpClient.GetRecommendedSongsAsync(party.Listeners.ElementAt(0).Id, songs.GetRandomNItems(5).Select(p => p.TrackUri).ToList(), 0);
+            List<Track> playlistSongs = await GenerateNewPlaylist(party);
             // If there is atleast 1 person still in the party, regenerate the playlist
             party.Playlist = new Playlist(playlistSongs, party.Listeners, party.PartyCode, party.Playlist.History);
 
@@ -91,6 +84,25 @@ namespace SpotSync.Classes
             party.Playlist.History,
             party.Playlist.Queue
             );
+        }
+
+        private async Task<List<Track>> GenerateNewPlaylist(Party party)
+        {
+            if (party.Playlist.History.Count > 0)
+            {
+                return await _spotifyHttpClient.GetRecommendedSongsAsync(party.Listeners.ElementAt(0).Id, party.Playlist.History.ToList().GetRandomNItems(5).Select(p => p.Uri).ToList(), 0);
+            }
+            else
+            {
+                List<Track> songs = new List<Track>();
+
+                foreach (PartyGoer listener in party.Listeners)
+                {
+                    songs.AddRange(await _partyGoerService.GetRecommendedSongsAsync(listener.Id, 2));
+                }
+
+                return await _spotifyHttpClient.GetRecommendedSongsAsync(party.Listeners.ElementAt(0).Id, songs.GetRandomNItems(5).Select(p => p.Uri).ToList(), 0);
+            }
         }
     }
 }

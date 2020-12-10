@@ -14,11 +14,19 @@ namespace SpotSync.Domain
 
             List<T> list = new List<T>();
 
-            for (int i = 0; i < n; i++)
+            int loopIterations = DetermineLoopIterations<T>(source, n);
+
+            for (int i = 0; i < loopIterations; i++)
             {
                 list.Add(source.ElementAt(random.Next(0, source.Count - 1)));
             }
             return list;
         }
+
+        private static int DetermineLoopIterations<T>(List<T> source, int n)
+        {
+            return source.Count > n ? n : source.Count;
+        }
+
     }
 }

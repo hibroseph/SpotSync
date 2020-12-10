@@ -72,8 +72,8 @@
     <div class="columns py-2">
         <div class="column is-one-third px-3">
             <div class="box">
-                <h2 class="subtitle">Join a Party</h2>
                 <form asp-controller="Party" asp-action="JoinParty">
+                    <h2 class="subtitle">Join a Party</h2>
                     <div class="field">
                         <label class="label">Party Code</label>
                         <div class="control">
@@ -87,40 +87,12 @@
                         </div>
                     </div>
                 </form>
-            </div>
-        </div>
-
-        <div class="column px-3">
-            <div class="box">
-                <div class="mb-4">
-                    <h2 class="subtitle mb-0">Suggested Playlist to Create</h2>
-                    <p class="is-size-7">
-                        These are your top suggested songs that will be used to create a party. A playlist will be generated from songs that are like the ones you have selected below.
-                    </p>
-                </div>
-                <form asp-controller="Party" asp-action="StartParty" method="post">
-                    <table class="table nolines is-fullwidth">
-                        <thead>
-                            <tr>
-                                <th>Title</th>
-                                <th>Artist</th>
-                                <th>Selected</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for (int i = 0; i < Model.PageModel.SuggestedSongs.Count; i++)
-                            {
-                                <tr>
-                                    <td>@Model.PageModel.SuggestedSongs[i].Title</td>
-                                    <td>@Model.PageModel.SuggestedSongs[i].Artist</td>
-                                    <td id="selected" style="padding-left:35px"><input asp-for="@Model.PageModel.SuggestedSongs[i].Selected" type="checkbox" checked="@Model.PageModel.SuggestedSongs[i].Selected" /> <input asp-for="@Model.PageModel.SuggestedSongs[i].TrackUri" type="hidden" /></td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                    <input type="submit" class="button is-primary" value="Generate Playlist" />
+                <h2 class="subtitle">Create a Party</h2>
+                <form asp-controller="Party" asp-action="StartParty">
+                    <button type="submit" class="button is-primary">Create Party</button>
                 </form>
             </div>
+            
         </div>
     </div>
 </section>

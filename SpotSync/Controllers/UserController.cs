@@ -33,7 +33,7 @@ namespace SpotSync.Controllers
         [Authorize]
         public async Task<IActionResult> SuggestedSongs(int limit = 5)
         {
-            List<Song> recommendedSongs = await _partyGoerService.GetRecommendedSongsAsync(_partyGoerService.GetCurrentPartyGoer().Id);
+            List<Track> recommendedSongs = await _partyGoerService.GetRecommendedSongsAsync((await _partyGoerService.GetCurrentPartyGoerAsync()).Id);
 
             return new JsonResult(recommendedSongs);
         }
@@ -42,7 +42,7 @@ namespace SpotSync.Controllers
         [Authorize]
         public async Task<IActionResult> CheckSpotifyForConnection()
         {
-            string deviceName = await _partyGoerService.GetUsersActiveDeviceAsync(_partyGoerService.GetCurrentPartyGoer().Id);
+            string deviceName = await _partyGoerService.GetUsersActiveDeviceAsync((await _partyGoerService.GetCurrentPartyGoerAsync()).Id);
 
             return new JsonResult(new { DeviceName = deviceName });
         }

@@ -10,17 +10,18 @@ namespace SpotSync.Domain
     {
         public Playlist Playlist;
         public Guid Id { get; }
-        public PartyGoer Host { get; }
+        public PartyGoer Host { get; set; }
         public List<PartyGoer> Listeners { get; }
         public string PartyCode { get; }
         private const int LENGTH_OF_PARTY_CODE = 6;
-
+        public bool HasExplicitSongs() => Playlist.Queue.Any(p => p.Explicit == true);
         public Party(PartyGoer host)
         {
             Id = Guid.NewGuid();
             Host = host;
             Listeners = new List<PartyGoer>() { host };
             PartyCode = GeneratePartyCode();
+            Playlist = new Playlist(Listeners, PartyCode);
         }
 
         public async Task ModifyPlaylistAsync(RearrangeQueueRequest request)
@@ -31,11 +32,17 @@ namespace SpotSync.Domain
         public async Task ModifyPlaylistAsync(AddSongToQueueRequest request)
         {
             await Playlist.AddSongToQueueAsync(request);
+
+            // Play the song that was added to queue automatically
+            if (Playlist.CurrentSong == null)
+            {
+                await Playlist.StartAsync();
+            }
         }
 
         public async Task DeletePlaylistAsync()
         {
-            await Playlist.DeleteAsync();
+            await Playlist?.DeleteAsync();
             Playlist = null;
         }
 
@@ -44,6 +51,7 @@ namespace SpotSync.Domain
         public void JoinParty(PartyGoer partyGoer)
         {
             Listeners.Add(partyGoer);
+
         }
 
         private static string GeneratePartyCode()
