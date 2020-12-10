@@ -24,12 +24,12 @@ steps:
 - task: Npm@1
   inputs:
     command: 'install'
-    workingDir: '/SpotSync/'
+    workingDir: 'SpotSync/'
 
 - task: Npm@1
   inputs:
     command: 'custom'
-    workingDir: '/SpotSync/'
+    workingDir: 'SpotSync/'
     customCommand: 'build'
 
 - task: DotNetCoreCLI@2
