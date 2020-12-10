@@ -8,7 +8,7 @@ namespace SpotSync.Domain.Events
     {
         public string PartyCode { get; set; }
         public List<PartyGoer> Listeners { get; set; }
-        public Song Song { get; set; }
+        public Track Song { get; set; }
         public int ProgressMs { get; set; }
     }
 }

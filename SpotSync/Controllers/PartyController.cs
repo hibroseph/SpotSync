@@ -6,9 +6,9 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SpotSync.Classes.Hubs;
 using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
@@ -19,7 +19,7 @@ using SpotSync.Domain.Events;
 using SpotSync.Models.Dashboard;
 using SpotSync.Models.Party;
 using SpotSync.Models.Shared;
-using Song = SpotSync.Domain.Song;
+using Track = SpotSync.Domain.Track;
 
 namespace SpotSync.Controllers
 {
@@ -49,9 +49,11 @@ namespace SpotSync.Controllers
                 return RedirectToAction("Index", "Dashboard", new { errorMessage = "Cannot create a party when you are joined in one. You need to leave the party you are currently in" });
             }
 
-            List<string> seedTrackUris = model.PageModel.SuggestedSongs.Where(p => p.Selected).Select(p => p.TrackUri).Take(5).ToList();
+            //List<string> seedTrackUris = model.PageModel.SuggestedSongs.Where(p => p.Selected).Select(p => p.TrackUri).Take(5).ToList();
 
-            string partyCode = await _partyService.StartPartyWithSeedSongsAsync(seedTrackUris, user);
+            //string partyCode = await _partyService.StartPartyWithSeedSongsAsync(seedTrackUris, user);
+
+            string partyCode = await _partyService.StartPartyAsync();
 
             return RedirectToAction("Index", new { PartyCode = partyCode });
         }
@@ -77,7 +79,7 @@ namespace SpotSync.Controllers
                 return RedirectToAction("Index", "Dashboard");
             }
 
-            List<Song> usersSuggestedSongs = null;
+            List<Track> usersSuggestedSongs = null;
 
             bool isUserListening = party.Listeners.Contains(user);
 
@@ -97,15 +99,15 @@ namespace SpotSync.Controllers
             return View(new BaseModel<PartyModel>(model, baseModel));
         }
 
-        private SongModel ConvertDomainSongToModelSong(Song song)
+        private SongModel ConvertDomainSongToModelSong(Track song)
         {
             return new SongModel
             {
-                Title = song.Title,
+                Title = song.Name,
                 Artist = song.Artist,
                 AlbumImageUrl = song.AlbumImageUrl,
                 Length = song.Length,
-                TrackUri = song.TrackUri
+                TrackUri = song.Uri
             };
         }
 
@@ -245,52 +247,30 @@ namespace SpotSync.Controllers
         {
             PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            List<Song> playlist = null;
-
-            if (await _partyService.IsUserHostingAPartyAsync(user))
-            {
-                Party party = await _partyService.GetPartyWithHostAsync(user);
-
-                playlist = await UpdatePlaylistForEveryoneInPartyAsync(party, user);
-
-                //await party.;
-
-                // update the playlist for everyone
-                await _partyHubContext.Clients.Group(party.PartyCode).SendAsync("UpdatePlaylist", playlist, playlist.First());
-            }
-            else if (await _partyService.IsUserPartyingAsync(user))
+            if (await _partyService.IsUserPartyingAsync(user))
             {
                 Party party = await _partyService.GetPartyWithAttendeeAsync(user);
 
-                playlist = await UpdatePlaylistForEveryoneInPartyAsync(party, user);
+                await UpdatePlaylistForEveryoneInPartyAsync(party, user);
 
-                //await party.StartPlaylistAsync();
-
-                // update the playlist for everyone
-                await _partyHubContext.Clients.Group(party.PartyCode).SendAsync("UpdatePlaylist", playlist, playlist.First());
-            }
-
-            if (playlist != null)
-            {
-                await _logService.LogUserActivityAsync(user.Id, $"User successfully updated playlist for party {partyCode.PartyCode}");
                 return Ok();
             }
             else
             {
-                await _logService.LogUserActivityAsync(user.Id, $"User failed to update playlist for party with code {partyCode.PartyCode}");
-                return BadRequest("Unable to create a new playlist");
+                return new StatusCodeResult(400);
             }
+
         }
 
-        private List<Song> CleansePlaylist(List<Song> playlist)
+        private List<Track> CleansePlaylist(List<Track> playlist)
         {
             var newPlaylist = playlist.ToList();
-            return newPlaylist.Select(song => { song.TrackUri = song.TrackUri.Substring(14); return song; }).ToList();
+            return newPlaylist.Select(song => { song.Uri = song.Uri.Substring(14); return song; }).ToList();
         }
 
-        private async Task<List<Song>> UpdatePlaylistForEveryoneInPartyAsync(Party party, PartyGoer partyGoer)
+        private async Task UpdatePlaylistForEveryoneInPartyAsync(Party party, PartyGoer partyGoer)
         {
-            return await _partyService.CreatePartyPlaylistForEveryoneInPartyAsync(party, partyGoer);
+            await DomainEvents.RaiseAsync(new PlaylistEnded { PartyCode = party.PartyCode });
         }
 
         private async Task<IActionResult> UpdateCurrentSongForEveryoneInPartyAsync(Party party, PartyGoer partyGoer)

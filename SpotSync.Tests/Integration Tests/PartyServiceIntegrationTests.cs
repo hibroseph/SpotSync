@@ -19,6 +19,7 @@ namespace SpotSync.Tests
         IPartyRepository _partyRepository;
         Mock<ISpotifyHttpClient> _spotifyHttpClient;
         Mock<ILogService> _logService;
+        Mock<IPartyGoerService> _partyGoerService;
         PartyGoer PartyHost1 = new PartyGoer("Joe");
         PartyGoer PartyHost2 = new PartyGoer("Kip");
         PartyGoer PartyHost3 = new PartyGoer("Kipseph");
@@ -33,9 +34,9 @@ namespace SpotSync.Tests
             _partyRepository = new PartyRepository();
             _logService = new Mock<ILogService>();
 
-            _spotifyHttpClient.Setup(p => p.RequestAccessAndRefreshTokenFromSpotifyAsync(It.IsAny<string>())).Returns(Task.FromResult(It.IsAny<string>()));
+            _spotifyHttpClient.Setup(p => p.RequestAccessAndRefreshTokenFromSpotifyAsync(It.IsAny<string>())).Returns(Task.FromResult(new PartyGoerDetails { Id = It.IsAny<string>(), ShouldFilterExplicitSongs = It.IsAny<bool>() }));
 
-            _partyService = new PartyService(_partyRepository, _spotifyHttpClient.Object, _logService.Object);
+            _partyService = new PartyService(_partyRepository, _spotifyHttpClient.Object, _logService.Object, _partyGoerService.Object);
         }
 
         [Test]

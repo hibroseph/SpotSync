@@ -33,6 +33,7 @@ namespace SpotSync
 
             serviceCollection.AddSingleton<IHandles<ChangeSong>, PartyHandler>();
             serviceCollection.AddSingleton<IHandles<PlaylistEnded>, PartyHandler>();
+            serviceCollection.AddHttpContextAccessor();
         }
 
         public static void AddSpotSyncAuthentication(this IServiceCollection serviceCollection)

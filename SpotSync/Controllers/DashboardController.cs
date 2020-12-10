@@ -54,24 +54,24 @@ namespace SpotSync.Controllers
         {
             try
             {
-                PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                PartyGoer user = await _partyGoerService.GetCurrentPartyGoerAsync();
                 Party party = await _partyService.GetPartyWithAttendeeAsync(user);
 
-                List<Domain.Song> userRecommendedSongs = await _partyGoerService.GetRecommendedSongsAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                List<Domain.Track> userRecommendedSongs = await _partyGoerService.GetRecommendedSongsAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
                 List<Party> topParties = await _partyService.GetTopParties(3);
 
                 DashboardModel model = new DashboardModel
                 {
-                    Name = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                    Name = user.Id,
                     AvailableParties = topParties.Select(p => new PreviewPartyModel
                     {
-                        AlbumArtUrl = p.Playlist?.CurrentSong?.AlbumImageUrl,
+                        AlbumArtUrl = p.Playlist?.CurrentSong?.AlbumImageUrl ?? "./assets/unknown-album-art.png",
                         ListenerCount = p.Listeners.Count,
                         Name = "Default Party Name",
                         PartyCode = p.PartyCode
                     }).ToList(),
-                    SuggestedSongs = userRecommendedSongs.Select(p => new PreviewPlaylistSong { Artist = p.Artist, Title = p.Title, TrackUri = p.TrackUri, Selected = true }).ToList(),
+                    SuggestedSongs = userRecommendedSongs.Select(p => new PreviewPlaylistSong { Artist = p.Artist, Title = p.Name, TrackUri = p.Uri, Selected = true }).ToList(),
                     RandomGreeting = GetRandomGreeting()
                 };
 

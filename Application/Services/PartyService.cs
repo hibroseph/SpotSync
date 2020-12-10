@@ -16,14 +16,16 @@ namespace SpotSync.Application.Services
     public class PartyService : IPartyService
     {
         private IPartyRepository _partyRepository;
+        private IPartyGoerService _partyGoerService;
         private ISpotifyHttpClient _spotifyHttpClient;
         private ILogService _logService;
         private Random _random;
 
-        public PartyService(IPartyRepository partyRepository, ISpotifyHttpClient spotifyHttpClient, ILogService logService)
+        public PartyService(IPartyRepository partyRepository, ISpotifyHttpClient spotifyHttpClient, ILogService logService, IPartyGoerService partyGoerService)
         {
             _partyRepository = partyRepository;
             _spotifyHttpClient = spotifyHttpClient;
+            _partyGoerService = partyGoerService;
             _random = new Random();
             _logService = logService;
         }
@@ -87,7 +89,7 @@ namespace SpotSync.Application.Services
         {
             Party newParty = new Party(host);
 
-            List<Song> playlistSongs = await _spotifyHttpClient.GetRecommendedSongsAsync(host.Id, seedTrackUris, 0);
+            List<Track> playlistSongs = await _spotifyHttpClient.GetRecommendedSongsAsync(host.Id, seedTrackUris, 0);
 
             newParty.Playlist = new Playlist(playlistSongs, newParty.Listeners, newParty.PartyCode);
 
@@ -96,6 +98,15 @@ namespace SpotSync.Application.Services
             await newParty.Playlist.StartAsync();
 
             return newParty.PartyCode;
+        }
+
+        public async Task<string> StartPartyAsync()
+        {
+            Party party = new Party(await _partyGoerService.GetCurrentPartyGoerAsync());
+
+            _partyRepository.CreateParty(party);
+
+            return party.PartyCode;
         }
 
         public async Task<bool> IsUserHostingAPartyAsync(PartyGoer host)
@@ -162,6 +173,11 @@ namespace SpotSync.Application.Services
             {
                 Party party = _partyRepository.Get(partyId);
 
+                if (party.Host == null)
+                {
+                    party.Host = attendee;
+                }
+
                 party.JoinParty(attendee);
 
                 _partyRepository.Update(party);
@@ -196,7 +212,7 @@ namespace SpotSync.Application.Services
             }
         }
 
-        public bool NextSong(Song song)
+        public bool NextSong(Track song)
         {
             return true;
         }
@@ -308,7 +324,7 @@ namespace SpotSync.Application.Services
 
         }
 
-        public async Task<List<Song>> CreatePartyPlaylistForEveryoneInPartyAsync(Party party, PartyGoer user)
+        public async Task<List<Track>> CreatePartyPlaylistForEveryoneInPartyAsync(Party party, PartyGoer user)
         {
             try
             {
@@ -332,7 +348,7 @@ namespace SpotSync.Application.Services
                     topTrackUrisTasks.Add(_spotifyHttpClient.GetUserTopTrackIdsAsync(attendee.Id, 5));
                 }
 
-                List<Song> playlist = await _spotifyHttpClient.GetRecommendedSongsAsync(user.Id, GetNNumberOfTrackUris(topTrackUrisTasks.SelectMany(p => p.Result).ToList(), 5), 5);
+                List<Track> playlist = await _spotifyHttpClient.GetRecommendedSongsAsync(user.Id, GetNNumberOfTrackUris(topTrackUrisTasks.SelectMany(p => p.Result).ToList(), 5), 5);
 
                 List<PartyGoer> partyGoersWithHost = party.Listeners.Select(p => p).ToList();
                 partyGoersWithHost.Add(new PartyGoer(user.Id));
@@ -342,6 +358,8 @@ namespace SpotSync.Application.Services
                     await party.DeletePlaylistAsync();
                 }
 
+                party.Playlist = new Playlist(playlist, partyGoersWithHost, party.PartyCode);
+                await party.Playlist.StartAsync();
                 //party.CreatePlaylist(new Playlist(playlist, partyGoersWithHost, party.PartyCode));
 
                 return playlist;
@@ -410,15 +428,18 @@ namespace SpotSync.Application.Services
         {
             try
             {
-                // Let's make sure he is part of the party
-                if (await _partyRepository.IsUserInAPartyAsync(attendee))
+                if (await IsUserPartyingAsync(attendee))
                 {
-                    return _partyRepository.LeaveParty(attendee);
+                    _partyRepository.LeaveParty(attendee);
                 }
-                else
+
+                if (await IsUserHostingAPartyAsync(attendee))
                 {
-                    return false;
+                    await _partyRepository.RemoveHostFromPartyAsync(attendee);
                 }
+
+                return true;
+
             }
             catch (PartyGoerWasInMultiplePartiesException ex)
             {

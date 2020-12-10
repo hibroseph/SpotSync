@@ -21,14 +21,16 @@ namespace SpotSync.Controllers
         private readonly Domain.Contracts.IAuthenticationService _authenticationService;
         private readonly IPartyService _partyService;
         private readonly ILogService _logService;
+        private readonly IPartyGoerService _partyGoerService;
 
         public AccountController(Domain.Contracts.IAuthenticationService authenticationService, IConfiguration configuration, IPartyService partyService,
-        ILogService logService)
+        ILogService logService, IPartyGoerService partyGoerService)
         {
             _authenticationService = authenticationService;
             _configuration = configuration;
             _partyService = partyService;
             _logService = logService;
+            _partyGoerService = partyGoerService;
         }
 
         [HttpGet]
@@ -49,17 +51,19 @@ namespace SpotSync.Controllers
         {
             try
             {
-                string userId = await _authenticationService.AuthenticateUserWithAccessCode(code);
+                PartyGoerDetails partyGoerDetails = await _authenticationService.AuthenticateUserWithAccessCodeAsync(code);
+
+                _partyGoerService.SavePartyGoer(partyGoerDetails);
 
                 // Get details from spotify of user 
                 var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
-                identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, userId));
+                identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, partyGoerDetails.Id));
 
                 var principal = new ClaimsPrincipal(identity);
 
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-                await _logService.LogUserActivityAsync(new PartyGoer(userId), "Successfully authenticated through Spotify");
+                await _logService.LogUserActivityAsync(new PartyGoer(partyGoerDetails.Id), "Successfully authenticated through Spotify");
 
                 return RedirectToAction("Index", "Dashboard");
             }

@@ -7,12 +7,14 @@ using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.DTO;
 using SpotSync.Domain.Errors;
 using SpotSync.Domain.Events;
+using SpotSync.Domain.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -47,20 +49,181 @@ namespace SpotSync.Infrastructure
             };
         }
 
-        public async Task<List<Song>> GetUserTopTracksAsync(string spotifyId, int limit = 10)
+        public async Task<PartyGoerDetails> GetUserDetailsAsync(string spotifyId)
+        {
+            var response = await SendHttpRequestAsync(spotifyId, _apiEndpoints[ApiEndpointType.UserInformation]);
+
+            EnsureSuccessfulResponse(response);
+
+            JObject jObject = await GetJObjectContentFromResponseAsync(response);
+
+            return new PartyGoerDetails
+            {
+                ShouldFilterExplicitSongs = jObject["explicit_content"]["filter_enabled"].Value<bool>(),
+                Id = jObject["id"].ToString()
+            };
+        }
+
+        public async Task<IEnumerable<ISpotifyQueryResult>> QuerySpotifyAsync(PartyGoer user, string searchQuery, SpotifyQueryType queryType, int limit)
+        {
+            try
+            {
+                switch (queryType)
+                {
+                    case SpotifyQueryType.Track:
+                        return await QuerySpotifyForTrackAsync(user, searchQuery, limit);
+                    case SpotifyQueryType.Artist:
+                        return await QuerySpotifyForArtistAsync(user, searchQuery, limit);
+                    case SpotifyQueryType.Album:
+                        return await QuerySpotifyForAlbumAsync(user, searchQuery, limit);
+                    case SpotifyQueryType.Playlist:
+                    //return await QuerySpotifyForPlaylistAsync(user, searchQuery, limit);
+                    case SpotifyQueryType.All:
+                    //return await QuerySpotifyAsync<T>(user, searchQuery);
+                    default:
+                        throw new ArgumentException($"Argument SpotifyQuertyType of {queryType} not handled");
+                }
+            }
+            catch (Exception ex)
+            {
+                // TODO: Add custom exception to catch in clients to know that there was a problem with Spotifys API
+                throw new Exception($"Error occurred while trying to query Spotify with query {searchQuery}", ex);
+            }
+        }
+
+        private async Task<IEnumerable<SpotifyTrackQueryResult>> QuerySpotifyForTrackAsync(PartyGoer user, string searchQuery, int limit)
+        {
+            var response = await SendHttpRequestAsync(user, _apiEndpoints[ApiEndpointType.SearchSpotify], $"q={HttpUtility.UrlEncode(searchQuery)}&type=track&limit={limit}", true);
+
+            EnsureSuccessfulResponse(response);
+
+            List<Track> tracks = await ReadFullTrackJsonObjectFromResponseAsync(response);
+
+            return tracks.Select(p => new SpotifyTrackQueryResult { Uri = p.Uri, Artist = p.Artist, Length = p.Length, Name = p.Name, Explicit = p.Explicit });
+        }
+
+        private async Task<List<Track>> ReadFullTrackJsonObjectFromResponseAsync(HttpResponseMessage response)
+        {
+            JObject json = await GetJObjectContentFromResponseAsync(response);
+
+            List<Track> tracks = new List<Track>();
+
+            foreach (var item in json["tracks"]["items"])
+            {
+                tracks.Add(new Track
+                {
+                    Name = item["name"].ToString(),
+                    Artist = item["artists"].First()["name"].ToString(),
+                    Uri = item["uri"].ToString(),
+                    Length = item["duration_ms"].Value<int>(),
+                    AlbumImageUrl = item["album"]["images"].First["url"].ToString(),
+                    Explicit = item["explicit"].Value<bool>()
+                });
+            }
+
+            return tracks;
+        }
+
+        private async Task<IEnumerable<SpotifyArtistQueryResult>> QuerySpotifyForArtistAsync(PartyGoer user, string searchQuery, int limit)
+        {
+            var response = await SendHttpRequestAsync(user, _apiEndpoints[ApiEndpointType.SearchSpotify], $"q={HttpUtility.UrlEncode(searchQuery)}&type=artist&limit={limit}", true);
+
+            EnsureSuccessfulResponse(response);
+
+            return await ReadSimplifiedArtistJsonObjectFromResponseAsync(response);
+        }
+
+        private async void EnsureSuccessfulResponse(HttpResponseMessage response)
+        {
+            try
+            {
+                response.EnsureSuccessStatusCode();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error code from Spotify while using their api {response.StatusCode}, Content: {await response.Content.ReadAsStringAsync()}");
+            }
+        }
+
+        private async Task<IEnumerable<SpotifyArtistQueryResult>> ReadSimplifiedArtistJsonObjectFromResponseAsync(HttpResponseMessage response)
+        {
+            JObject json = await GetJObjectContentFromResponseAsync(response);
+
+            List<SpotifyArtistQueryResult> artists = new List<SpotifyArtistQueryResult>();
+
+            foreach (var item in json["artists"]["items"])
+            {
+                artists.Add(new SpotifyArtistQueryResult
+                {
+                    Name = item["name"].ToString(),
+                    Uri = item["uri"].ToString()
+                });
+            }
+
+            return artists;
+        }
+
+        private async Task<JObject> GetJObjectContentFromResponseAsync(HttpResponseMessage response)
+        {
+            return JObject.Parse(await response.Content.ReadAsStringAsync());
+        }
+
+        private async Task<IEnumerable<SpotifyAlbumQueryResult>> QuerySpotifyForAlbumAsync(PartyGoer user, string searchQuery, int limit)
+        {
+            var response = await SendHttpRequestAsync(user, _apiEndpoints[ApiEndpointType.SearchSpotify], $"q={HttpUtility.UrlEncode(searchQuery)}&type=album&limit={limit}", true);
+
+            response.EnsureSuccessStatusCode();
+
+            return await ReadSimplifiedAlbumJsonObjectFromResponseAsync(response);
+        }
+
+        private async Task<IEnumerable<SpotifyAlbumQueryResult>> ReadSimplifiedAlbumJsonObjectFromResponseAsync(HttpResponseMessage response)
+        {
+            JObject json = await GetJObjectContentFromResponseAsync(response);
+
+            List<SpotifyAlbumQueryResult> results = new List<SpotifyAlbumQueryResult>();
+
+            foreach (var item in json["albums"]["items"])
+            {
+                results.Add(new SpotifyAlbumQueryResult
+                {
+                    Artist = item["artists"].First()["name"].ToString(),
+                    Name = item["name"].ToString(),
+                    Uri = item["uri"].ToString()
+                });
+            }
+
+            return results;
+        }
+
+        private async Task<List<SpotifyPlaylistQueryResult>> QuerySpotifyForPlaylistAsync(PartyGoer user, string searchQuery, int limit)
+        {
+            var response = await SendHttpRequestAsync(user, _apiEndpoints[ApiEndpointType.SearchSpotify], $"q={HttpUtility.UrlEncode(searchQuery)}&type=playlist&limit={limit}");
+
+            response.EnsureSuccessStatusCode();
+
+            throw new NotImplementedException();
+        }
+
+        private Task<List<ISpotifyQueryResult>> QuerySpotifyAsync(PartyGoer user, string searchQuery)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<List<Track>> GetUserTopTracksAsync(string spotifyId, int limit = 10)
         {
             var response = await SendHttpRequestAsync(spotifyId, _apiEndpoints[ApiEndpointType.GetTopTracks], $"limit={limit}", true);
 
             JObject json = JObject.Parse(await response.Content.ReadAsStringAsync());
 
-            List<Song> recommendedTrackUris = new List<Song>();
+            List<Track> recommendedTrackUris = new List<Track>();
             foreach (var item in json["items"])
             {
-                recommendedTrackUris.Add(new Song
+                recommendedTrackUris.Add(new Track
                 {
-                    Title = item["name"].ToString(),
+                    Name = item["name"].ToString(),
                     Artist = item["artists"].First()["name"].ToString(),
-                    TrackUri = item["id"].ToString(),
+                    Uri = item["id"].ToString(),
                     Length = item["duration_ms"].Value<int>(),
                     AlbumImageUrl = item["album"]["images"].First["url"].ToString()
                 });
@@ -84,13 +247,13 @@ namespace SpotSync.Infrastructure
             List<string> recommendedTrackUris = new List<string>();
             foreach (var item in json["tracks"])
             {
-                recommendedTrackUris.Add(item["uri"].ToString());
+                recommendedTrackUris.Add(item["id"].ToString());
             }
 
             return recommendedTrackUris;
         }
 
-        public async Task<List<Song>> GetRecommendedSongsAsync(string spotifyId, List<string> seedTrackIds, float minimumEnergy)
+        public async Task<List<Track>> GetRecommendedSongsAsync(string spotifyId, List<string> seedTrackIds, float minimumEnergy)
         {
             if (seedTrackIds.Count > 5)
                 throw new ArgumentException("Seed tracks cannot exeed 5");
@@ -98,17 +261,18 @@ namespace SpotSync.Infrastructure
             if (minimumEnergy > 1 && minimumEnergy < 0)
                 throw new ArgumentException("Minimum Energy must be between 0 and 1");
 
+            seedTrackIds = seedTrackIds.Select(p => p.Replace("spotify:track:", "")).ToList();
             var response = await SendHttpRequestAsync(spotifyId, _apiEndpoints[ApiEndpointType.GetRecommendedTracks], $"seed_tracks={HttpUtility.UrlEncode(ConvertToCommaDelimitedString(seedTrackIds))}", true);
 
             JObject json = JObject.Parse(await response.Content.ReadAsStringAsync());
 
-            List<Song> recommendedSongs = new List<Song>();
+            List<Track> recommendedSongs = new List<Track>();
             foreach (var item in json["tracks"])
             {
-                recommendedSongs.Add(new Song
+                recommendedSongs.Add(new Track
                 {
-                    TrackUri = item["uri"].ToString(),
-                    Title = item["name"].ToString(),
+                    Uri = item["id"].ToString(),
+                    Name = item["name"].ToString(),
                     Artist = item["artists"].First["name"].ToString(),
                     Length = item["duration_ms"].Value<int>(),
                     AlbumImageUrl = item["album"]["images"].First["url"].ToString()
@@ -123,7 +287,7 @@ namespace SpotSync.Infrastructure
             return string.Join(",", items);
         }
 
-        public async Task<string> RequestAccessAndRefreshTokenFromSpotifyAsync(string code)
+        public async Task<PartyGoerDetails> RequestAccessAndRefreshTokenFromSpotifyAsync(string code)
         {
             List<KeyValuePair<string, string>> properties = new List<KeyValuePair<string, string>> {
                 new KeyValuePair<string, string>("grant_type", "authorization_code"),
@@ -153,20 +317,20 @@ namespace SpotSync.Infrastructure
 
                 string accessToken = accessTokenBody["access_token"].ToString();
 
-                string currentUserId = await GetCurrentUserIdAsync(accessToken);
+                PartyGoerDetails details = await GetCurrentUserIdAsync(accessToken);
 
-                await _spotifyAuthentication.AddAuthenticatedPartyGoerAsync(currentUserId, accessToken,
+                await _spotifyAuthentication.AddAuthenticatedPartyGoerAsync(details.Id, accessToken,
                 accessTokenBody["refresh_token"].ToString(),
                 Convert.ToInt32(accessTokenBody["expires_in"])
                 );
 
-                return currentUserId;
+                return details;
             }
 
             return null;
         }
 
-        private async Task<string> GetCurrentUserIdAsync(string accessToken)
+        private async Task<PartyGoerDetails> GetCurrentUserIdAsync(string accessToken)
         {
 
             HttpResponseMessage response = null;
@@ -187,7 +351,11 @@ namespace SpotSync.Infrastructure
 
             JObject currentUser = JObject.Parse(responseContent);
 
-            return currentUser["id"].ToString();
+            return new PartyGoerDetails
+            {
+                Id = currentUser["id"].ToString(),
+                ShouldFilterExplicitSongs = currentUser["explicit_content"]["filter_enabled"].Value<bool>(),
+            };
         }
 
         public async Task<CurrentSongDTO> GetCurrentSongAsync(string partyGoerId)
@@ -225,8 +393,6 @@ namespace SpotSync.Infrastructure
 
         public async Task<List<string>> GetUserTopTrackIdsAsync(string spotifyId, int count = 10)
         {
-            await RefreshTokenForUserAsync(spotifyId);
-
             HttpResponseMessage response = await SendHttpRequestAsync(spotifyId, _apiEndpoints[ApiEndpointType.GetTopTracks], $"limit={count}", true);
 
             JObject json = JObject.Parse(await response.Content.ReadAsStringAsync());
@@ -241,27 +407,25 @@ namespace SpotSync.Infrastructure
             return trackUris;
         }
 
-        public async Task<List<Song>> SearchSpotifyAsync(string spotifyId, string query)
+        public async Task<List<Track>> SearchSpotifyAsync(string spotifyId, string query)
         {
-            await RefreshTokenForUserAsync(spotifyId);
-
             HttpResponseMessage response = await SendHttpRequestAsync(spotifyId, _apiEndpoints[ApiEndpointType.SearchSpotify], $"q={HttpUtility.UrlEncode(query)}&type={HttpUtility.UrlEncode("track,artist")}&limit=10", true);
 
             response.EnsureSuccessStatusCode();
 
             JObject json = JObject.Parse(await response.Content.ReadAsStringAsync());
 
-            List<Song> songs = new List<Song>();
+            List<Track> songs = new List<Track>();
 
             foreach (var item in json["tracks"]["items"])
             {
-                songs.Add(new Song
+                songs.Add(new Track
                 {
                     Artist = item["artists"].First()["name"].ToString(),
                     AlbumImageUrl = item["album"]["images"].First()["url"].ToString(),
                     Length = item["duration_ms"].Value<int>(),
-                    Title = item["name"].ToString(),
-                    TrackUri = item["uri"].ToString()
+                    Name = item["name"].ToString(),
+                    Uri = item["uri"].ToString()
                 });
             }
 
@@ -382,15 +546,19 @@ namespace SpotSync.Infrastructure
 
                 string accessToken = accessTokenBody["access_token"].ToString();
 
-                string currentUserId = await GetCurrentUserIdAsync(accessToken);
+                PartyGoerDetails details = await GetCurrentUserIdAsync(accessToken);
 
-                await _spotifyAuthentication.RefreshAccessTokenForPartyGoerAsync(currentUserId, accessToken,
+                await _spotifyAuthentication.RefreshAccessTokenForPartyGoerAsync(details.Id, accessToken,
                 Convert.ToInt32(accessTokenBody["expires_in"])
                 );
             }
 
         }
 
+        private async Task<HttpResponseMessage> SendHttpRequestAsync(PartyGoer user, SpotifyEndpoint spotifyEndpoint, object content = null, bool useQueryString = false)
+        {
+            return await SendHttpRequestAsync(user.Id, spotifyEndpoint, content, useQueryString);
+        }
         private async Task<HttpResponseMessage> SendHttpRequestAsync(string spotifyId, SpotifyEndpoint spotifyEndpoint, object content = null, bool useQueryString = false)
         {
             await RefreshTokenForUserAsync(spotifyId);

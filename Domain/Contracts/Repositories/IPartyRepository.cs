@@ -22,5 +22,6 @@ namespace SpotSync.Domain.Contracts
         bool LeaveParty(PartyGoer attendee);
         Task<List<Party>> GetPartiesWithMostListenersAsync(int count);
         Task<Party> GetPartyWithCode(string partyCode);
+        Task RemoveHostFromPartyAsync(PartyGoer host);
     }
 }
