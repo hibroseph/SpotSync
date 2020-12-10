@@ -33,6 +33,7 @@ namespace SpotSync.Tests
             _spotifyHttpClient = new Mock<ISpotifyHttpClient>();
             _partyRepository = new PartyRepository();
             _logService = new Mock<ILogService>();
+            _partyGoerService = new Mock<IPartyGoerService>();
 
             _spotifyHttpClient.Setup(p => p.RequestAccessAndRefreshTokenFromSpotifyAsync(It.IsAny<string>())).Returns(Task.FromResult(new PartyGoerDetails { Id = It.IsAny<string>(), ShouldFilterExplicitSongs = It.IsAny<bool>() }));
 
