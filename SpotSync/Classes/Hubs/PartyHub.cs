@@ -76,6 +76,12 @@ namespace SpotSync.Classes.Hubs
 
         }
 
+        public async Task UserWantsToSkipSong(string partyCode)
+        {
+            //  TODO: Add validation, user is in party
+            await _partyService.UserWantsToSkipSong(await _partyGoerService.GetCurrentPartyGoerAsync(), partyCode);
+        }
+
         public async Task UserAddedSong(AddSongToQueueRequest request)
         {
             PartyGoer partier = new PartyGoer(Context.UserIdentifier);

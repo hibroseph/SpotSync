@@ -11,7 +11,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Remove="TypeScript\index.ts" />
+	  <None Remove="Views\Party\Index.ts" />
+	  <None Remove="Views\Party\NowPlayingManager.ts" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -27,6 +28,15 @@
 		<ProjectReference Include="..\Domain\Domain.csproj" />
 		<ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
 		<ProjectReference Include="..\Persistence\Persistence.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <TypeScriptCompile Include="Views\Party\Index.ts" />
+	  <TypeScriptCompile Include="Views\Party\NowPlayingManager.ts" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Views\Party\NewFolder\" />
 	</ItemGroup>
 
 

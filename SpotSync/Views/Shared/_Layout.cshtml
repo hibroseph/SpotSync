@@ -66,15 +66,11 @@
         </main>
     </div>
 
-    <footer class="footer">
-        <div class="content has-text-centered">
-            &copy; 2020 - SpotSync - Created By Joseph Ridgley
-        </div>
-    </footer>
-
-    <div style="position: fixed; display: flex; flex-direction: row; justify-content: center; bottom: 50px; width: 100%;">
+    <div style="position: fixed; display: flex; flex-direction: row; justify-content: center; bottom: 100px; width: 100%;">
         <div id="user-notifications" style="display: flex; flex-direction: column"></div>
     </div>
+
+    @RenderSection("StatusBar", required: false)
 
     <div id="notifications" style="position: fixed; bottom: 0; right: 0; margin: 10px;">
         @if (!string.IsNullOrWhiteSpace(Model?.ErrorMessage))

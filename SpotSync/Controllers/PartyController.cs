@@ -58,6 +58,22 @@ namespace SpotSync.Controllers
             return RedirectToAction("Index", new { PartyCode = partyCode });
         }
 
+        [Authorize]
+        public async Task<IActionResult> TogglePlaybackState(string partyCode)
+        {
+            try
+            {
+                await _partyService.TogglePlaybackStateAsync(partyCode, await _partyGoerService.GetCurrentPartyGoerAsync());
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, "Error occurred in TogglePlaybackState()");
+                return new StatusCodeResult(500);
+            }
+
+            return new StatusCodeResult(200);
+        }
+
 
         [Authorize]
         public async Task<IActionResult> Index(string partyCode)

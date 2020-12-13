@@ -5,23 +5,27 @@ var u = require("umbrellajs");
 var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
 var ajax_1 = require("rxjs/ajax");
+var NowPlayingManager_1 = require("../Views/Party/NowPlayingManager");
 module.exports = {
     RealtimeFunctionality: function ConnectToParty(partyCode) {
-        document.addEventListener('DOMContentLoaded', function () {
-            // MAIN
-            //console.log("We loaded the dom content");
-        });
-        //console.log("Connecting to real time server");
         var connection = new signalR.HubConnectionBuilder().withUrl("/partyhub").build();
-        connection.start().then(function () { return connection.invoke("ConnectToParty", partyCode); });
+        connection.start().then(function () {
+            connection.invoke("ConnectToParty", partyCode);
+            var nowPlayingManager = new NowPlayingManager_1.NowPlayingManager(connection, partyCode);
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+        });
         connection.on("UpdateParty", function (msg) {
             //console.log(msg); 
         });
         connection.on("ExplicitSong", function (message) {
             CreateAndShowModal("Explicit Content", "<p>" + message + "</p>", "<a onclick=\"Spotibro.CloseModal()\" class=\"card-footer-item\">Close</a>");
         });
+        u("#toggle-information-menu").on("click", function (event) {
+            u("#more-information-popup").toggleClass("hidden");
+        });
         u("#generate-playlist-button").on("click", function () {
-            console.log("Generating a playlist");
+            SwapGeneratePlaylistButtonWithSyncMusic();
             fetch("/party/UpdateQueueForParty", {
                 method: "POST",
                 headers: {
@@ -30,6 +34,11 @@ module.exports = {
                 },
                 body: JSON.stringify({ PartyCode: partyCode })
             });
+        });
+        u("#toggle-playback").on('click', function (event) {
+            // toggle icon
+            u("#toggle-playback").toggleClass("fa-pause-circle fa-play-circle");
+            fetch("/party/toggleplaybackstate?PartyCode=" + partyCode);
         });
         connection.on("UpdatePartyView", function (current, history, queue) {
             //console.log("updating the party view")
@@ -44,6 +53,7 @@ module.exports = {
             else {
                 //console.log("current is not undefined or null")
                 //console.log(current);
+                SwapGeneratePlaylistButtonWithSyncMusic();
                 ShowNowPlayingSong();
                 UpdateHistory(history);
                 UpdateQueue(queue);
@@ -58,6 +68,10 @@ module.exports = {
             console.log(queue);
             */
         });
+        function SwapGeneratePlaylistButtonWithSyncMusic() {
+            u("#generate-playlist-button").addClass("hidden");
+            u("#sync-music-button").removeClass("hidden");
+        }
         function HideNowPlayingLoader() {
             u("#now-playing-loader").removeClass("is-active");
         }

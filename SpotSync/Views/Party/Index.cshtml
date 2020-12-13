@@ -103,74 +103,46 @@
         justify-content: space-between
     }
 
-    .track-item:hover {
-        background-color: #ececec;
-        border-radius: 5px;
-    }
+        .track-item:hover {
+            background-color: #ececec;
+            border-radius: 5px;
+        }
 
     .add-icon {
-        display: flex; 
-        flex-direction: column; 
+        display: flex;
+        flex-direction: column;
         justify-content: center
     }
 
-    .fas.fa-plus{
+    .fas.fa-plus {
         padding: 10px;
     }
 
-    .fas.fa-plus:hover {
-        color: black;
+        .fas.fa-plus:hover {
+            color: black;
+        }
+
+    #status-bar {
+        position: fixed;
+        bottom: 0px;
+        display: flex;
+        width: 100%;
+        height: 60px;
+        flex-direction: row;
+        justify-content: space-between;
     }
 
+
+    #more-information-popup {
+        position: absolute;
+        bottom: 80px;
+        right: 20px;
+        border-radius: 20px;
+        padding: 10px;
+    }
 </style>
 
 <section class="section">
-    <div class="columns">
-        <div class="column">
-            <div class="box">
-                <h1 class="title">Now Playing</h1>
-                <div id="now-playing-container" class="hidden">
-                    <div style="overflow:hidden">
-                        <div class="is-flex is-justify-content-center">
-                            <img style="max-width:340px; width: auto; height: auto;" id="albumArt" src="" />
-                            <div class="is-flex is-flex-direction-column is-justify-content-center">
-                                <div class="p-3" id="is-now-playing-information">
-                                    <strong>Title: </strong><p id="track"></p>
-                                    <br />
-                                    <strong>Artist: </strong><p id="artist"></p>
-                                    <p id="album"></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="now-playing-loader" class="loader-wrapper is-active">
-                    <div class="loader is-loading"></div>
-                </div>
-                <div id="no-songs-playing-container" class="hidden">
-                    <h2 class="subtitle">There are no songs currently playing in this party</h2>
-                    <div class="is-flex is-justify-content-center is-align-items-center">
-                        <button id="generate-playlist-button" class="button is-primary mr-5">Generate Playlist</button>
-                        <p>Or search a song below to add</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="column">
-            <div class="box">
-                <h1 class="title">Listeners</h1>
-                <div id="listeners"></div>
-            </div>
-            <div class="box">
-                <h1 class="title">Controls</h1>
-                <p>Party Code: <strong>@PartyModel.PartyCode</strong></p>
-                <div class="container">
-                    <button class="button is-primary" onclick="Spotibro.SyncMusicForUser()">Sync Music</button>
-                    <a class="button is-danger" href="/party/leaveparty?partyCode=@PartyModel.PartyCode">Leave Party</a>
-                </div>
-            </div>
-        </div>
-    </div>
     <div id="search-outline" class="pb-4">
         <div class="">
             <input id="search-spotify-input" class="input" type="text" placeholder="Search for Tracks, Artists, Albums to Add to Queue" />
@@ -225,7 +197,7 @@
             </div>
         }
     </div>
-    <div class="container pt-2" style="z-index: -1">
+    <div class="container pt-2 mb-5" style="z-index: -1">
         <div class="box">
             <div>
                 <h1 class="subtitle">History</h1>
@@ -243,6 +215,8 @@
     </div>
 </section>
 
+
+
 <div class="modal">
     <div class="modal-background"></div>
     <div class="card">
@@ -255,15 +229,52 @@
             </div>
         </div>
         <footer id="card-footer" class="card-footer">
-            
         </footer>
     </div>
 </div>
 
-<script src="~/js/signalr/dist/browser/signalr.js"></script>
-<script src="~/js/bundle.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/umbrellajs"></script>
+@section StatusBar {
+    <div id="status-bar" class="has-background-white-ter">
+        <div style="display:flex;">
+            <img id="albumArt" style="width:60px; " />
+
+            <div id="now-playing-information" style="padding: 10px; box-sizing: border-box">
+                <p id="track"></p>
+                <p id="artist"></p>
+            </div>
+        </div>
+
+        <div style="display:flex; align-items: center;">
+            <i id="toggle-playback" class="fas fa-pause-circle fa-2x"></i>
+            <i id="skip" class="fas fa-step-forward fa-1x"></i>
+        </div>
+
+        <div style="display:flex; align-items: center;">
+            <i id="toggle-information-menu" class="fas fa-ellipsis-v fa-1x mr-5"></i>
+        </div>
+
+        <div id="more-information-popup" class="has-background-white-ter hidden">
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <div class="p-3">
+                    <strong>@Model.PartyCode</strong>
+                </div>
+                <div class="pb-3">
+                    <button id="generate-playlist-button" class="button is-primary">Generate Playlist</button>
+                    <button id="sync-music-button" class="button is-primary hidden" onclick="Spotibro.SyncMusicForUser()">Sync Music</button>
+                </div>
+                <div class="pb-3">
+                    <a class="button is-danger" href="/party/leaveparty?partyCode=@PartyModel.PartyCode">Leave Party</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @section Scripts {
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script src="~/js/bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/umbrellajs"></script>
+
     <script>
         Spotibro.RealtimeFunctionality("@PartyModel.PartyCode");
 

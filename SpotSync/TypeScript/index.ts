@@ -3,19 +3,23 @@ const u = require("umbrellajs");
 import { fromEvent, interval, of, pipe, observable, defer, Observable } from 'rxjs';
 import { debounce, map, catchError, startWith, tap, filter } from 'rxjs/operators';
 import { ajax } from 'rxjs/ajax';
+import { NowPlayingManager } from '../Views/Party/NowPlayingManager';
 
 module.exports = {
     RealtimeFunctionality: function ConnectToParty(partyCode: string) {
 
-        document.addEventListener('DOMContentLoaded', () => {
-            // MAIN
-            //console.log("We loaded the dom content");
-        })
-
-        //console.log("Connecting to real time server");
         const connection = new signalR.HubConnectionBuilder().withUrl("/partyhub").build();
 
-        connection.start().then(() => connection.invoke("ConnectToParty", partyCode));
+        connection.start().then(() => {
+            connection.invoke("ConnectToParty", partyCode);
+
+            const nowPlayingManager = new NowPlayingManager(connection, partyCode);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            
+        })
+
 
         connection.on("UpdateParty", (msg: string) => {
             //console.log(msg); 
@@ -25,8 +29,12 @@ module.exports = {
             CreateAndShowModal("Explicit Content", `<p>${message}</p>`, `<a onclick="Spotibro.CloseModal()" class="card-footer-item">Close</a>`);
         })
 
+        u("#toggle-information-menu").on("click", (event) => {
+            u("#more-information-popup").toggleClass("hidden");
+        })
+
         u("#generate-playlist-button").on("click", () => {
-            console.log("Generating a playlist")
+            SwapGeneratePlaylistButtonWithSyncMusic();
             fetch("/party/UpdateQueueForParty", {
                 method: "POST",
                 headers: {
@@ -35,6 +43,13 @@ module.exports = {
                 },
                 body: JSON.stringify({ PartyCode: partyCode })
             })
+        })
+
+
+        u("#toggle-playback").on('click', (event) => {
+            // toggle icon
+            u("#toggle-playback").toggleClass("fa-pause-circle fa-play-circle")
+            fetch(`/party/toggleplaybackstate?PartyCode=${partyCode}`);
         })
 
         connection.on("UpdatePartyView", (current: CurrentSong, history: Song[], queue: Song[]) => {
@@ -51,6 +66,7 @@ module.exports = {
             } else {
                 //console.log("current is not undefined or null")
                 //console.log(current);
+                SwapGeneratePlaylistButtonWithSyncMusic();
                 ShowNowPlayingSong();
                 UpdateHistory(history);
                 UpdateQueue(queue);
@@ -66,6 +82,12 @@ module.exports = {
             console.log(queue);
             */
         })
+
+        function SwapGeneratePlaylistButtonWithSyncMusic() {
+            u("#generate-playlist-button").addClass("hidden");
+            u("#sync-music-button").removeClass("hidden");
+        }
+
 
         function HideNowPlayingLoader() {
             u("#now-playing-loader").removeClass("is-active");
@@ -112,8 +134,8 @@ module.exports = {
             CreateAndShowModal("Where is your Spotify?", "<p> It looks like your Spotify got disconnected from us.This might be because your Spotify app was closed.Make sure your Spotify app is open on whatever device you want to listen through and start playing a song and press the button below to see if we can find your Spotify </p>", `<a onclick="Spotibro.CheckForActiveSpotifyConnection()" class="card-footer-item">Sync</a>`, `<a onclick="Spotibro.CloseModal()" class="card-footer-item">Close</a>`)
         })
 
-            //<a onclick="Spotibro.CheckForActiveSpotifyConnection()" class="card-footer-item">Sync</a>
-            //<a onclick="Spotibro.CloseModal()" class="card-footer-item" > Close < /a>
+        //<a onclick="Spotibro.CheckForActiveSpotifyConnection()" class="card-footer-item">Sync</a>
+        //<a onclick="Spotibro.CloseModal()" class="card-footer-item" > Close < /a>
         function CreateAndShowModal(htmlTitle, htmlMessage, button1Html, button2Html = undefined) {
 
 
