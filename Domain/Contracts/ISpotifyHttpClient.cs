@@ -21,5 +21,6 @@ namespace SpotSync.Domain.Contracts
         Task<string> GetUsersActiveDeviceAsync(string spotifyId);
         Task<IEnumerable<ISpotifyQueryResult>> QuerySpotifyAsync(PartyGoer user, string searchQuery, SpotifyQueryType queryType, int limit);
         Task<PartyGoerDetails> GetUserDetailsAsync(string spotifyId);
+        Task TogglePlaybackAsync(PartyGoer partyGoer, MusicState state);
     }
 }

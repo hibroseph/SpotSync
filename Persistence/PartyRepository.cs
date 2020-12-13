@@ -148,7 +148,7 @@ namespace Persistence
             return Task.FromResult(_parties.Take(count).ToList());
         }
 
-        public Task<Party> GetPartyWithCode(string partyCode)
+        public Task<Party> GetPartyWithCodeAsync(string partyCode)
         {
             List<Party> parties = _parties.FindAll(p => p.PartyCode.Equals(partyCode, StringComparison.OrdinalIgnoreCase));
 

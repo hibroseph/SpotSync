@@ -1,4 +1,5 @@
 ﻿using SpotSync.Domain.Events;
+using SpotSync.Domain.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +23,21 @@ namespace SpotSync.Domain
             Listeners = new List<PartyGoer>() { host };
             PartyCode = GeneratePartyCode();
             Playlist = new Playlist(Listeners, PartyCode);
+        }
+
+        public async Task TogglePlaybackAsync(PartyGoer partyGoer)
+        {
+            // Grabbing partier by reference, so any change I make to it will change it in the list
+            PartyGoer partier = Listeners.Find(p => p.Equals(partyGoer));
+
+            partier.PausedMusic = !partier.PausedMusic;
+
+            await DomainEvents.RaiseAsync(new ToggleMusicState { Listener = partier, State = DetermineMusicState(partier.PausedMusic) });
+        }
+
+        private MusicState DetermineMusicState(bool isMusicPaused)
+        {
+            return isMusicPaused ? MusicState.Pause : MusicState.Play;
         }
 
         public async Task ModifyPlaylistAsync(RearrangeQueueRequest request)

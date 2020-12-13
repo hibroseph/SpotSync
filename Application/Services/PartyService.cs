@@ -29,11 +29,40 @@ namespace SpotSync.Application.Services
             _random = new Random();
             _logService = logService;
         }
+
+        public async Task TogglePlaybackStateAsync(string partyCode, PartyGoer partyGoer)
+        {
+            try
+            {
+                Party party = await _partyRepository.GetPartyWithCodeAsync(partyCode);
+
+                await party.TogglePlaybackAsync(partyGoer);
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, "Error occurred in TogglePlaybackStateAsync()");
+            }
+        }
+
+        public async Task UserWantsToSkipSong(PartyGoer partyGoer, string partyCode)
+        {
+            try
+            {
+                Party party = await _partyRepository.GetPartyWithCodeAsync(partyCode);
+
+                await party?.Playlist?.UserRequestedSkipAsync(partyGoer);
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, "Error occurred in UserWantsToSkipSong()");
+            }
+        }
+
         public async Task<bool> AddNewSongToQueue(AddSongToQueueRequest request)
         {
             try
             {
-                Party party = await _partyRepository.GetPartyWithCode(request.PartyCode);
+                Party party = await _partyRepository.GetPartyWithCodeAsync(request.PartyCode);
 
                 await party.ModifyPlaylistAsync(request);
 
@@ -50,7 +79,7 @@ namespace SpotSync.Application.Services
         {
             try
             {
-                Party party = await _partyRepository.GetPartyWithCode(request.PartyCode);
+                Party party = await _partyRepository.GetPartyWithCodeAsync(request.PartyCode);
 
                 await party.ModifyPlaylistAsync(request);
 
@@ -68,7 +97,7 @@ namespace SpotSync.Application.Services
         {
             try
             {
-                return await _partyRepository.GetPartyWithCode(partyCode);
+                return await _partyRepository.GetPartyWithCodeAsync(partyCode);
             }
             catch (Exception ex)
             {
@@ -190,6 +219,7 @@ namespace SpotSync.Application.Services
                 return false;
             }
         }
+
 
         public async Task<string> StartNewPartyAsync(PartyGoer partyHost)
         {

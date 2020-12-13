@@ -29,5 +29,7 @@ namespace SpotSync.Domain.Contracts
         Task<bool> RearrangeQueue(RearrangeQueueRequest request);
         Task<bool> AddNewSongToQueue(AddSongToQueueRequest request);
         Task<string> StartPartyAsync();
+        Task UserWantsToSkipSong(PartyGoer partyGoer, string partyCode);
+        Task TogglePlaybackStateAsync(string partyCode, PartyGoer listener);
     }
 }

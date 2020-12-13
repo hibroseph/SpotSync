@@ -14,6 +14,7 @@ namespace SpotSync.Domain
     public class Playlist
     {
         public Track CurrentSong { get; private set; }
+        public List<PartyGoer> UsersThatRequestedSkip { get; set; }
         public List<QueuedTrack> Queue { get; private set; }
         public Queue<Track> History { get; private set; }
         private Timer _nextSongTimer;
@@ -24,14 +25,19 @@ namespace SpotSync.Domain
         public Playlist(List<PartyGoer> listeners, string partyCode)
         {
             Queue = new List<QueuedTrack>();
+            UsersThatRequestedSkip = new List<PartyGoer>();
             History = new Queue<Track>();
             _songPositionTime = new Stopwatch();
             _partyCode = partyCode;
             _listeners = listeners;
             CurrentSong = null;
         }
+
         public Playlist(List<Track> songs, List<PartyGoer> listeners, string partyCode)
         {
+
+            Queue = new List<QueuedTrack>();
+            UsersThatRequestedSkip = new List<PartyGoer>();
             Queue = songs.Select(track =>
             {
                 return new QueuedTrack
@@ -54,6 +60,9 @@ namespace SpotSync.Domain
 
         public Playlist(List<Track> songs, List<PartyGoer> listeners, string partyCode, Queue<Track> existingHistory)
         {
+
+            Queue = new List<QueuedTrack>();
+            UsersThatRequestedSkip = new List<PartyGoer>();
             Queue = songs.Select(track =>
             {
                 return new QueuedTrack
@@ -73,6 +82,18 @@ namespace SpotSync.Domain
             _partyCode = partyCode;
             _songPositionTime = new Stopwatch();
             CurrentSong = null;
+        }
+
+        public async Task UserRequestedSkipAsync(PartyGoer partyGoer)
+        {
+            UsersThatRequestedSkip.Add(partyGoer);
+
+            if (UsersThatRequestedSkip.Count > _listeners.Count * 0.5)
+            {
+                // Skip the song
+                await NextSongAsync();
+                UsersThatRequestedSkip.Clear();
+            }
         }
 
         public void RemoveListener(PartyGoer listener)
