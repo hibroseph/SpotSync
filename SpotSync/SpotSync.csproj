@@ -11,7 +11,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Remove="Views\Party\Index.ts" />
+	  <Compile Remove="Views\Party\NewFolder\**" />
+	  <Content Remove="Views\Party\NewFolder\**" />
+	  <EmbeddedResource Remove="Views\Party\NewFolder\**" />
+	  <None Remove="Views\Party\NewFolder\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <None Remove="Views\Party\NowPlayingManager.ts" />
 	</ItemGroup>
 
@@ -31,12 +37,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <TypeScriptCompile Include="Views\Party\Index.ts" />
 	  <TypeScriptCompile Include="Views\Party\NowPlayingManager.ts" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Views\Party\NewFolder\" />
 	</ItemGroup>
 
 

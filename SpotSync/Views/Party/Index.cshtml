@@ -135,10 +135,38 @@
 
     #more-information-popup {
         position: absolute;
-        bottom: 80px;
-        right: 20px;
+        bottom: 70px;
+        right: 10px;
         border-radius: 20px;
-        padding: 10px;
+        padding: 5px;
+    }
+
+    #toggle-information-menu:hover {
+        background-color: #dedede;
+        border-radius: 20px;
+    }
+
+    .np-box {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .np-box:first-child > div {
+            margin-right: auto;
+        }
+
+        .np-box:last-child > div {
+            margin-left: auto;
+        }
+
+    .icon-spacing {
+        margin: 5px;
+    }
+
+    .now-playing-icons > i:hover {
+        opacity: 0.7;
     }
 </style>
 
@@ -174,8 +202,14 @@
                 <div class="loader is-loading"></div>
             </div>
             <div id="no-queue" class="hidden">
-                <div class="is-flex is-justify-content-center">
-                    <h2 class="subtitle">There is no queue. Search a track, artist, or album above to add it to the queue.</h2>
+                    <div class="is-flex is-flex-direction-column is-align-items-center ">
+                        <h2 class="subtitle">
+                            There currently is no queue. Search a track, artist, or album above to add it to the queue
+                        </h2>
+                        <h2 class="subtitle">
+                            or
+                        </h2>
+                        <button id="generate-playlist-button" class="button is-primary">Generate Playlist</button>
                 </div>
             </div>
         }
@@ -235,8 +269,8 @@
 
 @section StatusBar {
     <div id="status-bar" class="has-background-white-ter">
-        <div style="display:flex;">
-            <img id="albumArt" style="width:60px; " />
+        <div class="np-box" style="display:flex;">
+            <img id="albumArt" style="width:60px;" />
 
             <div id="now-playing-information" style="padding: 10px; box-sizing: border-box">
                 <p id="track"></p>
@@ -244,22 +278,21 @@
             </div>
         </div>
 
-        <div style="display:flex; align-items: center;">
-            <i id="toggle-playback" class="fas fa-pause-circle fa-2x"></i>
-            <i id="skip" class="fas fa-step-forward fa-1x"></i>
+        <div class="np-box now-playing-icons" style="display:flex; align-items: center;">
+            <i id="toggle-playback" class="fas fa-pause-circle fa-2x icon-spacing"></i>
+            <i id="skip" class="fas fa-step-forward fa-1x icon-spacing"></i>
         </div>
 
-        <div style="display:flex; align-items: center;">
-            <i id="toggle-information-menu" class="fas fa-ellipsis-v fa-1x mr-5"></i>
+        <div class="np-box" style="display:flex; justify-content: flex-end">
+            <i id="toggle-information-menu" class="fas fa-ellipsis-v fa-1x" style="padding: 20px;"></i>
         </div>
 
-        <div id="more-information-popup" class="has-background-white-ter hidden">
+        <div id="more-information-popup" class="has-background-white-ter p-5 hidden">
             <div style="display: flex; flex-direction: column; align-items: center;">
                 <div class="p-3">
                     <strong>@Model.PartyCode</strong>
                 </div>
                 <div class="pb-3">
-                    <button id="generate-playlist-button" class="button is-primary">Generate Playlist</button>
                     <button id="sync-music-button" class="button is-primary hidden" onclick="Spotibro.SyncMusicForUser()">Sync Music</button>
                 </div>
                 <div class="pb-3">
