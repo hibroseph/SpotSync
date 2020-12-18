@@ -4,6 +4,7 @@ import { fromEvent, interval, of, pipe, observable, defer, Observable } from 'rx
 import { debounce, map, catchError, startWith, tap, filter } from 'rxjs/operators';
 import { ajax } from 'rxjs/ajax';
 import { NowPlayingManager } from '../Views/Party/NowPlayingManager';
+import { PartyTabManager } from "../Views/Party/PartyTabManager";
 
 module.exports = {
     RealtimeFunctionality: function ConnectToParty(partyCode: string) {
@@ -14,6 +15,7 @@ module.exports = {
             connection.invoke("ConnectToParty", partyCode);
 
             const nowPlayingManager = new NowPlayingManager(connection, partyCode);
+            const partyTabManager = new PartyTabManager();
         });
 
         document.addEventListener('DOMContentLoaded', () => {
