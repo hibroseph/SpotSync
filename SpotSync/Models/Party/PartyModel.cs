@@ -13,5 +13,6 @@ namespace SpotSync.Models.Party
         public string PartyCode { get; set; }
         public List<SongModel> SuggestedSongs { get; set; }
         public bool IsUserListening { get; set; }
+        public string Name { get; set; }
     }
 }

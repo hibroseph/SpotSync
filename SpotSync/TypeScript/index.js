@@ -6,12 +6,14 @@ var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
 var ajax_1 = require("rxjs/ajax");
 var NowPlayingManager_1 = require("../Views/Party/NowPlayingManager");
+var PartyTabManager_1 = require("../Views/Party/PartyTabManager");
 module.exports = {
     RealtimeFunctionality: function ConnectToParty(partyCode) {
         var connection = new signalR.HubConnectionBuilder().withUrl("/partyhub").build();
         connection.start().then(function () {
             connection.invoke("ConnectToParty", partyCode);
             var nowPlayingManager = new NowPlayingManager_1.NowPlayingManager(connection, partyCode);
+            var partyTabManager = new PartyTabManager_1.PartyTabManager();
         });
         document.addEventListener('DOMContentLoaded', function () {
         });

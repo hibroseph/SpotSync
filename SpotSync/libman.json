@@ -10,20 +10,6 @@
         "dist/browser/signalr.min.js"
       ]
     },
-    {
-      "provider": "jsdelivr",
-      "library": "bulma@0.9.1",
-      "destination": "wwwroot/lib/bulma/",
-      "files": [
-        "css/bulma-rtl.css",
-        "css/bulma-rtl.css.map",
-        "css/bulma-rtl.min.css",
-        "css/bulma.css",
-        "css/bulma.css.map",
-        "css/bulma.min.css"
-      ]
-    }
-  ,
 {
   "provider": "jsdelivr",
   "library": "umbrellajs@3.2.3",

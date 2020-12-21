@@ -40,7 +40,7 @@ namespace SpotSync.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> StartParty(BaseModel<DashboardModel> model)
+        public async Task<IActionResult> StartParty()
         {
             PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
