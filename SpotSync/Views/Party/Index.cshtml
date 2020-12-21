@@ -4,6 +4,7 @@
 @{
     var PartyModel = Model.PageModel;
     ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_SpotibroAppLayout.cshtml";
 }
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <style>
@@ -162,14 +163,7 @@
     }
 </style>
 
-<section class="section">
-    <div id="party-tabs" class="tabs">
-        <ul>
-            <li class="is-active"><a data-page="queue">Queue</a></li>
-            <li><a data-page="history">History</a></li>
-        </ul>
-    </div>
-
+<section class="spotibro-centered-container">
     <div id="queue-container">
         <div id="search-outline" class="pb-4">
             <div class="">

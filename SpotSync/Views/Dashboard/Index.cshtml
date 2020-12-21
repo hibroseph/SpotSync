@@ -4,9 +4,28 @@
 @{
     ViewData["Title"] = "Dashboard";
     var DashboardModel = Model.PageModel;
+    Layout = "~/Views/Shared/_SpotibroAppLayout.cshtml";
 }
 <script src="~/js/bundle.js"></script>
 <style>
+    .section {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .subtitle {
+        font-size: 20px;
+    }
+
+    .title {
+        font-size: 30px;
+    }
+
+    .box {
+        padding: 20px;
+    }
+
     .albumArtPreview {
         width: 250px;
     }
@@ -79,7 +98,6 @@
                         <div class="control">
                             <input name="partyCode" class="input" type="text" placeholder="ex. B4A152">
                         </div>
-                        <p class="help">This is a six alpha-numeric number that identifies the party you want to join. Contact someone in the party to send you the code.</p>
                     </div>
                     <div class="field">
                         <div class="control">
@@ -87,6 +105,8 @@
                         </div>
                     </div>
                 </form>
+            </div>
+            <div class="box">
                 <h2 class="subtitle">Create a Party</h2>
                 <form asp-controller="Party" asp-action="StartParty">
                     <button type="submit" class="button is-primary">Create Party</button>

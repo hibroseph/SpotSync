@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/" />
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
-    <link href="~/css/style.css" />
     <link rel="stylesheet" href="~/css/style.css" />
     <style>
         html, body, div, span, applet, object, iframe,
@@ -72,11 +71,24 @@
             color: black;
         }
 
-        .spotibro-nav {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .spotibro-left-bar-nav {
+            top: 0px;
+            left: 0px;
             background-color: #f1f1f1;
+            display: flex;
+            flex-direction: column;
+            width: 150px;
+        }
+
+        @@media (min-width: 1000px) {
+            .spotibro-left-bar-nav {
+                position: absolute;
+                height: 100%;
+            }
+
+            .spotibro-main-content {
+                margin-left: 150px;
+            }
         }
 
         .spotibro-nav-list li {
@@ -101,7 +113,6 @@
 
         .spotibro-logo {
             padding: 20px;
-            width: 100px;
         }
 
         .spotibro-button {
@@ -112,7 +123,6 @@
             margin: 10px;
             padding: 10px 5px 10px 5px;
             text-align: center;
-            min-width: 100px;
         }
 
             .spotibro-button.primary {
@@ -133,23 +143,41 @@
     </style>
 </head>
 <body>
-    <nav class="spotibro-nav">
+    <nav class="spotibro-left-bar-nav">
         <div class="spotibro-logo">
             <img src="~/assets/logo.svg" />
         </div>
-        @if (User.Identity.IsAuthenticated)
+        <ul class="spotibro-nav-list">
+            <li class="spotibro-selected">
+                <a href="@Url.Action("index", "dashboard")">Dashboard</a>
+            </li>
+            @if (Model != null && Model.IsUserInParty)
+            {
+
+                <li>
+                    <a>Party</a>
+                    <ul>
+                        <li><a>Queue</a></li>
+                        <li><a>History</a></li>
+                        <li><a>Settings</a></li>
+                    </ul>
+                </li>
+            }
+        </ul>
+        @if (Model != null && !Model.IsUserInParty)
         {
-            <a class="spotibro-button affirmative" href="@Url.Action("logout", "account")">Log Out</a>
+            <a href="@Url.Action("startparty", "party")" class="spotibro-button primary">Create Party</a>
         }
-        else
-        {
-            <a class="spotibro-button affirmative" href="@Url.Action("login", "account")">Log In</a>
-        }
+        <a id="logout-button" class="spotibro-button affirmative" href="@Url.Action("logout", "account")">Log Out</a>
     </nav>
     <div class="spotibro-main-content">
         <main role="main">
             @RenderBody()
         </main>
+    </div>
+
+    <div style="position: fixed; display: flex; flex-direction: row; justify-content: center; bottom: 100px; width: 100%;">
+        <div id="user-notifications" style="display: flex; flex-direction: column"></div>
     </div>
 
     @RenderSection("StatusBar", required: false)

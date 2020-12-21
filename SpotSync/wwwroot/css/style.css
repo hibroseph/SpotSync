@@ -5,3 +5,9 @@ table.nolines td {
 table.interactive tr:hover {
     background-color: hsl(0, 0%, 96%);
 }
+
+.spotibro-centered-container {
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
