@@ -4,6 +4,7 @@ using SpotSync.Application.Authentication;
 using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
+using SpotSync.Domain.Contracts.Services.PartyGoerSetting;
 using SpotSync.Domain.DTO;
 using SpotSync.Domain.Errors;
 using SpotSync.Domain.Events;
@@ -29,13 +30,15 @@ namespace SpotSync.Infrastructure
         private IHttpClient _httpClient;
         private ISpotifyAuthentication _spotifyAuthentication;
         private ILogService _logService;
+        private IPartyGoerSettingsService _partyGoerSettingsService;
         private Dictionary<ApiEndpointType, SpotifyEndpoint> _apiEndpoints;
 
-        public SpotifyHttpClient(ISpotifyAuthentication spotifyAuthentication, IHttpClient httpClient, ILogService logService)
+        public SpotifyHttpClient(ISpotifyAuthentication spotifyAuthentication, IHttpClient httpClient, ILogService logService, IPartyGoerSettingsService partyGoerSettingsService)
         {
             _httpClient = httpClient;
             _spotifyAuthentication = spotifyAuthentication;
             _logService = logService;
+            _partyGoerSettingsService = partyGoerSettingsService;
             _apiEndpoints = new Dictionary<ApiEndpointType, SpotifyEndpoint>
             {
                 { ApiEndpointType.CurrentSong, new SpotifyEndpoint { EndpointUrl = "https://api.spotify.com/v1/me/player/currently-playing", HttpMethod = HttpMethod.Get } },
@@ -440,13 +443,15 @@ namespace SpotSync.Infrastructure
             return songs;
         }
 
-        public async Task<ServiceResult<UpdateSongError>> UpdateSongForPartyGoerAsync(string partyGoerId, List<string> songUris, int currentSongProgressInMs)
+        public async Task<ServiceResult<UpdateSongError>> UpdateSongForPartyGoerAsync(PartyGoer partyGoer, List<string> songUris, int currentSongProgressInMs)
         {
-            HttpResponseMessage response = await SendHttpRequestAsync(partyGoerId, _apiEndpoints[ApiEndpointType.PlaySong], new StartUserPlaybackSong
+            HttpResponseMessage response = await SendHttpRequestAsync(partyGoer, _apiEndpoints[ApiEndpointType.PlaySong], new ApiParameters
             {
-                uris = songUris,
-                position_ms = currentSongProgressInMs
-            });
+                Parameters = new Dictionary<string, object>
+                {
+                    {"device_id", _partyGoerSettingsService.GetConfigurationSetting(partyGoer).PerferredDeviceId }
+                }
+            }, new StartUserPlaybackSong { uris = songUris.Select(song => song.Contains("spotify:track:") ? song : $"spotify:track:{song}").ToList(), position_ms = currentSongProgressInMs });
 
             ServiceResult<UpdateSongError> error = new ServiceResult<UpdateSongError>();
 
@@ -456,9 +461,9 @@ namespace SpotSync.Infrastructure
             }
             else
             {
-                await _logService.LogExceptionAsync(new Exception($"Unable to update song for {partyGoerId}"), await response.Content.ReadAsStringAsync());
+                await _logService.LogExceptionAsync(new Exception($"Unable to update song for {partyGoer.Id}"), await response.Content.ReadAsStringAsync());
                 // TODO: Check status codes and add specific messaging for status codes based on Spotifys API
-                error.AddError(new UpdateSongError($"Unable to update song for {partyGoerId}"));
+                error.AddError(new UpdateSongError($"Unable to update song for {partyGoer.Id}"));
                 return error;
             }
         }
@@ -567,6 +572,24 @@ namespace SpotSync.Infrastructure
         {
             return await SendHttpRequestAsync(user.Id, spotifyEndpoint, content, useQueryString);
         }
+
+        private async Task<HttpResponseMessage> SendHttpRequestAsync(PartyGoer user, SpotifyEndpoint spotifyEndpoint, ApiParameters queryStringParameters, object requestBodyParameters)
+        {
+            await RefreshTokenForUserAsync(user.Id);
+
+            using (var requestMessage = new HttpRequestMessage(spotifyEndpoint.HttpMethod, spotifyEndpoint.EndpointUrl + AddQueryStrings(queryStringParameters)))
+            {
+                requestMessage.Headers.Authorization = await _spotifyAuthentication.GetAuthenticationHeaderForPartyGoerAsync(user.Id);
+
+                if (requestBodyParameters != null)
+                {
+                    requestMessage.Content = new StringContent(JsonConvert.SerializeObject(requestBodyParameters));
+
+                }
+
+                return await _httpClient.SendAsync(requestMessage);
+            }
+        }
         private async Task<HttpResponseMessage> SendHttpRequestAsync(string spotifyId, SpotifyEndpoint spotifyEndpoint, object content = null, bool useQueryString = false)
         {
             await RefreshTokenForUserAsync(spotifyId);
@@ -583,5 +606,48 @@ namespace SpotSync.Infrastructure
                 return await _httpClient.SendAsync(requestMessage);
             }
         }
+
+        private string AddQueryStrings(ApiParameters queryStringParameters)
+        {
+            if (queryStringParameters?.Parameters == null)
+            {
+                return string.Empty;
+            }
+
+            int count = queryStringParameters.Parameters.Count;
+            if (count > 0)
+            {
+                StringBuilder builder = new StringBuilder(35);
+
+                builder.Append("?");
+                int i = 0;
+                foreach (KeyValuePair<string, object> parameter in queryStringParameters.Parameters)
+                {
+                    builder.Append($"{parameter.Key}={parameter.Value}");
+                    AppendAmpersandConditonallyBetweenParameters(builder, i, count);
+                    i++;
+                }
+
+                return builder.ToString();
+            }
+
+            return string.Empty;
+        }
+
+        private void AppendAmpersandConditonallyBetweenParameters(StringBuilder builder, int currentIndex, int totalCount)
+        {
+            if (currentIndex != (totalCount - 1))
+            {
+                builder.Append("&");
+            }
+        }
     }
+
+
+
+    public class ApiParameters
+    {
+        public Dictionary<string, object> Parameters { get; set; }
+    }
+
 }

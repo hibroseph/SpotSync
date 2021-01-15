@@ -106,12 +106,14 @@ namespace SpotSync.Application.Services
             }
         }
 
-        public async Task SyncUserWithSong(PartyGoer listener)
+        public async Task SyncUserWithSongAsync(PartyGoer listener)
         {
             Party party = await _partyRepository.GetPartyWithAttendeeAsync(listener);
 
-            await DomainEvents.RaiseAsync(new ChangeSong { Listeners = new List<PartyGoer> { listener }, PartyCode = party.PartyCode, ProgressMs = party.Playlist.CurrentPositionInSong(), Song = party.Playlist.CurrentSong });
-            //await _spotifyHttpClient.UpdateSongForPartyGoerAsync(listener.Id, party.Playlist.CurrentSong.TrackUri, party.Playlist.CurrentPositionInSong());
+            if (party != null && party.IsPartyPlayingMusic())
+            {
+                await DomainEvents.RaiseAsync(new ChangeSong { Listeners = new List<PartyGoer> { listener }, PartyCode = party.PartyCode, ProgressMs = party.Playlist.CurrentPositionInSong(), Song = party.Playlist.CurrentSong });
+            }
         }
 
         public async Task<string> StartPartyWithSeedSongsAsync(List<string> seedTrackUris, PartyGoer host)
@@ -269,7 +271,7 @@ namespace SpotSync.Application.Services
 
                 foreach (PartyGoer attendee in party.Listeners)
                 {
-                    updateSongForPartyTask.Add(_spotifyHttpClient.UpdateSongForPartyGoerAsync(attendee.Id, new List<string> { song.TrackUri }, song.ProgressMs));
+                    updateSongForPartyTask.Add(_spotifyHttpClient.UpdateSongForPartyGoerAsync(attendee, new List<string> { song.TrackUri }, song.ProgressMs));
                 }
 
                 await Task.WhenAll(updateSongForPartyTask);
@@ -330,7 +332,7 @@ namespace SpotSync.Application.Services
                 List<Task<ServiceResult<UpdateSongError>>> updateSongForPartyTask = new List<Task<ServiceResult<UpdateSongError>>>();
                 foreach (PartyGoer attendee in party.Listeners)
                 {
-                    updateSongForPartyTask.Add(_spotifyHttpClient.UpdateSongForPartyGoerAsync(attendee.Id, recommendTrackUris, 0));
+                    updateSongForPartyTask.Add(_spotifyHttpClient.UpdateSongForPartyGoerAsync(attendee, recommendTrackUris, 0));
                 }
 
                 await Task.WhenAll(updateSongForPartyTask);

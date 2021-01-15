@@ -41,7 +41,7 @@ namespace SpotSync.Classes
                     try
                     {
                         await _logService.LogAppActivityAsync($"Updating song for PartyGoer {listener.Id}. New song artist: {args.Song.Artist}, title: {args.Song.Name}");
-                        await _spotifyHttpClient.UpdateSongForPartyGoerAsync(listener.Id, args.Song.Uri, args.ProgressMs);
+                        await _spotifyHttpClient.UpdateSongForPartyGoerAsync(listener, new List<string> { args.Song.Uri }, args.ProgressMs);
                     }
                     catch (NoActiveDeviceException)
                     {
@@ -67,7 +67,7 @@ namespace SpotSync.Classes
             }
             else
             {
-                await _partyService.SyncUserWithSong(args.Listener);
+                await _partyService.SyncUserWithSongAsync(args.Listener);
             }
         }
 

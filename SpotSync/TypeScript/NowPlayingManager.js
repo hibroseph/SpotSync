@@ -7,6 +7,9 @@ var NowPlayingManager = /** @class */ (function () {
         this.setUpOnClickListeners = function () {
             _this.skipUiElement.on('click', _this.skipUiOnClickCallback);
             _this.togglePlaybackUiElement.on('on', _this.togglePlaybackCallback);
+            u("#toggle-information-menu").on("click", function (event) {
+                u("#more-information-popup").toggleClass("hidden");
+            });
         };
         this.skipUiOnClickCallback = function () {
             console.log(_this.signalRConnection);

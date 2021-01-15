@@ -12,6 +12,7 @@ namespace SpotSync.Domain.Contracts
         string RedirectUrl { get; }
         string ClientSecret { get; }
 
+        Task<string> GetAccessTokenAsync(PartyGoer partyGoer);
         Task<AuthenticationHeaderValue> GetAuthenticationHeaderForPartyGoerAsync(string partyGoerId);
         Task AddAuthenticatedPartyGoerAsync(string partyGoerId, string accessToken, string refreshToken, int secondsTillAccessTokenExpires);
         Task<bool> DoesAccessTokenNeedRefreshAsync(string partyGoerId);

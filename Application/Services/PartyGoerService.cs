@@ -2,6 +2,7 @@
 using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
+using SpotSync.Domain.Contracts.Services.PartyGoerSetting;
 using SpotSync.Domain.DTO;
 using SpotSync.Domain.Types;
 using System;
@@ -18,12 +19,14 @@ namespace SpotSync.Application.Services
     {
         private ISpotifyHttpClient _spotifyHttpClient;
         private IHttpContextAccessor _httpContextAccessor;
+        private ISpotifyAuthentication _spotifyAuthentication;
         private Dictionary<string, PartyGoer> _partyGoerCache;
 
-        public PartyGoerService(ISpotifyHttpClient spotifyHttpClient, IHttpContextAccessor httpContextAccessor)
+        public PartyGoerService(ISpotifyHttpClient spotifyHttpClient, IHttpContextAccessor httpContextAccessor, ISpotifyAuthentication spotifyAuthentication)
         {
             _spotifyHttpClient = spotifyHttpClient;
             _httpContextAccessor = httpContextAccessor;
+            _spotifyAuthentication = spotifyAuthentication;
             _partyGoerCache = new Dictionary<string, PartyGoer>();
         }
 
@@ -76,6 +79,11 @@ namespace SpotSync.Application.Services
 
                 return newPartyGoer;
             }
+        }
+
+        public async Task<string> GetPartyGoerAccessTokenAsync(PartyGoer partyGoer)
+        {
+            return await _spotifyAuthentication.GetAccessTokenAsync(partyGoer);
         }
     }
 }

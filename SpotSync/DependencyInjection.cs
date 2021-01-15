@@ -9,6 +9,7 @@ using SpotSync.Classes;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Repositories;
 using SpotSync.Domain.Contracts.Services;
+using SpotSync.Domain.Contracts.Services.PartyGoerSetting;
 using SpotSync.Domain.Events;
 using SpotSync.Infrastructure;
 using System;
@@ -21,6 +22,8 @@ namespace SpotSync
         {
             serviceCollection.AddSingleton<ISpotifyAuthentication>(new SpotifyAuthentication(configuration["Spotify:ClientId"], configuration["Spotify:ClientSecret"], configuration["Spotify:RedirectUrl"]));
             serviceCollection.AddSingleton<IHttpClient>(new HttpClient());
+
+            serviceCollection.AddSingleton<IPartyGoerSettingsService, PartyGoerSettingsService>();
 
             serviceCollection.AddSingleton<ISpotifyHttpClient, SpotifyHttpClient>();
             serviceCollection.AddSingleton<ILogRepository>(new LogRepository(configuration["DatabaseConnection"]));

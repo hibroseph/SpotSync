@@ -14,6 +14,7 @@ using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.DTO;
 using SpotSync.Domain.Types;
 using SpotSync.Models.Party;
+using SpotSync.Domain.Contracts;
 
 namespace SpotSync.Controllers
 {
@@ -23,10 +24,12 @@ namespace SpotSync.Controllers
     {
         private IPartyGoerService _partyGoerService;
         private ILogService _logService;
-        public UserController(IPartyGoerService partyGoerService, ILogService logService)
+        private ISpotifyAuthentication _spotifyAuthentication;
+        public UserController(IPartyGoerService partyGoerService, ILogService logService, ISpotifyAuthentication spotifyAuthentication)
         {
             _partyGoerService = partyGoerService;
             _logService = logService;
+            _spotifyAuthentication = spotifyAuthentication;
         }
 
         [HttpGet]
@@ -45,6 +48,13 @@ namespace SpotSync.Controllers
             string deviceName = await _partyGoerService.GetUsersActiveDeviceAsync((await _partyGoerService.GetCurrentPartyGoerAsync()).Id);
 
             return new JsonResult(new { DeviceName = deviceName });
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetPartyGoerSpotifyAccessToken()
+        {
+            return new JsonResult(new { AccessToken = await _spotifyAuthentication.GetAccessTokenAsync(await _partyGoerService.GetCurrentPartyGoerAsync()) });
         }
 
         [HttpGet]

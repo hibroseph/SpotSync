@@ -1,7 +1,10 @@
 ﻿const path = require('path');
 
 module.exports = {
-    entry: './TypeScript/index.ts',
+    entry: {
+        main: './TypeScript/index.ts',
+        party: './Views/Party/index.ts'
+    },
     module: {
         rules: [
             {
@@ -15,8 +18,8 @@ module.exports = {
         extensions: ['.tsx', '.ts', '.js'],
     },
     output: {
-        filename: 'bundle.js',
-        path: path.resolve(__dirname, 'wwwroot/js'),
-        library: 'Spotibro'
+        filename: '[name].bundle.js',
+        library: 'Spotibro',
+        path: path.resolve(__dirname, 'wwwroot/js')
     },
 };

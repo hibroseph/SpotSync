@@ -14,6 +14,7 @@ namespace SpotSync.Domain.Contracts.Services
         Task<string> GetUsersActiveDeviceAsync(string partyGoerId);
         Task<IEnumerable<ISpotifyQueryResult>> SearchSpotifyAsync(string query, SpotifyQueryType queryType, int limit = 10);
         Task<PartyGoer> GetCurrentPartyGoerAsync();
+        Task<string> GetPartyGoerAccessTokenAsync(PartyGoer partyGoer);
         void SavePartyGoer(PartyGoerDetails partyGoerDetails);
     }
 }

@@ -6,6 +6,7 @@ using SpotSync.Application.Services;
 using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
+using SpotSync.Domain.Contracts.Services.PartyGoerSetting;
 using SpotSync.Domain.Events;
 using SpotSync.Infrastructure;
 using System;
@@ -23,13 +24,15 @@ namespace SpotSync.Classes.Hubs
         private IPartyGoerService _partyGoerService;
         private ISpotifyHttpClient _spotifyHttpClient;
         private ILogService _logService;
+        private IPartyGoerSettingsService _partyGoerSettingsService;
 
-        public PartyHub(IPartyService partyService, ISpotifyHttpClient spotifyHttpClient, ILogService logService, IPartyGoerService partyGoerService)
+        public PartyHub(IPartyService partyService, ISpotifyHttpClient spotifyHttpClient, ILogService logService, IPartyGoerService partyGoerService, IPartyGoerSettingsService partyGoerSettingsService)
         {
             _partyService = partyService;
             _spotifyHttpClient = spotifyHttpClient;
             _logService = logService;
             _partyGoerService = partyGoerService;
+            _partyGoerSettingsService = partyGoerSettingsService;
         }
 
         public async Task ConnectToParty(string partyCode)
@@ -66,14 +69,26 @@ namespace SpotSync.Classes.Hubs
                 await Clients.Client(Context.ConnectionId).SendAsync("ExplicitSong", "You have filtering explicit music turned on in Spotify and there are explicit songs in the queue. We will not play the explicit song for you but continue playback when a non explicit song comes on.");
             }
 
+            await Clients.Client(Context.ConnectionId).SendAsync("InitializeWebPlayer", await _partyGoerService.GetPartyGoerAccessTokenAsync(partier));
+
             // make sure that the users spotify is connected
             if (string.IsNullOrEmpty(await _spotifyHttpClient.GetUsersActiveDeviceAsync(partier.Id)))
             {
                 await Clients.Client(Context.ConnectionId).SendAsync("ConnectSpotify", "");
             }
+
             await _logService.LogUserActivityAsync(partier, $"Joined real time collobration in party with code {partyCode}");
             return;
 
+        }
+
+        public async Task WebPlayerInitialized(string device_id)
+        {
+            PartyGoer partyGoer = await _partyGoerService.GetCurrentPartyGoerAsync();
+
+            _partyGoerSettingsService.SetConfigurationSetting(partyGoer, new PartyGoerConfigurationSetting { PerferredDeviceId = device_id });
+
+            await _partyService.SyncUserWithSongAsync(partyGoer);
         }
 
         public async Task UserWantsToSkipSong(string partyCode)
@@ -133,11 +148,6 @@ namespace SpotSync.Classes.Hubs
             {
                 await Clients.Client(Context.ConnectionId).SendAsync("UserModifiedPlaylist", new { error = true });
             }
-        }
-
-        public async Task UpdateParty(string partyCode)
-        {
-            await Clients.Group(partyCode).SendAsync("UpdateParty", $"{Context.UserIdentifier} updated the party at {DateTime.UtcNow}");
         }
 
         public async Task UpdateSongForParty(string partyCode, Track currentSong, int currentProgressInMs)

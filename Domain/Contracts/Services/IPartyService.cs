@@ -25,7 +25,7 @@ namespace SpotSync.Domain.Contracts
         Task<bool> LeavePartyAsync(PartyGoer attendee);
         Task<string> StartPartyWithSeedSongsAsync(List<string> seedTrackUris, PartyGoer host);
         Task<List<Party>> GetTopParties(int count);
-        Task SyncUserWithSong(PartyGoer listener);
+        Task SyncUserWithSongAsync(PartyGoer listener);
         Task<bool> RearrangeQueue(RearrangeQueueRequest request);
         Task<bool> AddNewSongToQueue(AddSongToQueueRequest request);
         Task<string> StartPartyAsync();

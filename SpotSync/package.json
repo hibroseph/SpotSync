@@ -1,7 +1,9 @@
 {
   "dependencies": {
     "@microsoft/signalr": "^3.1.9",
+    "@types/jquery": "^3.5.5",
     "@types/signalr": "^2.2.36",
+    "@types/spotify-web-playback-sdk": "^0.1.7",
     "gulp": "4.0.2",
     "gulp-sass": "4.1.0",
     "rxjs": "^6.6.3",

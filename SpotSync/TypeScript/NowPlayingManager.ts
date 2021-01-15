@@ -17,6 +17,10 @@ export class NowPlayingManager {
     private setUpOnClickListeners = () => {
         this.skipUiElement.on('click', this.skipUiOnClickCallback)
         this.togglePlaybackUiElement.on('on', this.togglePlaybackCallback)
+
+        u("#toggle-information-menu").on("click", (event) => {
+            u("#more-information-popup").toggleClass("hidden");
+        })
     }
 
     private skipUiOnClickCallback = () => {
@@ -30,4 +34,6 @@ export class NowPlayingManager {
             fetch(`/party/toggleplaybackstate?PartyCode=${this.partyCode}`);
         })
     }
+
+
 }

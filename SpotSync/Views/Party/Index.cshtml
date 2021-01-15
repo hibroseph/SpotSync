@@ -6,6 +6,7 @@
     ViewData["Title"] = "Index";
 }
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<script src="https://sdk.scdn.co/spotify-player.js"></script>
 <style>
     #is-now-playing-information > p {
         display: inline-block;
@@ -14,11 +15,13 @@
     #search-results-container {
         position: absolute;
         top: 45px;
+        width: 100%;
     }
 
     #search-outline {
         position: relative;
     }
+
 
     .hidden {
         display: none;
@@ -32,6 +35,7 @@
     .card {
         max-width: 650px;
     }
+
 
     .spotify-search-results {
         position: absolute;
@@ -163,7 +167,7 @@
 </style>
 
 <section class="section">
-    <h1 class="title">Party @Model.par</h1>
+    <h1 class="title">Party @Model.PartyCode</h1>
     <div id="party-tabs" class="tabs">
         <ul>
             <li class="is-active"><a data-page="queue">Queue</a></li>
@@ -293,29 +297,12 @@
 
 @section Scripts {
     <script src="~/js/signalr/dist/browser/signalr.js"></script>
-    <script src="~/js/bundle.js"></script>
+    <script src="~/js/main.bundle.js"></script>
+    <script src="~/js/party.bundle.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/umbrellajs"></script>
 
     <script>
-        Spotibro.RealtimeFunctionality("@PartyModel.PartyCode");
-
-        /*
-        Sortable.create(suggestedSongsElement, {
-            group: {
-                name: 'shared',
-                put: false
-            },
-            animation: 300,
-            easing: "cubic-bezier(0.76, 0, 0.24, 1)",
-            ghostClass: "has-background-white-ter",
-            chosenClass: "has-background-info-light",
-            dragClass: "has-background-info-light"
-        });
-        */
-
-        u("#results").children().on('click',(event) => {
-            console.log("clicked")
-        })
-
+        Spotibro.ConnectToParty('@PartyModel.PartyCode');
+        Spotibro.SetUpSpotifyPlayback();
     </script>
 }

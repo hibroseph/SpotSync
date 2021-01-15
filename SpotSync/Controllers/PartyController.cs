@@ -152,7 +152,7 @@ namespace SpotSync.Controllers
 
             if (await _partyService.JoinPartyAsync(partyCodeDto, user))
             {
-                await _partyService.SyncUserWithSong(user);
+                //await _partyService.SyncUserWithSongAsync(user);
                 await _logService.LogUserActivityAsync(user.Id, $"Joined a party with code {partyCodeDto.PartyCode}");
 
                 return RedirectToAction("Index", "Party", new { PartyCode = partyCode });
@@ -246,7 +246,7 @@ namespace SpotSync.Controllers
             {
                 PartyGoer listener = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-                await _partyService.SyncUserWithSong(listener);
+                await _partyService.SyncUserWithSongAsync(listener);
 
                 return StatusCode(200);
             }
