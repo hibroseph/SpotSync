@@ -27,7 +27,7 @@ function SetUpSpotifyPlayback() {
             console.log("Your api key is " + data.accessToken);
             console.log(data);
             var player = new Spotify.Player({
-                name: 'Spotibro',
+                name: 'Spotibro Web Player',
                 getOAuthToken: function (cb) { cb(data.accessToken); }
             });
             // Error handling

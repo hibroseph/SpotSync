@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using NUnit.Framework;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
+using SpotSync.Domain.Contracts.Services.PartyGoerSetting;
 using SpotSync.Domain.DTO;
 using SpotSync.Infrastructure;
 using System;
@@ -21,6 +22,7 @@ namespace SpotSync.Tests.Unit_Tests
         private Mock<IHttpClient> _httpClient;
         private Mock<ILogService> _logService;
         private Mock<IPartyGoerService> _partyGoerService;
+        private Mock<IPartyGoerSettingsService> _partyGoerSettingService;
         private const string PARTY_GOER_ID = "ValidPartyGoerId";
 
         [SetUp]
@@ -29,8 +31,8 @@ namespace SpotSync.Tests.Unit_Tests
             _spotifyAuthentication = new Mock<ISpotifyAuthentication>();
             _httpClient = new Mock<IHttpClient>();
             _logService = new Mock<ILogService>();
-
-            _spotifyHttpClient = new SpotifyHttpClient(_spotifyAuthentication.Object, _httpClient.Object, _logService.Object);
+            _partyGoerSettingService = new Mock<IPartyGoerSettingsService>();
+            _spotifyHttpClient = new SpotifyHttpClient(_spotifyAuthentication.Object, _httpClient.Object, _logService.Object, _partyGoerSettingService.Object);
         }
 
         [Test]

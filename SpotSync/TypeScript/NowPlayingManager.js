@@ -26,6 +26,14 @@ var NowPlayingManager = /** @class */ (function () {
             });
             u("#toggle-devices-popup").on("click", function (event) {
                 u("#devices-popup").toggleClass("hidden");
+                _this.devicePopupClearAndShowLoading();
+                // TODO: Fix this. If the user clicks the icon to hide it, this will cause a request be sent to the server
+                _this.getUsersAvailableDevices();
+            });
+            u("#refresh-devices").on("click", function (event) {
+                _this.devicePopupClearAndShowLoading();
+                // TODO: Fix this. If the user clicks the icon to hide it, this will cause a request be sent to the server
+                _this.getUsersAvailableDevices();
             });
         };
         this.skipUiOnClickCallback = function () {
@@ -44,7 +52,28 @@ var NowPlayingManager = /** @class */ (function () {
         this.partyCode = partyCode;
         this.setUpOnClickListeners();
     }
+    NowPlayingManager.prototype.devicePopupClearAndShowLoading = function () {
+        u("#active-device").empty();
+        u("#device-loader").addClass("is-active");
+    };
     NowPlayingManager.prototype.getUsersAvailableDevices = function () {
+        var _this = this;
+        fetch("/api/user/getactivedevice")
+            .then(function (response) { return response.json(); })
+            .then(function (device) {
+            console.log("the users device is " + device.deviceName);
+            _this.hideLoader();
+            _this.displayDeviceInPopUp(device.deviceName);
+        });
+    };
+    NowPlayingManager.prototype.hideLoader = function () {
+        u("#device-loader").removeClass("is-active");
+    };
+    NowPlayingManager.prototype.displayDeviceInPopUp = function (deviceName) {
+        u("#active-device").append(this.createHtmlForDevice(deviceName));
+    };
+    NowPlayingManager.prototype.createHtmlForDevice = function (deviceName) {
+        return "<p class=\"spotibro-text\">" + deviceName + "</p>";
     };
     return NowPlayingManager;
 }());
