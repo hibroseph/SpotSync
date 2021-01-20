@@ -52,6 +52,15 @@ namespace SpotSync.Controllers
 
         [HttpGet]
         [Authorize]
+        public async Task<IActionResult> GetActiveDevice()
+        {
+            string deviceName = await _partyGoerService.GetUsersActiveDeviceAsync((await _partyGoerService.GetCurrentPartyGoerAsync()).Id);
+
+            return new JsonResult(new { DeviceName = deviceName });
+        }
+
+        [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetPartyGoerSpotifyAccessToken()
         {
             return new JsonResult(new { AccessToken = await _spotifyAuthentication.GetAccessTokenAsync(await _partyGoerService.GetCurrentPartyGoerAsync()) });

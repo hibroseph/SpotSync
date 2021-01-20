@@ -117,7 +117,7 @@ var SearchContainerManager = /** @class */ (function () {
         });
     };
     SearchContainerManager.prototype.NotifyUserSongAdded = function (song) {
-        this.notificationManager.ShowMessage("Successfully added " + song.name + " to the queue.", 5000);
+        this.notificationManager.ShowMessage("Successfully added " + song.name + " to the queue.", 50000);
     };
     SearchContainerManager.prototype.CreateTrackViewHtml = function (song) {
         //console.log(song);

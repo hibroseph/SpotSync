@@ -31,7 +31,7 @@ export function SetUpSpotifyPlayback() {
                 console.log(data);
 
                 const player = new Spotify.Player({
-                    name: 'Spotibro',
+                    name: 'Spotibro Web Player',
                     getOAuthToken: cb => { cb(data.accessToken); }
                 });
 

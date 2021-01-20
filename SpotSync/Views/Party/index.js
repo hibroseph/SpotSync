@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var RealTimeConnectionManager_1 = require("../../TypeScript/RealTimeConnectionManager");
 var NowPlayingManager_1 = require("../../TypeScript/NowPlayingManager");
-var PartyTabManager_1 = require("./PartyTabManager");
+var PartyTabManager_1 = require("../../TypeScript/PartyTabManager");
 var PlaylistManager_1 = require("../../TypeScript/PlaylistManager");
 var SearchContainerManager_1 = require("../../TypeScript/SearchContainerManager");
 var connectionManager;

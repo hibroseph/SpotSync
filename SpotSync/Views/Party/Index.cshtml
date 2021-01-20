@@ -12,6 +12,14 @@
         display: inline-block;
     }
 
+    .spotibro-title {
+        font-weight: bold;
+    }
+
+    .spotibro-text {
+        color: #5a5a5a;
+    }
+
     #search-results-container {
         position: absolute;
         top: 45px;
@@ -24,7 +32,7 @@
 
 
     .hidden {
-        display: none;
+        display: none !important;
     }
 
     table.center {
@@ -128,19 +136,35 @@
         justify-content: space-between;
     }
 
+    #devices-popup {
+        right: 50px;
+        width: 200px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
     #more-information-popup {
+        right: 10px;
+    }
+
+    .now-playing-popup {
         position: absolute;
         bottom: 70px;
-        right: 10px;
         border-radius: 20px;
         padding: 5px;
     }
 
-    #toggle-information-menu:hover {
-        background-color: #dedede;
-        border-radius: 20px;
+
+    .spotibro-icon {
+        margin: 10px;
+        padding: 10px;
     }
+
+        .spotibro-icon:hover {
+            background-color: #dedede;
+            border-radius: 20px;
+        }
 
     .np-box {
         flex: 1;
@@ -167,7 +191,7 @@
 </style>
 
 <section class="section">
-    <h1 class="title">Party @Model.PartyCode</h1>
+    <p class="spotibro-title">Party @Model.PartyCode</p>
     <div id="party-tabs" class="tabs">
         <ul>
             <li class="is-active"><a data-page="queue">Queue</a></li>
@@ -199,7 +223,7 @@
             </div>
         </div>
         <div class="box">
-            <h1 class="subtitle">Queue</h1>
+            <p class="spotibro-title">Queue</p>
             <table class="table nolines center interactive is-fullwidth" id="queue"></table>
             <div id="queue-loader" class="loader-wrapper is-active">
                 <div class="loader is-loading"></div>
@@ -276,13 +300,25 @@
         </div>
 
         <div class="np-box" style="display:flex; justify-content: flex-end">
-            <i id="toggle-information-menu" class="fas fa-ellipsis-v fa-1x" style="padding: 20px;"></i>
+            <i id="toggle-devices-popup" class="fas fa-headphones background-grey-hover spotibro-icon"></i>
+            <i id="toggle-information-menu" class="fas fa-ellipsis-v fa-1x spotibro-icon" ></i>
         </div>
 
-        <div id="more-information-popup" class="has-background-white-ter p-5 hidden">
+        <div id="devices-popup" class="has-background-white-ter p-5 now-playing-popup hidden">
+            <p class="spotibro-title">Available Devices</p>
+            <div id="device-loader" class="loader-wrapper is-active">
+                <div class="loader is-loading"></div>
+            </div>
+            <div id="active-device">
+            </div>
+            <i id="refresh-devices" class="fas fa-sync"></i>
+        </div>
+
+        <div id="more-information-popup" class="has-background-white-ter p-5 now-playing-popup hidden">
             <div style="display: flex; flex-direction: column; align-items: center;">
                 <div class="p-3">
-                    <strong>@Model.PartyCode</strong>
+                    <p class="spotibro-title">Party Code</p>
+                    <p class="spotibro-text">@Model.PartyCode</p>
                 </div>
                 <div class="pb-3">
                     <button id="sync-music-button" class="button is-primary hidden" onclick="Spotibro.SyncMusicForUser()">Sync Music</button>
