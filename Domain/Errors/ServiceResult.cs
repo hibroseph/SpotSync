@@ -7,6 +7,7 @@ namespace SpotSync.Domain.Errors
 {
     public class ServiceResult<T>
     {
+        public ServiceResult() { Errors = new List<T>(); }
         public bool Success => Errors.Count == 0;
         public List<T> Errors { get; set; }
 

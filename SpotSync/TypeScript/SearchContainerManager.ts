@@ -145,7 +145,7 @@ export class SearchContainerManager {
     }
 
     private NotifyUserSongAdded(song: TrackSearchModel) {
-        this.notificationManager.ShowMessage(`Successfully added ${song.name} to the queue.`, 50000);
+        this.notificationManager.ShowMessage(`Successfully added ${song.name} to the queue.`, 3000);
     }
 
     private CreateTrackViewHtml(song: TrackSearchModel) {
