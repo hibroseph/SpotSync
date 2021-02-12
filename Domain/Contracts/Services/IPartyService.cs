@@ -15,7 +15,7 @@ namespace SpotSync.Domain.Contracts
         Task<bool> EndPartyAsync(string partyCode);
         Task<bool> UpdatePartyPlaylistForEveryoneInPartyAsync(Party party, PartyGoer host);
         Task<List<Track>> CreatePartyPlaylistForEveryoneInPartyAsync(Party party, PartyGoer user);
-        Task<Errors.ServiceResult<UpdateSongError>> UpdateCurrentSongForEveryoneInPartyAsync(Party party, PartyGoer host);
+        Task<Domain.Errors.ServiceResult<UpdateSongError>> UpdateCurrentSongForEveryoneInPartyAsync(Party party, PartyGoer host);
         Task<bool> JoinPartyAsync(PartyCodeDTO partyCode, PartyGoer attendee);
         Task<bool> IsUserHostingAPartyAsync(PartyGoer host);
         Task<Party> GetPartyWithHostAsync(PartyGoer host);

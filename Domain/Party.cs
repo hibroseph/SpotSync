@@ -43,6 +43,16 @@ namespace SpotSync.Domain
             await StartQueueAsync();
         }
 
+        public Task UpdateCurrentSongForPartyAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<PartyGoer> GetListeners()
+        {
+            return _listeners.Select(p => p.Value).ToList();
+        }
+
         public async Task RequestSkip(PartyGoer partyGoer)
         {
             _usersThatHaveRequestedSkip.Add(partyGoer);
@@ -90,11 +100,6 @@ namespace SpotSync.Domain
         public string GetPartyCode()
         {
             return _partyCode;
-        }
-
-        public void CreateNewPlaylist(List<Track> tracks)
-        {
-            _queue = tracks;
         }
 
         public bool HasExplicitTracks()
@@ -159,6 +164,16 @@ namespace SpotSync.Domain
 
         }
 
+        public List<Track> GetQueue()
+        {
+            return _queue;
+        }
+
+        public List<Track> GetHistory()
+        {
+            return _history;
+        }
+
         private static string GeneratePartyCode()
         {
             Random random = new Random();
@@ -180,7 +195,7 @@ namespace SpotSync.Domain
             return _partyCode.Equals(other.GetPartyCode(), StringComparison.OrdinalIgnoreCase);
         }
 
-        public int CurrentPositionInSong()
+        public int GetCurrentPositionInSong()
         {
             return (int)_trackPositionTime.ElapsedMilliseconds;
         }

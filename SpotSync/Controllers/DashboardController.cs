@@ -66,16 +66,16 @@ namespace SpotSync.Controllers
                     Name = user.Id,
                     AvailableParties = topParties.Select(p => new PreviewPartyModel
                     {
-                        AlbumArtUrl = p.Playlist?.CurrentSong?.AlbumImageUrl ?? "./assets/unknown-album-art.png",
-                        ListenerCount = p.Listeners.Count,
+                        AlbumArtUrl = p.GetCurrentSong()?.AlbumImageUrl ?? "./assets/unknown-album-art.png",
+                        ListenerCount = p.GetListenerCount(),
                         Name = "Default Party Name",
-                        PartyCode = p.PartyCode
+                        PartyCode = p.GetPartyCode()
                     }).ToList(),
                     SuggestedSongs = userRecommendedSongs.Select(p => new PreviewPlaylistSong { Artist = p.Artist, Title = p.Name, TrackUri = p.Uri, Selected = true }).ToList(),
                     RandomGreeting = GetRandomGreeting()
                 };
 
-                BaseModel baseModel = new BaseModel(party == null ? false : true, party?.PartyCode, errorMessage);
+                BaseModel baseModel = new BaseModel(party == null ? false : true, party?.GetPartyCode(), errorMessage);
 
                 return View(new BaseModel<DashboardModel>(model, baseModel));
             }

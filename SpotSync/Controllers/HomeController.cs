@@ -33,7 +33,7 @@ namespace SpotSync.Controllers
 
                 Party party = await _partyService.GetPartyWithAttendeeAsync(user);
 
-                return View(new BaseModel(party != null ? true : false, party?.PartyCode));
+                return View(new BaseModel(party != null ? true : false, party?.GetPartyCode()));
             }
 
             return View();

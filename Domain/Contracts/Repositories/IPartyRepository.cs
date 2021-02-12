@@ -9,7 +9,6 @@ namespace SpotSync.Domain.Contracts
 {
     public interface IPartyRepository
     {
-        Party Get(Guid partyId);
         Task<Party> GetAsync(PartyCodeDTO partyCode);
         void Update(Party party);
         Task<Party> GetPartyWithHostAsync(PartyGoer host);

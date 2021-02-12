@@ -37,11 +37,6 @@ namespace Persistence
             return _parties.Find(p => p.GetPartyCode() == item.GetPartyCode());
         }
 
-        public Party Get(Guid partyId)
-        {
-            return _parties.Find(p => p.Id == partyId);
-        }
-
         public void Update(Party party)
         {
             var parties = _parties.FindAll(p => p.GetPartyCode() == party.GetPartyCode());

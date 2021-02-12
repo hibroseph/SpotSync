@@ -97,16 +97,16 @@ namespace SpotSync.Controllers
 
             List<Track> usersSuggestedSongs = null;
 
-            bool isUserListening = party.Listeners.Contains(user);
+            bool isUserListening = party.IsListener(user);
 
-            if (party.Listeners.Contains(user))
+            if (isUserListening)
             {
                 usersSuggestedSongs = await _partyGoerService.GetRecommendedSongsAsync(user.Id);
             }
 
             PartyModel model = new PartyModel
             {
-                PartyCode = party.PartyCode,
+                PartyCode = party.GetPartyCode(),
                 SuggestedSongs = usersSuggestedSongs?.Select(song => ConvertDomainSongToModelSong(song)).ToList(),
                 IsUserListening = isUserListening
             };
@@ -286,7 +286,7 @@ namespace SpotSync.Controllers
 
         private async Task UpdatePlaylistForEveryoneInPartyAsync(Party party, PartyGoer partyGoer)
         {
-            await DomainEvents.RaiseAsync(new PlaylistEnded { PartyCode = party.PartyCode });
+            await DomainEvents.RaiseAsync(new PlaylistEnded { PartyCode = party.GetPartyCode() });
         }
 
         private async Task<IActionResult> UpdateCurrentSongForEveryoneInPartyAsync(Party party, PartyGoer partyGoer)

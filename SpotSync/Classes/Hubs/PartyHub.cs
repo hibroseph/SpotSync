@@ -56,11 +56,11 @@ namespace SpotSync.Classes.Hubs
             await Clients.Client(Context.ConnectionId).SendAsync("UpdatePartyView",
             new
             {
-                Song = party.Playlist.CurrentSong,
-                Position = party.Playlist.CurrentPositionInSong()
+                Song = party.GetCurrentSong(),
+                Position = party.GetCurrentPositionInSong()
             },
-            party.Playlist.History,
-            party.Playlist.Queue
+            party.GetHistory(),
+            party.GetQueue()
             );
 
             // check for explicit music
@@ -109,14 +109,14 @@ namespace SpotSync.Classes.Hubs
                 Party party = await _partyService.GetPartyWithAttendeeAsync(partier);
 
                 // Update the view of the partier to the current playlist
-                await Clients.Group(party.PartyCode).SendAsync("UpdatePartyView",
+                await Clients.Group(party.GetPartyCode()).SendAsync("UpdatePartyView",
                 new
                 {
-                    Song = party.Playlist.CurrentSong,
-                    Position = party.Playlist.CurrentPositionInSong()
+                    Song = party.GetCurrentSong(),
+                    Position = party.GetCurrentPositionInSong()
                 },
-                party.Playlist.History,
-                party.Playlist.Queue
+                party.GetHistory(),
+                party.GetQueue()
                 );
             }
             else
@@ -135,14 +135,14 @@ namespace SpotSync.Classes.Hubs
                 Party party = await _partyService.GetPartyWithAttendeeAsync(partier);
 
                 // Update the view of the partier to the current playlist
-                await Clients.Group(party.PartyCode).SendAsync("UpdatePartyView",
+                await Clients.Group(party.GetPartyCode()).SendAsync("UpdatePartyView",
                 new
                 {
-                    Song = party.Playlist.CurrentSong,
-                    Position = party.Playlist.CurrentPositionInSong()
+                    Song = party.GetCurrentSong(),
+                    Position = party.GetCurrentPositionInSong()
                 },
-                party.Playlist.History,
-                party.Playlist.Queue
+                party.GetHistory(),
+                party.GetQueue()
                 );
             }
             else

@@ -21,7 +21,6 @@ namespace SpotSync.Tests.Unit_Tests
         private Mock<ISpotifyAuthentication> _spotifyAuthentication;
         private Mock<IHttpClient> _httpClient;
         private Mock<ILogService> _logService;
-        private Mock<IPartyGoerService> _partyGoerService;
         private Mock<IPartyGoerSettingsService> _partyGoerSettingService;
         private const string PARTY_GOER_ID = "ValidPartyGoerId";
 

@@ -77,46 +77,43 @@ namespace SpotSync.Classes
 
             Party party = await _partyService.GetPartyWithCodeAsync(args.PartyCode);
 
-            if (party.Listeners.Count < 1)
+            if (party.GetListeners().Count < 1)
             {
-                await party.DeletePlaylistAsync();
                 await _partyService.EndPartyAsync(args.PartyCode);
                 return;
             }
 
             List<Track> playlistSongs = await GenerateNewPlaylist(party);
-            // If there is atleast 1 person still in the party, regenerate the playlist
-            party.Playlist = new Playlist(playlistSongs, party.Listeners, party.PartyCode, party.Playlist.History);
 
-            await party.Playlist.StartAsync();
+            await party.AddNewQueueAsync(playlistSongs);
 
             await _partyHubContext.Clients.Group(args.PartyCode).SendAsync("UpdatePartyView",
             new
             {
-                Song = party.Playlist.CurrentSong,
-                Position = party.Playlist.CurrentPositionInSong()
+                Song = party.GetCurrentSong(),
+                Position = party.GetCurrentPositionInSong()
             },
-            party.Playlist.History,
-            party.Playlist.Queue
+            party.GetHistory(),
+            party.GetQueue()
             );
         }
 
         private async Task<List<Track>> GenerateNewPlaylist(Party party)
         {
-            if (party.Playlist.History.Count > 0)
+            if (party.GetHistory().Count > 0)
             {
-                return await _spotifyHttpClient.GetRecommendedSongsAsync(party.Listeners.ElementAt(0).Id, party.Playlist.History.ToList().GetRandomNItems(5).Select(p => p.Uri).ToList(), 0);
+                return await _spotifyHttpClient.GetRecommendedSongsAsync(party.GetListeners().ElementAt(0).Id, party.GetHistory().ToList().GetRandomNItems(5).Select(p => p.Uri).ToList(), 0);
             }
             else
             {
                 List<Track> songs = new List<Track>();
 
-                foreach (PartyGoer listener in party.Listeners)
+                foreach (PartyGoer listener in party.GetListeners())
                 {
                     songs.AddRange(await _partyGoerService.GetRecommendedSongsAsync(listener.Id, 2));
                 }
 
-                return await _spotifyHttpClient.GetRecommendedSongsAsync(party.Listeners.ElementAt(0).Id, songs.GetRandomNItems(5).Select(p => p.Uri).ToList(), 0);
+                return await _spotifyHttpClient.GetRecommendedSongsAsync(party.GetListeners().ElementAt(0).Id, songs.GetRandomNItems(5).Select(p => p.Uri).ToList(), 0);
             }
         }
     }

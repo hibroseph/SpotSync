@@ -48,7 +48,7 @@ namespace SpotSync.Tests
             string partyCode = await _partyService.StartNewPartyAsync(PartyHost1);
 
             PartyCodeDTO partyCodeDTO = new PartyCodeDTO { PartyCode = partyCode };
-            Assert.AreEqual(0, (await _partyService.GetPartyWithHostAsync(PartyHost1)).Listeners.Count);
+            Assert.AreEqual(0, (await _partyService.GetPartyWithHostAsync(PartyHost1)).GetListenerCount());
         }
 
         [Test]
@@ -63,7 +63,7 @@ namespace SpotSync.Tests
             await _partyService.JoinPartyAsync(partyCodeDTO, PartyAttendee2);
             await _partyService.JoinPartyAsync(partyCodeDTO, PartyAttendee3);
 
-            Assert.AreEqual(3, (await _partyService.GetPartyWithHostAsync(PartyHost1)).Listeners.Count);
+            Assert.AreEqual(3, (await _partyService.GetPartyWithHostAsync(PartyHost1)).GetListenerCount());
         }
 
         [Test]
@@ -81,7 +81,7 @@ namespace SpotSync.Tests
 
             await _partyService.LeavePartyAsync(PartyAttendee2);
 
-            Assert.AreEqual(2, (await _partyService.GetPartyWithHostAsync(PartyHost1)).Listeners.Count);
+            Assert.AreEqual(2, (await _partyService.GetPartyWithHostAsync(PartyHost1)).GetListenerCount());
         }
 
         [Test]
@@ -100,7 +100,7 @@ namespace SpotSync.Tests
             await _partyService.LeavePartyAsync(PartyAttendee2);
             await _partyService.LeavePartyAsync(PartyAttendee3);
 
-            Assert.AreEqual(1, (await _partyService.GetPartyWithHostAsync(PartyHost1)).Listeners.Count);
+            Assert.AreEqual(1, (await _partyService.GetPartyWithHostAsync(PartyHost1)).GetListenerCount());
         }
 
         [Test]
@@ -120,7 +120,7 @@ namespace SpotSync.Tests
             await _partyService.LeavePartyAsync(PartyAttendee3);
             await _partyService.LeavePartyAsync(PartyAttendee1);
 
-            Assert.AreEqual(0, (await _partyService.GetPartyWithHostAsync(PartyHost1)).Listeners.Count);
+            Assert.AreEqual(0, (await _partyService.GetPartyWithHostAsync(PartyHost1)).GetListenerCount());
         }
 
         [Test]
@@ -144,9 +144,9 @@ namespace SpotSync.Tests
             await _partyService.JoinPartyAsync(partyCodeDTO2, PartyAttendee2);
             await _partyService.JoinPartyAsync(partyCodeDTO3, PartyAttendee3);
 
-            Assert.AreEqual(2, (await _partyService.GetPartyWithHostAsync(PartyHost1)).Listeners.Count);
-            Assert.AreEqual(2, (await _partyService.GetPartyWithHostAsync(PartyHost2)).Listeners.Count);
-            Assert.AreEqual(2, (await _partyService.GetPartyWithHostAsync(PartyHost3)).Listeners.Count);
+            Assert.AreEqual(2, (await _partyService.GetPartyWithHostAsync(PartyHost1)).GetListenerCount());
+            Assert.AreEqual(2, (await _partyService.GetPartyWithHostAsync(PartyHost2)).GetListenerCount());
+            Assert.AreEqual(2, (await _partyService.GetPartyWithHostAsync(PartyHost3)).GetListenerCount());
         }
 
         [Test]
@@ -174,9 +174,9 @@ namespace SpotSync.Tests
             await _partyService.LeavePartyAsync(PartyAttendee1);
             await _partyService.LeavePartyAsync(PartyAttendee2);
 
-            Assert.AreEqual(0, (await _partyService.GetPartyWithHostAsync(PartyHost1)).Listeners.Count);
-            Assert.AreEqual(0, (await _partyService.GetPartyWithHostAsync(PartyHost2)).Listeners.Count);
-            Assert.AreEqual(1, (await _partyService.GetPartyWithHostAsync(PartyHost3)).Listeners.Count);
+            Assert.AreEqual(0, (await _partyService.GetPartyWithHostAsync(PartyHost1)).GetListenerCount());
+            Assert.AreEqual(0, (await _partyService.GetPartyWithHostAsync(PartyHost2)).GetListenerCount());
+            Assert.AreEqual(1, (await _partyService.GetPartyWithHostAsync(PartyHost3)).GetListenerCount());
         }
 
         [Test]
@@ -201,7 +201,7 @@ namespace SpotSync.Tests
 
             Domain.Party party = await _partyService.GetPartyWithAttendeeAsync(PartyAttendee3);
 
-            Assert.AreEqual(partyCodeDTO3.PartyCode, party.PartyCode);
+            Assert.AreEqual(partyCodeDTO3.PartyCode, party.GetPartyCode());
         }
     }
 }
