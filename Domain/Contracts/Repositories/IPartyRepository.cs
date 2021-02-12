@@ -13,7 +13,7 @@ namespace SpotSync.Domain.Contracts
         Task<Party> GetAsync(PartyCodeDTO partyCode);
         void Update(Party party);
         Task<Party> GetPartyWithHostAsync(PartyGoer host);
-        Task<bool> DeleteAsync(PartyGoer host);
+        bool Delete(PartyGoer host);
         Task<bool> DeleteAsync(string partyCode);
         bool IsUserHostingAParty(PartyGoer host);
         Task<bool> IsUserInAPartyAsync(PartyGoer attendee);

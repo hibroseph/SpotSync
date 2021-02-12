@@ -12,6 +12,7 @@ using System.Reflection.Metadata;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using SpotSync.Domain.Errors;
 
 namespace SpotSync.Application.Services
 {
@@ -21,13 +22,15 @@ namespace SpotSync.Application.Services
         private IHttpContextAccessor _httpContextAccessor;
         private ISpotifyAuthentication _spotifyAuthentication;
         private Dictionary<string, PartyGoer> _partyGoerCache;
+        private ILogService _logService;
 
-        public PartyGoerService(ISpotifyHttpClient spotifyHttpClient, IHttpContextAccessor httpContextAccessor, ISpotifyAuthentication spotifyAuthentication)
+        public PartyGoerService(ISpotifyHttpClient spotifyHttpClient, IHttpContextAccessor httpContextAccessor, ISpotifyAuthentication spotifyAuthentication, ILogService logService)
         {
             _spotifyHttpClient = spotifyHttpClient;
             _httpContextAccessor = httpContextAccessor;
             _spotifyAuthentication = spotifyAuthentication;
             _partyGoerCache = new Dictionary<string, PartyGoer>();
+            _logService = logService;
         }
 
         public async Task<CurrentSongDTO> GetCurrentSongAsync(string partyGoerId)
@@ -84,6 +87,22 @@ namespace SpotSync.Application.Services
         public async Task<string> GetPartyGoerAccessTokenAsync(PartyGoer partyGoer)
         {
             return await _spotifyAuthentication.GetAccessTokenAsync(partyGoer);
+        }
+
+        public async Task<SpotSync.Domain.ServiceResult<List<Device>>> GetUserDevicesAsync(PartyGoer partyGoer)
+        {
+            try
+            {
+                List<Device> devices = await _spotifyHttpClient.GetUserDevicesAsync(partyGoer);
+
+                return new Domain.ServiceResult<List<Device>> { Result = devices };
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, "Error occurred while trying to get user devices");
+
+                return new Domain.ServiceResult<List<Device>> { Error = ErrorType.SpotifyApiFailed };
+            }
         }
     }
 }

@@ -64,7 +64,7 @@ namespace SpotSync.Classes.Hubs
             );
 
             // check for explicit music
-            if (partier.FilterExplicitSongs && party.HasExplicitSongs())
+            if (partier.FilterExplicitSongs && party.HasExplicitTracks())
             {
                 await Clients.Client(Context.ConnectionId).SendAsync("ExplicitSong", "You have filtering explicit music turned on in Spotify and there are explicit songs in the queue. We will not play the explicit song for you but continue playback when a non explicit song comes on.");
             }
@@ -89,6 +89,7 @@ namespace SpotSync.Classes.Hubs
             _partyGoerSettingsService.SetConfigurationSetting(partyGoer, new PartyGoerConfigurationSetting { PerferredDeviceId = device_id });
 
             await _partyService.SyncUserWithSongAsync(partyGoer);
+
         }
 
         public async Task UserWantsToSkipSong(string partyCode)

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SpotSync.Classes.Hubs;
+using SpotSync.Classes.Middleware;
 using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.Events;
 
@@ -44,21 +45,7 @@ namespace SpotSync
             }
             else
             {
-                app.UseExceptionHandler(error =>
-               {
-                   error.Run(async context =>
-                   {
-                       context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                       context.Response.ContentType = "application/json";
-
-                       var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
-
-                       if (contextFeature != null)
-                       {
-                           await logService.LogExceptionAsync(contextFeature.Error, "Error caught in global exception handler");
-                       }
-                   });
-               });
+                app.UseMiddleware<ExceptionHandler>();
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }

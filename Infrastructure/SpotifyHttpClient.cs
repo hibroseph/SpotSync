@@ -53,7 +53,7 @@ namespace SpotSync.Infrastructure
             };
         }
 
-        public async Task TogglePlaybackAsync(PartyGoer partyGoer, MusicState state)
+        public async Task TogglePlaybackAsync(PartyGoer partyGoer, PlaybackState state)
         {
             var response = await SendHttpRequestAsync(partyGoer, _apiEndpoints[ApiEndpointType.PausePlayback]);
 
@@ -443,7 +443,7 @@ namespace SpotSync.Infrastructure
             return songs;
         }
 
-        public async Task<ServiceResult<UpdateSongError>> UpdateSongForPartyGoerAsync(PartyGoer partyGoer, List<string> songUris, int currentSongProgressInMs)
+        public async Task<Domain.Errors.ServiceResult<UpdateSongError>> UpdateSongForPartyGoerAsync(PartyGoer partyGoer, List<string> songUris, int currentSongProgressInMs)
         {
             HttpResponseMessage response = await SendHttpRequestAsync(partyGoer, _apiEndpoints[ApiEndpointType.PlaySong], new ApiParameters
             {
@@ -453,7 +453,7 @@ namespace SpotSync.Infrastructure
                 }
             }, new StartUserPlaybackSong { uris = songUris.Select(song => song.Contains("spotify:track:") ? song : $"spotify:track:{song}").ToList(), position_ms = currentSongProgressInMs });
 
-            ServiceResult<UpdateSongError> error = new ServiceResult<UpdateSongError>();
+            Domain.Errors.ServiceResult<UpdateSongError> error = new Domain.Errors.ServiceResult<UpdateSongError>();
 
             if (response.IsSuccessStatusCode)
             {
@@ -639,6 +639,38 @@ namespace SpotSync.Infrastructure
             if (currentIndex != (totalCount - 1))
             {
                 builder.Append("&");
+            }
+        }
+
+        public async Task<List<Device>> GetUserDevicesAsync(PartyGoer partyGoer)
+        {
+            HttpResponseMessage response = await SendHttpRequestAsync(partyGoer.Id, _apiEndpoints[ApiEndpointType.GetUserDevices]);
+
+            if (response.IsSuccessStatusCode)
+            {
+                JObject json = JObject.Parse(await response.Content.ReadAsStringAsync());
+
+                List<Device> devices = new List<Device>();
+                foreach (var item in json["devices"])
+                {
+                    devices.Add(new Device
+                    {
+                        Name = item["name"].ToString(),
+                        Active = item["is_active"].Value<bool>(),
+                        Id = item["id"].ToString()
+                    });
+                }
+
+                return devices;
+
+            }
+            else
+            {
+                SpotifyApiException exception = new SpotifyApiException("Unable to get users devices from Spotify");
+
+                await _logService.LogExceptionAsync(exception, await response.Content.ReadAsStringAsync());
+
+                throw exception;
             }
         }
     }

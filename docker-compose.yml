@@ -14,5 +14,6 @@ services:
     image: postgres
     environment:
       - "POSTGRES_PASSWORD=test12345"
+      - "ASPNETCORE_ENVIRONMENT=Production"
     ports:
       - "5432:5432"

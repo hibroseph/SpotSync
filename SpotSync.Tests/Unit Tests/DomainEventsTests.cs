@@ -23,11 +23,11 @@ namespace SpotSync.Tests.Unit_Tests
         [Test]
         public async Task ClearDomainEventsCallback()
         {
-            DomainEvents.Register<ChangeSong>(song => Assert.Fail());
+            DomainEvents.Register<ChangeTrack>(song => Assert.Fail());
 
             DomainEvents.ClearCallbacks();
 
-            await DomainEvents.RaiseAsync(new ChangeSong());
+            await DomainEvents.RaiseAsync(new ChangeTrack());
 
             Assert.Pass();
         }
@@ -43,19 +43,19 @@ namespace SpotSync.Tests.Unit_Tests
                 Uri = SONG_URI
             };
 
-            DomainEvents.Register<ChangeSong>(changedSong =>
+            DomainEvents.Register<ChangeTrack>(changedSong =>
             {
                 Assert.AreEqual(PARTY_CODE, changedSong.PartyCode);
-                Assert.AreEqual(song, changedSong.Song);
+                Assert.AreEqual(song, changedSong.Track);
                 Assert.AreEqual(PROGRESS_MS, changedSong.ProgressMs);
                 Assert.Pass();
             });
 
-            await DomainEvents.RaiseAsync(new ChangeSong
+            await DomainEvents.RaiseAsync(new ChangeTrack
             {
                 PartyCode = PARTY_CODE,
                 ProgressMs = PROGRESS_MS,
-                Song = song,
+                Track = song,
                 Listeners = new List<PartyGoer>
                 {
                     new PartyGoer(PARTY_GOER_ID_1)

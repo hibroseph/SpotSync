@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace SpotSync.Classes
 {
-    public class PartyHandler : IHandles<ChangeSong>, IHandles<PlaylistEnded>, IHandles<ToggleMusicState>
+    public class PartyHandler : IHandles<ChangeTrack>, IHandles<PlaylistEnded>, IHandles<ToggleMusicState>
     {
         private readonly ISpotifyHttpClient _spotifyHttpClient;
         private readonly IHubContext<PartyHub> _partyHubContext;
@@ -29,9 +29,9 @@ namespace SpotSync.Classes
             _partyGoerService = partyGoerService;
         }
 
-        public async Task HandleAsync(ChangeSong args)
+        public async Task HandleAsync(ChangeTrack args)
         {
-            await _logService.LogAppActivityAsync($"Updating song for party with code {args.PartyCode}. New song artist: {args.Song.Artist}, title: {args.Song.Name}");
+            await _logService.LogAppActivityAsync($"Updating song for party with code {args.PartyCode}. New song artist: {args.Track.Artist}, title: {args.Track.Name}");
 
             // TODO: Make this a parallel
             foreach (PartyGoer listener in args.Listeners)
@@ -40,8 +40,8 @@ namespace SpotSync.Classes
                 {
                     try
                     {
-                        await _logService.LogAppActivityAsync($"Updating song for PartyGoer {listener.Id}. New song artist: {args.Song.Artist}, title: {args.Song.Name}");
-                        await _spotifyHttpClient.UpdateSongForPartyGoerAsync(listener, new List<string> { args.Song.Uri }, args.ProgressMs);
+                        await _logService.LogAppActivityAsync($"Updating song for PartyGoer {listener.Id}. New song artist: {args.Track.Artist}, title: {args.Track.Name}");
+                        await _spotifyHttpClient.UpdateSongForPartyGoerAsync(listener, new List<string> { args.Track.Uri }, args.ProgressMs);
                     }
                     catch (NoActiveDeviceException)
                     {
@@ -54,14 +54,14 @@ namespace SpotSync.Classes
                 }
             }
 
-            await _partyHubContext.Clients.Group(args.PartyCode).SendAsync("UpdateSong", new { song = args.Song, position = args.ProgressMs });
+            await _partyHubContext.Clients.Group(args.PartyCode).SendAsync("UpdateSong", new { song = args.Track, position = args.ProgressMs });
 
             return;
         }
 
         public async Task HandleAsync(ToggleMusicState args)
         {
-            if (args.State == Domain.Types.MusicState.Pause)
+            if (args.State == Domain.Types.PlaybackState.Pause)
             {
                 await _spotifyHttpClient.TogglePlaybackAsync(args.Listener, args.State);
             }

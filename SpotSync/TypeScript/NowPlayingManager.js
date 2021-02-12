@@ -58,24 +58,43 @@ var NowPlayingManager = /** @class */ (function () {
     };
     NowPlayingManager.prototype.getUsersAvailableDevices = function () {
         var _this = this;
-        fetch("/api/user/getactivedevice")
+        fetch("/api/user/getactivedevices")
             .then(function (response) { return response.json(); })
-            .then(function (device) {
-            console.log("the users device is " + device.deviceName);
-            _this.hideLoader();
-            _this.displayDeviceInPopUp(device.deviceName);
+            .then(function (devices) {
+            if (devices.type != undefined && devices.type == "error") {
+                console.log("There was an error reaching Spotifies API");
+            }
+            else {
+                devices.map(function (device) {
+                    _this.hideLoader();
+                    _this.displayDeviceInPopUp(device);
+                });
+            }
         });
     };
     NowPlayingManager.prototype.hideLoader = function () {
         u("#device-loader").removeClass("is-active");
     };
-    NowPlayingManager.prototype.displayDeviceInPopUp = function (deviceName) {
-        u("#active-device").append(this.createHtmlForDevice(deviceName));
+    NowPlayingManager.prototype.displayDeviceInPopUp = function (playbackDevice) {
+        u("#active-device").append(this.createHtmlForDevice(playbackDevice));
     };
-    NowPlayingManager.prototype.createHtmlForDevice = function (deviceName) {
-        return "<p class=\"spotibro-text\">" + deviceName + "</p>";
+    NowPlayingManager.prototype.createHtmlForDevice = function (playbackDevice) {
+        return "<p class=\"spotibro-text device " + this.IsActiveCss(playbackDevice) + "\">" + playbackDevice.name + "</p>";
+    };
+    NowPlayingManager.prototype.IsActiveCss = function (playbackDevice) {
+        if (playbackDevice.active) {
+            return 'active-device';
+        }
+        else {
+            return '';
+        }
     };
     return NowPlayingManager;
 }());
 exports.NowPlayingManager = NowPlayingManager;
+var Device = /** @class */ (function () {
+    function Device() {
+    }
+    return Device;
+}());
 //# sourceMappingURL=NowPlayingManager.js.map

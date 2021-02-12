@@ -50,7 +50,7 @@ namespace SpotSync.Application.Services
             {
                 Party party = await _partyRepository.GetPartyWithCodeAsync(partyCode);
 
-                await party?.Playlist?.UserRequestedSkipAsync(partyGoer);
+                await party.RequestSkip(partyGoer);
             }
             catch (Exception ex)
             {
@@ -64,7 +64,7 @@ namespace SpotSync.Application.Services
             {
                 Party party = await _partyRepository.GetPartyWithCodeAsync(request.PartyCode);
 
-                await party.ModifyPlaylistAsync(request);
+                party.AddTrackToQueue(request);
 
                 return true;
             }
@@ -81,7 +81,7 @@ namespace SpotSync.Application.Services
             {
                 Party party = await _partyRepository.GetPartyWithCodeAsync(request.PartyCode);
 
-                await party.ModifyPlaylistAsync(request);
+                party.RearrangeTrackInQueue(request);
 
                 return true;
             }
@@ -112,7 +112,7 @@ namespace SpotSync.Application.Services
 
             if (party != null && party.IsPartyPlayingMusic())
             {
-                await DomainEvents.RaiseAsync(new ChangeSong { Listeners = new List<PartyGoer> { listener }, PartyCode = party.PartyCode, ProgressMs = party.Playlist.CurrentPositionInSong(), Song = party.Playlist.CurrentSong });
+                await DomainEvents.RaiseAsync(new ChangeTrack { Listeners = new List<PartyGoer> { listener }, PartyCode = party.GetPartyCode(), ProgressMs = party.CurrentPositionInSong(), Track = party.GetCurrentSong() });
             }
         }
 
@@ -122,13 +122,11 @@ namespace SpotSync.Application.Services
 
             List<Track> playlistSongs = await _spotifyHttpClient.GetRecommendedSongsAsync(host.Id, seedTrackUris, 0);
 
-            newParty.Playlist = new Playlist(playlistSongs, newParty.Listeners, newParty.PartyCode);
+            await newParty.AddNewQueueAsync(playlistSongs);
 
             _partyRepository.CreateParty(newParty);
 
-            await newParty.Playlist.StartAsync();
-
-            return newParty.PartyCode;
+            return newParty.GetPartyCode();
         }
 
         public async Task<string> StartPartyAsync()
@@ -137,7 +135,7 @@ namespace SpotSync.Application.Services
 
             _partyRepository.CreateParty(party);
 
-            return party.PartyCode;
+            return party.GetPartyCode();
         }
 
         public async Task<bool> IsUserHostingAPartyAsync(PartyGoer host)
@@ -190,7 +188,7 @@ namespace SpotSync.Application.Services
                     return false;
                 }
 
-                return await JoinPartyAsync(party.Id, attendee);
+                return await JoinPartyAsync(partyCode, attendee);
             }
             catch (Exception ex)
             {
@@ -204,10 +202,13 @@ namespace SpotSync.Application.Services
             {
                 Party party = _partyRepository.Get(partyId);
 
+                // TODO remove this, once everyone leaves party, party should end
+                /*
                 if (party.Host == null)
                 {
                     party.Host = attendee;
                 }
+                */
 
                 party.JoinParty(attendee);
 
@@ -235,7 +236,7 @@ namespace SpotSync.Application.Services
 
                 _partyRepository.CreateParty(party);
 
-                return party.PartyCode;
+                return party.GetPartyCode();
             }
             catch (Exception ex)
             {
@@ -249,25 +250,20 @@ namespace SpotSync.Application.Services
             return true;
         }
 
-        public async Task<ServiceResult<UpdateSongError>> UpdateCurrentSongForEveryoneInPartyAsync(Party party, PartyGoer user)
+        public async Task<Domain.Errors.ServiceResult<UpdateSongError>> UpdateCurrentSongForEveryoneInPartyAsync(Party party, PartyGoer user)
         {
             try
             {
                 if (party is null)
                 {
-                    throw new Exception($"Obtaining a party with ID {party.Id} returned null from the database");
-                }
-
-                if (!party.Host.Id.Equals(user.Id, StringComparison.CurrentCultureIgnoreCase) &&
-                !party.Listeners.Exists(p => p.Id.Equals(user.Id, StringComparison.CurrentCultureIgnoreCase)))
-                {
-                    throw new Exception($"A non host or party attendee tried to change the song for the party with ID {party.Id}. Attempted user ID: {user.Id}");
+                    throw new Exception($"Obtaining a party with code {party.GetPartyCode()} returned null from the database");
                 }
 
                 // Get the current song from the host
                 CurrentSongDTO song = await _spotifyHttpClient.GetCurrentSongAsync(user.Id);
 
-                List<Task<ServiceResult<UpdateSongError>>> updateSongForPartyTask = new List<Task<ServiceResult<UpdateSongError>>>();
+                List<Task<Domain.Errors.ServiceResult<UpdateSongError>>> updateSongForPartyTask = new List<Task<Domain.Errors.ServiceResult<UpdateSongError>>>();
+
 
                 foreach (PartyGoer attendee in party.Listeners)
                 {
@@ -276,10 +272,10 @@ namespace SpotSync.Application.Services
 
                 await Task.WhenAll(updateSongForPartyTask);
 
-                ServiceResult<UpdateSongError> errors = new ServiceResult<UpdateSongError>();
+                Domain.Errors.ServiceResult<UpdateSongError> errors = new Domain.Errors.ServiceResult<UpdateSongError>();
 
                 // Verify all the updates worked
-                foreach (Task<ServiceResult<UpdateSongError>> task in updateSongForPartyTask)
+                foreach (Task<Domain.Errors.ServiceResult<UpdateSongError>> task in updateSongForPartyTask)
                 {
                     if (task.IsCompletedSuccessfully && !task.Result.Success)
                     {
@@ -296,7 +292,7 @@ namespace SpotSync.Application.Services
             {
                 await _logService.LogExceptionAsync(ex, "Error occurred in UpdateCurrentSongForEveryoneInPartyAsync");
 
-                ServiceResult<UpdateSongError> error = new ServiceResult<UpdateSongError>();
+                Domain.Errors.ServiceResult<UpdateSongError> error = new Domain.Errors.ServiceResult<UpdateSongError>();
                 error.AddError(new UpdateSongError("Unable to update everyone's song."));
 
                 return error;
@@ -309,13 +305,7 @@ namespace SpotSync.Application.Services
             {
                 if (party is null)
                 {
-                    throw new Exception($"Obtaining a party with ID {party.Id} returned null from the database");
-                }
-
-                if (!party.Host.Id.Equals(user.Id, StringComparison.CurrentCultureIgnoreCase) &&
-                !party.Listeners.Exists(p => p.Id.Equals(user.Id, StringComparison.CurrentCultureIgnoreCase)))
-                {
-                    throw new Exception($"A non host or party attendee tried to change the song for the party with ID {party.Id}. Attempted user ID: {user.Id}");
+                    throw new Exception($"Obtaining a party with code {party.GetPartyCode()} returned null from the database");
                 }
 
                 List<Task<List<string>>> topTrackUrisTasks = new List<Task<List<string>>>();
@@ -329,7 +319,7 @@ namespace SpotSync.Application.Services
 
                 var recommendTrackUris = await _spotifyHttpClient.GetRecommendedTrackUrisAsync(user.Id, GetNNumberOfTrackUris(topTrackUrisTasks.SelectMany(p => p.Result).ToList(), 5));
 
-                List<Task<ServiceResult<UpdateSongError>>> updateSongForPartyTask = new List<Task<ServiceResult<UpdateSongError>>>();
+                List<Task<Domain.Errors.ServiceResult<UpdateSongError>>> updateSongForPartyTask = new List<Task<Domain.Errors.ServiceResult<UpdateSongError>>>();
                 foreach (PartyGoer attendee in party.Listeners)
                 {
                     updateSongForPartyTask.Add(_spotifyHttpClient.UpdateSongForPartyGoerAsync(attendee, recommendTrackUris, 0));
@@ -338,7 +328,7 @@ namespace SpotSync.Application.Services
                 await Task.WhenAll(updateSongForPartyTask);
 
                 // Verify all the updates worked
-                foreach (Task<ServiceResult<UpdateSongError>> task in updateSongForPartyTask)
+                foreach (Task<Domain.Errors.ServiceResult<UpdateSongError>> task in updateSongForPartyTask)
                 {
                     if (!task.Result.Success)
                     {
@@ -362,13 +352,7 @@ namespace SpotSync.Application.Services
             {
                 if (party is null)
                 {
-                    throw new Exception($"Obtaining a party with ID {party.Id} returned null from the database");
-                }
-
-                if (!party.Host.Id.Equals(user.Id, StringComparison.CurrentCultureIgnoreCase) &&
-                !party.Listeners.Exists(p => p.Id.Equals(user.Id, StringComparison.CurrentCultureIgnoreCase)))
-                {
-                    throw new Exception($"A non host or party attendee tried to change the song for the party with ID {party.Id}. Attempted user ID: {user.Id}");
+                    throw new Exception($"Obtaining a party with ID {party.GetPartyCode()} returned null from the database");
                 }
 
                 List<Task<List<string>>> topTrackUrisTasks = new List<Task<List<string>>>();
@@ -383,16 +367,10 @@ namespace SpotSync.Application.Services
                 List<Track> playlist = await _spotifyHttpClient.GetRecommendedSongsAsync(user.Id, GetNNumberOfTrackUris(topTrackUrisTasks.SelectMany(p => p.Result).ToList(), 5), 5);
 
                 List<PartyGoer> partyGoersWithHost = party.Listeners.Select(p => p).ToList();
+
                 partyGoersWithHost.Add(new PartyGoer(user.Id));
 
-                if (party.Playlist != null)
-                {
-                    await party.DeletePlaylistAsync();
-                }
-
-                party.Playlist = new Playlist(playlist, partyGoersWithHost, party.PartyCode);
-                await party.Playlist.StartAsync();
-                //party.CreatePlaylist(new Playlist(playlist, partyGoersWithHost, party.PartyCode));
+                party.CreateNewPlaylist(playlist);
 
                 return playlist;
             }

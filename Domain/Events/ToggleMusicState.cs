@@ -8,6 +8,6 @@ namespace SpotSync.Domain.Events
     public class ToggleMusicState : IDomainEvent
     {
         public PartyGoer Listener { get; set; }
-        public MusicState State { get; set; }
+        public PlaybackState State { get; set; }
     }
 }

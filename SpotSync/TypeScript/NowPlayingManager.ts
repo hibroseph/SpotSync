@@ -58,14 +58,19 @@ export class NowPlayingManager {
     }
 
     private getUsersAvailableDevices() {
-        fetch("/api/user/getactivedevice")
+        fetch("/api/user/getactivedevices")
             .then(response => response.json())
-            .then(device => {
-                console.log(`the users device is ${device.deviceName}`)
-                this.hideLoader();
-                this.displayDeviceInPopUp(device.deviceName);
-            });
+            .then(devices => {
+                if (devices.type != undefined && devices.type == "error") {
+                    console.log("There was an error reaching Spotifies API");
+                } else {
+                    devices.map(device => {
+                        this.hideLoader();
+                        this.displayDeviceInPopUp(device);
+                    })
+                }
 
+            });
     }
 
     private hideLoader() {
@@ -73,14 +78,21 @@ export class NowPlayingManager {
         u("#device-loader").removeClass("is-active");
     }
 
-    private displayDeviceInPopUp(deviceName: string) {
-        u("#active-device").append(this.createHtmlForDevice(deviceName));
+    private displayDeviceInPopUp(playbackDevice: Device) {
+        u("#active-device").append(this.createHtmlForDevice(playbackDevice));
     }
 
-    private createHtmlForDevice(deviceName: string): string {
-        return `<p class="spotibro-text">${deviceName}</p>`
+    private createHtmlForDevice(playbackDevice: Device): string {
+        return `<p class="spotibro-text device ${this.IsActiveCss(playbackDevice)}">${playbackDevice.name}</p>`
     }
 
+    private IsActiveCss(playbackDevice: Device): string {
+        if (playbackDevice.active) {
+            return 'active-device';
+        } else {
+            return '';
+        }
+    }
     private skipUiOnClickCallback = () => {
         console.log(this.signalRConnection);
         this.signalRConnection.invoke("UserWantsToSkipSong", this.partyCode);
@@ -92,6 +104,10 @@ export class NowPlayingManager {
             fetch(`/party/toggleplaybackstate?PartyCode=${this.partyCode}`);
         })
     }
+}
 
-
+class Device {
+    name: string;
+    id: string;
+    active: boolean;
 }

@@ -61,6 +61,22 @@ namespace SpotSync.Controllers
 
         [HttpGet]
         [Authorize]
+        public async Task<IActionResult> GetActiveDevices()
+        {
+            ServiceResult<List<Device>> devicesResult = await _partyGoerService.GetUserDevicesAsync(await _partyGoerService.GetCurrentPartyGoerAsync());
+
+            if (devicesResult.IsSuccessful())
+            {
+                return new JsonResult(devicesResult.Result);
+            }
+            else
+            {
+                return new JsonResult(new { Type = "Error", Message = "Unable to reach Spotify API, try again" });
+            }
+        }
+
+        [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetPartyGoerSpotifyAccessToken()
         {
             return new JsonResult(new { AccessToken = await _spotifyAuthentication.GetAccessTokenAsync(await _partyGoerService.GetCurrentPartyGoerAsync()) });

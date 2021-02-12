@@ -13,6 +13,7 @@ namespace SpotSync.Domain
         public string Uri { get; set; }
         public string AlbumImageUrl { get; set; }
         public bool Explicit { get; set; }
+
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Name;

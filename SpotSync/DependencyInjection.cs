@@ -34,7 +34,7 @@ namespace SpotSync
             serviceCollection.AddSingleton<IPartyService, PartyService>();
             serviceCollection.AddSingleton<IAuthenticationService, AuthenticationService>();
 
-            serviceCollection.AddSingleton<IHandles<ChangeSong>, PartyHandler>();
+            serviceCollection.AddSingleton<IHandles<ChangeTrack>, PartyHandler>();
             serviceCollection.AddSingleton<IHandles<PlaylistEnded>, PartyHandler>();
             serviceCollection.AddSingleton<IHandles<ToggleMusicState>, PartyHandler>();
 

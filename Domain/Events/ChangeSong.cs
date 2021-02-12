@@ -4,11 +4,11 @@ using System.Text;
 
 namespace SpotSync.Domain.Events
 {
-    public class ChangeSong : IDomainEvent
+    public class ChangeTrack : IDomainEvent
     {
         public string PartyCode { get; set; }
         public List<PartyGoer> Listeners { get; set; }
-        public Track Song { get; set; }
+        public Track Track { get; set; }
         public int ProgressMs { get; set; }
     }
 }
