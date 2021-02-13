@@ -207,7 +207,7 @@ namespace SpotSync.Application.Services
             }
         }
 
-        public async Task<Domain.Errors.ServiceResult<UpdateSongError>> UpdateCurrentSongForEveryoneInPartyAsync(Party party, PartyGoer user)
+        public async Task UpdateCurrentSongForEveryoneInPartyAsync(Party party, PartyGoer user)
         {
             try
             {
@@ -215,43 +215,12 @@ namespace SpotSync.Application.Services
                 {
                     throw new Exception($"Obtaining a party with code {party.GetPartyCode()} returned null from the database");
                 }
-                // Get the current song from the host
-                CurrentSongDTO song = await _spotifyHttpClient.GetCurrentSongAsync(user.Id);
 
-                List<Task<Domain.Errors.ServiceResult<UpdateSongError>>> updateSongForPartyTask = new List<Task<Domain.Errors.ServiceResult<UpdateSongError>>>();
-
-
-                foreach (PartyGoer attendee in party.GetListeners())
-                {
-                    updateSongForPartyTask.Add(_spotifyHttpClient.UpdateSongForPartyGoerAsync(attendee, new List<string> { song.TrackUri }, song.ProgressMs));
-                }
-
-                await Task.WhenAll(updateSongForPartyTask);
-
-                Domain.Errors.ServiceResult<UpdateSongError> errors = new Domain.Errors.ServiceResult<UpdateSongError>();
-
-                // Verify all the updates worked
-                foreach (Task<Domain.Errors.ServiceResult<UpdateSongError>> task in updateSongForPartyTask)
-                {
-                    if (task.IsCompletedSuccessfully && !task.Result.Success)
-                    {
-                        foreach (var error in task.Result.Errors)
-                        {
-                            errors.AddError(error);
-                        }
-                    }
-                }
-
-                return errors;
+                await party.UpdateCurrentSongForPartyAsync();
             }
             catch (Exception ex)
             {
                 await _logService.LogExceptionAsync(ex, "Error occurred in UpdateCurrentSongForEveryoneInPartyAsync");
-
-                Domain.Errors.ServiceResult<UpdateSongError> error = new Domain.Errors.ServiceResult<UpdateSongError>();
-                error.AddError(new UpdateSongError("Unable to update everyone's song."));
-
-                return error;
             }
         }
 

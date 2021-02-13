@@ -218,18 +218,12 @@ namespace SpotSync.Controllers
         {
             PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            if (await _partyService.IsUserHostingAPartyAsync(user))
-            {
-                Party party = await _partyService.GetPartyWithHostAsync(user);
-
-                await _logService.LogUserActivityAsync(user.Id, $"User updated song for party with code {partyCode.PartyCode}");
-                return await UpdateCurrentSongForEveryoneInPartyAsync(party, user);
-            }
-            else if (await _partyService.IsUserPartyingAsync(user))
+            if (await _partyService.IsUserPartyingAsync(user))
             {
                 Party party = await _partyService.GetPartyWithAttendeeAsync(user);
 
                 await _logService.LogUserActivityAsync(user.Id, $"User updated song for party with code {partyCode.PartyCode}");
+
                 return await UpdateCurrentSongForEveryoneInPartyAsync(party, user);
             }
             else
@@ -291,34 +285,16 @@ namespace SpotSync.Controllers
 
         private async Task<IActionResult> UpdateCurrentSongForEveryoneInPartyAsync(Party party, PartyGoer partyGoer)
         {
-            var response = await _partyService.UpdateCurrentSongForEveryoneInPartyAsync(party, partyGoer);
-
-            if (response.Success)
+            try
             {
+                await _partyService.UpdateCurrentSongForEveryoneInPartyAsync(party, partyGoer);
+
                 return Ok();
             }
-            else
+            catch
             {
-                return BadRequest(ConstructFriendlyMessage(response.Errors));
+                return base.StatusCode(500);
             }
-        }
-
-        private string ConstructFriendlyMessage(List<UpdateSongError> errors)
-        {
-            if (errors.Count == 1)
-            {
-                return errors.First().FriendlyMessage;
-            }
-
-            StringBuilder builder = new StringBuilder(50);
-
-            foreach (var error in errors)
-            {
-                builder.Append(error.FriendlyMessage);
-                builder.Append(". ");
-            }
-
-            return builder.ToString();
         }
     }
 }
