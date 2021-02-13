@@ -66,12 +66,15 @@ namespace SpotSync.Domain
 
         private async Task NextTrackAsync()
         {
-            if (_queue.Count > 2)
+            if (_queue.Count > 0)
             {
                 _history.Add(_queue.First());
 
                 _queue.RemoveAt(0);
+            }
 
+            if (_queue.Count > 0)
+            {
                 _currentTrack = _queue.First();
 
                 _nextTrackTimer.Change(_currentTrack.Length, Timeout.Infinite);
@@ -81,6 +84,10 @@ namespace SpotSync.Domain
                 _usersThatHaveRequestedSkip.Clear();
 
                 await DomainEvents.RaiseAsync(new ChangeTrack { PartyCode = _partyCode, Listeners = _listeners.Values.ToList(), Track = _currentTrack, ProgressMs = 0 });
+            }
+            else
+            {
+                await DomainEvents.RaiseAsync(new PlaylistEnded { PartyCode = _partyCode });
             }
         }
 
