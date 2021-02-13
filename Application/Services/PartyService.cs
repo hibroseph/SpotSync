@@ -3,12 +3,8 @@ using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.DTO;
 using SpotSync.Domain.Errors;
-using SpotSync.Domain.Events;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SpotSync.Application.Services
@@ -19,14 +15,12 @@ namespace SpotSync.Application.Services
         private IPartyGoerService _partyGoerService;
         private ISpotifyHttpClient _spotifyHttpClient;
         private ILogService _logService;
-        private Random _random;
 
         public PartyService(IPartyRepository partyRepository, ISpotifyHttpClient spotifyHttpClient, ILogService logService, IPartyGoerService partyGoerService)
         {
             _partyRepository = partyRepository;
             _spotifyHttpClient = spotifyHttpClient;
             _partyGoerService = partyGoerService;
-            _random = new Random();
             _logService = logService;
         }
 
@@ -106,27 +100,15 @@ namespace SpotSync.Application.Services
             }
         }
 
-        public async Task SyncUserWithSongAsync(PartyGoer listener)
+        public async Task SyncListenerWithSongAsync(PartyGoer listener)
         {
+
             Party party = await _partyRepository.GetPartyWithAttendeeAsync(listener);
 
             if (party != null && party.IsPartyPlayingMusic())
             {
-                await DomainEvents.RaiseAsync(new ChangeTrack { Listeners = new List<PartyGoer> { listener }, PartyCode = party.GetPartyCode(), ProgressMs = party.GetCurrentPositionInSong(), Track = party.GetCurrentSong() });
+                await party.SyncListenerWithSongAsync(listener);
             }
-        }
-
-        public async Task<string> StartPartyWithSeedSongsAsync(List<string> seedTrackUris, PartyGoer host)
-        {
-            Party newParty = new Party(host);
-
-            List<Track> playlistSongs = await _spotifyHttpClient.GetRecommendedSongsAsync(host.Id, seedTrackUris, 0);
-
-            await newParty.AddNewQueueAsync(playlistSongs);
-
-            _partyRepository.CreateParty(newParty);
-
-            return newParty.GetPartyCode();
         }
 
         public async Task<string> StartPartyAsync()
@@ -225,11 +207,6 @@ namespace SpotSync.Application.Services
             }
         }
 
-        public bool NextSong(Track song)
-        {
-            return true;
-        }
-
         public async Task<Domain.Errors.ServiceResult<UpdateSongError>> UpdateCurrentSongForEveryoneInPartyAsync(Party party, PartyGoer user)
         {
             try
@@ -275,102 +252,6 @@ namespace SpotSync.Application.Services
                 error.AddError(new UpdateSongError("Unable to update everyone's song."));
 
                 return error;
-            }
-        }
-
-        public async Task<bool> UpdatePartyPlaylistForEveryoneInPartyAsync(Party party, PartyGoer user)
-        {
-            try
-            {
-                if (party is null)
-                {
-                    throw new Exception($"Obtaining a party with code {party.GetPartyCode()} returned null from the database");
-                }
-
-                List<Task<List<string>>> topTrackUrisTasks = new List<Task<List<string>>>();
-
-                topTrackUrisTasks.Add(_spotifyHttpClient.GetUserTopTrackIdsAsync(user.Id, 5));
-
-                foreach (PartyGoer attendee in party.GetListeners())
-                {
-                    topTrackUrisTasks.Add(_spotifyHttpClient.GetUserTopTrackIdsAsync(attendee.Id, 5));
-                }
-
-                var recommendTrackUris = await _spotifyHttpClient.GetRecommendedTrackUrisAsync(user.Id, GetNNumberOfTrackUris(topTrackUrisTasks.SelectMany(p => p.Result).ToList(), 5));
-
-                List<Task<Domain.Errors.ServiceResult<UpdateSongError>>> updateSongForPartyTask = new List<Task<Domain.Errors.ServiceResult<UpdateSongError>>>();
-                foreach (PartyGoer attendee in party.GetListeners())
-                {
-                    updateSongForPartyTask.Add(_spotifyHttpClient.UpdateSongForPartyGoerAsync(attendee, recommendTrackUris, 0));
-                }
-
-                await Task.WhenAll(updateSongForPartyTask);
-
-                // Verify all the updates worked
-                foreach (Task<Domain.Errors.ServiceResult<UpdateSongError>> task in updateSongForPartyTask)
-                {
-                    if (!task.Result.Success)
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                await _logService.LogExceptionAsync(ex, "Error occurred in UpdatePartyPlaylistForEveryoneInPartyAsync");
-                return false;
-            }
-
-        }
-
-        public async Task<List<Track>> CreatePartyPlaylistForEveryoneInPartyAsync(Party party, PartyGoer user)
-        {
-            try
-            {
-                if (party is null)
-                {
-                    throw new Exception($"Obtaining a party with ID {party.GetPartyCode()} returned null from the database");
-                }
-
-                List<Task<List<string>>> topTrackUrisTasks = new List<Task<List<string>>>();
-
-                topTrackUrisTasks.Add(_spotifyHttpClient.GetUserTopTrackIdsAsync(user.Id, 5));
-
-                foreach (PartyGoer attendee in party.GetListeners())
-                {
-                    topTrackUrisTasks.Add(_spotifyHttpClient.GetUserTopTrackIdsAsync(attendee.Id, 5));
-                }
-
-                List<Track> playlist = await _spotifyHttpClient.GetRecommendedSongsAsync(user.Id, GetNNumberOfTrackUris(topTrackUrisTasks.SelectMany(p => p.Result).ToList(), 5), 5);
-
-                List<PartyGoer> partyGoersWithHost = party.GetListeners().Select(p => p).ToList();
-
-                partyGoersWithHost.Add(new PartyGoer(user.Id));
-
-                await party.AddNewQueueAsync(playlist);
-
-                return playlist;
-            }
-            catch (Exception ex)
-            {
-                await _logService.LogExceptionAsync(ex, "Error occurred in CreatePartyPlaylistForEveryoneInPartyAsync");
-                return null;
-            }
-
-        }
-
-        public async Task<Party> GetPartyAsync(PartyCodeDTO partyCode)
-        {
-            try
-            {
-                return await _partyRepository.GetAsync(partyCode);
-            }
-            catch (Exception ex)
-            {
-                await _logService.LogExceptionAsync(ex, "Error occurred in GetPartyAsync");
-                return null;
             }
         }
 
@@ -440,11 +321,6 @@ namespace SpotSync.Application.Services
                 await _logService.LogExceptionAsync(ex, "Error occurred in LeavePartyAsync");
                 return false;
             }
-        }
-
-        private List<string> GetNNumberOfTrackUris(List<string> topTrackUris, int selectNTracks)
-        {
-            return topTrackUris.OrderBy(p => _random.Next()).Take(selectNTracks).ToList();
         }
 
         public async Task<List<Party>> GetTopParties(int count)

@@ -88,7 +88,7 @@ namespace SpotSync.Classes.Hubs
 
             _partyGoerSettingsService.SetConfigurationSetting(partyGoer, new PartyGoerConfigurationSetting { PerferredDeviceId = device_id });
 
-            await _partyService.SyncUserWithSongAsync(partyGoer);
+            await _partyService.SyncListenerWithSongAsync(partyGoer);
 
         }
 

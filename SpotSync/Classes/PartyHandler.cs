@@ -67,7 +67,7 @@ namespace SpotSync.Classes
             }
             else
             {
-                await _partyService.SyncUserWithSongAsync(args.Listener);
+                await _partyService.SyncListenerWithSongAsync(args.Listener);
             }
         }
 

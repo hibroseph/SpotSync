@@ -246,7 +246,7 @@ namespace SpotSync.Controllers
             {
                 PartyGoer listener = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-                await _partyService.SyncUserWithSongAsync(listener);
+                await _partyService.SyncListenerWithSongAsync(listener);
 
                 return StatusCode(200);
             }

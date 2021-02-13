@@ -13,8 +13,6 @@ namespace SpotSync.Domain.Contracts
         Task<string> StartNewPartyAsync(PartyGoer host);
         Task<bool> EndPartyAsync(PartyGoer host);
         Task<bool> EndPartyAsync(string partyCode);
-        Task<bool> UpdatePartyPlaylistForEveryoneInPartyAsync(Party party, PartyGoer host);
-        Task<List<Track>> CreatePartyPlaylistForEveryoneInPartyAsync(Party party, PartyGoer user);
         Task<Domain.Errors.ServiceResult<UpdateSongError>> UpdateCurrentSongForEveryoneInPartyAsync(Party party, PartyGoer host);
         Task<bool> JoinPartyAsync(PartyCodeDTO partyCode, PartyGoer attendee);
         Task<bool> IsUserHostingAPartyAsync(PartyGoer host);
@@ -23,9 +21,8 @@ namespace SpotSync.Domain.Contracts
         Task<Party> GetPartyWithAttendeeAsync(PartyGoer attendee);
         Task<Party> GetPartyWithCodeAsync(string partyCode);
         Task<bool> LeavePartyAsync(PartyGoer attendee);
-        Task<string> StartPartyWithSeedSongsAsync(List<string> seedTrackUris, PartyGoer host);
         Task<List<Party>> GetTopParties(int count);
-        Task SyncUserWithSongAsync(PartyGoer listener);
+        Task SyncListenerWithSongAsync(PartyGoer listener);
         Task<bool> RearrangeQueue(RearrangeQueueRequest request);
         Task<bool> AddNewSongToQueue(AddSongToQueueRequest request);
         Task<string> StartPartyAsync();
