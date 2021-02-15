@@ -2,8 +2,7 @@
 
 module.exports = {
     entry: {
-        main: './TypeScript/index.ts',
-        party: './Views/Party/index.ts'
+        partyapp: './ClientApp/src/index.js'
     },
     module: {
         rules: [
@@ -12,14 +11,32 @@ module.exports = {
                 use: 'ts-loader',
                 exclude: /node_modules/,
             },
-        ],
+            {
+                test: /\.(js|jsx)$/,
+                exclude: /node_modules/,
+                use: ['babel-loader']
+            },
+            {
+                test: /\.(png|jpe?g|gif|svg)$/i,
+                use: [
+                    {
+                        loader: 'file-loader',
+                    },
+                ],
+            }
+        ]
     },
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
+    }, optimization: {
+        minimize: false
     },
     output: {
         filename: '[name].bundle.js',
-        library: 'Spotibro',
         path: path.resolve(__dirname, 'wwwroot/js')
     },
+    watchOptions: {
+        poll: true,
+        ignored: /node_modules/
+    }
 };

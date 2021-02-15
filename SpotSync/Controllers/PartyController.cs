@@ -272,6 +272,13 @@ namespace SpotSync.Controllers
 
         }
 
+        [Authorize]
+        [HttpGet]
+        public IActionResult App()
+        {
+            return View();
+        }
+
         private List<Track> CleansePlaylist(List<Track> playlist)
         {
             var newPlaylist = playlist.ToList();

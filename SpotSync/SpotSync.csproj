@@ -33,7 +33,7 @@
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.3" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="3.1.8" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.8" />
-		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.4" />
+		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.5" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -54,6 +54,11 @@
 	  <TypeScriptCompile Include="TypeScript\Types.ts" />
 	  <TypeScriptCompile Include="Views\Party\index.ts" />
 	  <TypeScriptCompile Include="TypeScript\NowPlayingManager.ts" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="ClientApp\src\components\nav\" />
+	  <Folder Include="ClientApp\src\components\shared\" />
 	</ItemGroup>
 
 
