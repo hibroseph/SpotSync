@@ -1,20 +1,24 @@
 import React from "react";
 import styled from "styled-components";
 
-const ButtonStyle = styled.button`
-  height: 50px;
+const $Button = styled.button`
   border-radius: 10px;
-  background-color: #e5e5e5;
+  background-color: ${(props) => props.selected && "#e5e5e5"};
   border: none;
   font-weight: bold;
   padding: 10px;
+
   &:hover {
     background-color: #e0e0e0;
   }
 `;
 
 const Button = (props) => {
-  return <ButtonStyle href={props.link}>{props.title}</ButtonStyle>;
+  return (
+    <$Button selected={props.selected} className={props.className} onClick={props.onClick}>
+      {props.children}
+    </$Button>
+  );
 };
 
-export { Button };
+export default Button;

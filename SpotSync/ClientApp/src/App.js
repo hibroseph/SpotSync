@@ -1,12 +1,13 @@
 import React from "react";
-import { Navigation } from "./components/nav/navigation";
+import Navigation from "./components/navigation/Navigation";
+import MainContent from "./components/main/MainContent";
 
 function App(props) {
   console.log("Hello World");
   return (
     <div>
       <Navigation />
-      <h1>Hello World</h1>
+      <MainContent></MainContent>
     </div>
   );
 }
