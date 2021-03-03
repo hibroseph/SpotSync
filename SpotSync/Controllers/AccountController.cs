@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using SpotSync.Domain;
@@ -47,6 +48,12 @@ namespace SpotSync.Controllers
             return Redirect(CreateSpotifyAuthenicateUrl(model));
         }
 
+        [Authorize]
+        public async Task<IActionResult> IsAuthenticated()
+        {
+            return Ok(new { userName = (await _partyGoerService.GetCurrentPartyGoerAsync()).Id });
+        }
+
         public async Task<IActionResult> Authorized(string code)
         {
             try
@@ -65,12 +72,12 @@ namespace SpotSync.Controllers
 
                 await _logService.LogUserActivityAsync(new PartyGoer(partyGoerDetails.Id), "Successfully authenticated through Spotify");
 
-                return RedirectToAction("Index", "Dashboard");
+                return RedirectToAction("App", "Party");
             }
             catch (Exception)
             {
                 //  TODO: CHANGE THIS TO THE IDNEX PAGE ON HOME
-                return RedirectToAction("Index", "Dashboard");
+                return RedirectToAction("App", "Party");
             }
         }
 

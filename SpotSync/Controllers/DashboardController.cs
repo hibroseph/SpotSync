@@ -59,7 +59,7 @@ namespace SpotSync.Controllers
 
                 List<Domain.Track> userRecommendedSongs = await _partyGoerService.GetRecommendedSongsAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-                List<Party> topParties = await _partyService.GetTopParties(3);
+                List<Party> topParties = await _partyService.GetTopPartiesAsync(3);
 
                 DashboardModel model = new DashboardModel
                 {

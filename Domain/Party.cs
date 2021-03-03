@@ -36,6 +36,11 @@ namespace SpotSync.Domain
             _usersThatHaveRequestedSkip = new List<PartyGoer>();
         }
 
+        public void EndParty()
+        {
+            _nextTrackTimer = null;
+        }
+
         public async Task SyncListenerWithSongAsync(PartyGoer listener)
         {
             await DomainEvents.RaiseAsync(new ChangeTrack { Listeners = new List<PartyGoer> { listener }, PartyCode = GetPartyCode(), ProgressMs = GetCurrentPositionInSong(), Track = GetCurrentSong() });

@@ -170,7 +170,7 @@ namespace SpotSync.Application.Services
         {
             try
             {
-                Party party = await _partyRepository.GetAsync(partyCode);
+                Party party = await _partyRepository.GetPartyWithCodeAsync(partyCode.PartyCode);
 
                 if (party == null)
                 {
@@ -292,7 +292,7 @@ namespace SpotSync.Application.Services
             }
         }
 
-        public async Task<List<Party>> GetTopParties(int count)
+        public async Task<List<Party>> GetTopPartiesAsync(int count)
         {
             // Currently this gets the parties with the most listeners
             return await _partyRepository.GetPartiesWithMostListenersAsync(count);

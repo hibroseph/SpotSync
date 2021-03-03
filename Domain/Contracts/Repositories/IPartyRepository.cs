@@ -9,10 +9,9 @@ namespace SpotSync.Domain.Contracts
 {
     public interface IPartyRepository
     {
-        Task<Party> GetAsync(PartyCodeDTO partyCode);
-        void Update(Party party);
+        void UpdateParty(Party party);
         Task<Party> GetPartyWithHostAsync(PartyGoer host);
-        bool Delete(PartyGoer host);
+        bool DeletePartyWithHost(PartyGoer host);
         Task<bool> DeleteAsync(string partyCode);
         bool IsUserHostingAParty(PartyGoer host);
         Task<bool> IsUserInAPartyAsync(PartyGoer attendee);

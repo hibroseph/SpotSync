@@ -15,138 +15,178 @@ namespace Persistence
     public class PartyRepository : IPartyRepository
     {
         // TODO: implement this as a dictionary for faster lookups
-        private List<Party> _parties;
+        private Dictionary<string, Party> _parties;
 
         public PartyRepository()
         {
-            _parties = new List<Party>();
+            _parties = new Dictionary<string, Party>();
         }
 
-        public void CreateParty(Party item)
+        public void CreateParty(Party party)
         {
-            _parties.Add(item);
-        }
 
-        public bool Exists(Party item)
-        {
-            return _parties.Contains(item);
-        }
-
-        public Party Get(Party item)
-        {
-            return _parties.Find(p => p.GetPartyCode() == item.GetPartyCode());
-        }
-
-        public void Update(Party party)
-        {
-            var parties = _parties.FindAll(p => p.GetPartyCode() == party.GetPartyCode());
-
-            if (parties.Count != 1)
+            if (!_parties.ContainsKey(party.GetPartyCode()))
             {
-                throw new Exception($"There was {parties.Count} returned when searched for a party code{party.GetPartyCode()}");
+                _parties.Add(party.GetPartyCode(), party);
+                return;
             }
 
-            Party partyToBeUpdated = parties.First();
-
-            partyToBeUpdated = party;
+            throw new Exception($"A party with code {party.GetPartyCode()} was attempted to be created but one already existed");
         }
 
-        public Task<Party> GetAsync(PartyCodeDTO partyCode)
+        public void UpdateParty(Party party)
         {
-            return Task.FromResult(_parties.Find(p => p.GetPartyCode().Equals(partyCode.PartyCode, StringComparison.OrdinalIgnoreCase)));
+            if (_parties.ContainsKey(party.GetPartyCode()))
+            {
+                _parties[party.GetPartyCode()] = party;
+                return;
+            }
+
+            throw new Exception("While trying to update an existing party, no party was returned");
         }
 
-        public void Remove(Party item)
+        public Party GetParty(string partyCode)
         {
-            throw new NotImplementedException();
+            if (_parties.ContainsKey(partyCode))
+            {
+                return _parties[partyCode];
+            }
+
+            return null;
         }
 
         public bool IsUserHostingAParty(PartyGoer host)
         {
-            return _parties.Find(p => p.IsHost(host)) != null;
+            foreach (var key in _parties.Keys)
+            {
+                if (_parties[key].IsHost(host))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public Task<Party> GetPartyWithHostAsync(PartyGoer host)
         {
-            return Task.FromResult(_parties.Find(p => p.IsHost(host)));
-        }
-
-        public bool Delete(PartyGoer host)
-        {
-            List<Party> parties = _parties.FindAll(p => p.IsHost(host));
-
-            if (parties.Count > 1)
+            foreach (var key in _parties.Keys)
             {
-                throw new Exception($"Host: {host?.Id} is hosting {parties.Count} parties. A host should only host 1 party at a time.");
+                if (_parties[key].IsHost(host))
+                {
+                    return Task.FromResult(_parties[key]);
+                }
             }
 
-            if (parties == null)
+            return Task.FromResult<Party>(null);
+        }
+
+        public bool DeletePartyWithHost(PartyGoer host)
+        {
+            List<string> partyKeys = new List<string>();
+
+            foreach (var key in _parties.Keys)
+            {
+                if (_parties[key].IsHost(host))
+                {
+                    partyKeys.Add(key);
+                }
+            }
+
+            if (partyKeys.Count > 1)
+            {
+                throw new Exception($"Host: {host?.Id} is hosting {partyKeys.Count} parties. A host should only host 1 party at a time.");
+            }
+
+            if (partyKeys == null)
             {
                 throw new Exception($"Host: {host?.Id} is not hosting a party");
             }
 
-            _parties.Remove(parties.First());
+            _parties.Remove(partyKeys.First());
 
             return true;
         }
 
         public Task<bool> DeleteAsync(string partyCode)
         {
-            _parties.RemoveAll(p => p.GetPartyCode().Equals(partyCode, StringComparison.OrdinalIgnoreCase));
+            if (_parties.ContainsKey(partyCode))
+            {
+                _parties[partyCode].EndParty();
+                _parties.Remove(partyCode);
+            }
 
             return Task.FromResult(true);
         }
 
         public Task<bool> IsUserInAPartyAsync(PartyGoer attendee)
         {
-            return Task.FromResult(_parties.Find(p => p.IsListener(attendee)) != null);
+            foreach (var key in _parties.Keys)
+            {
+                if (_parties[key].IsListener(attendee))
+                {
+                    return Task.FromResult(true);
+                }
+            }
+
+            return Task.FromResult(false);
         }
 
         public Task<Party> GetPartyWithAttendeeAsync(PartyGoer attendee)
         {
-            return Task.FromResult(_parties.Find(p => p.IsListener(attendee)));
+            foreach (var key in _parties.Keys)
+            {
+                if (_parties[key].IsListener(attendee))
+                {
+                    return Task.FromResult(_parties[key]);
+                }
+            }
+
+            return Task.FromResult<Party>(null);
         }
 
         public bool LeaveParty(PartyGoer attendee)
         {
-            List<Party> parties = _parties.FindAll(p => p.IsListener(attendee));
+            List<string> partyKeys = new List<string>();
 
-            if (parties.Count > 1)
+            foreach (var key in _parties.Keys)
             {
-                parties.ForEach(p => p.LeaveParty(attendee));
-
-                throw new PartyGoerWasInMultiplePartiesException($"The user {attendee} was in {parties.Count} but was successfully removed from them");
+                if (_parties[key].IsListener(attendee))
+                {
+                    partyKeys.Add(key);
+                }
             }
 
-            if (parties == null || parties.Count == 0)
+            if (partyKeys.Count > 1)
+            {
+                partyKeys.ForEach(p => _parties[p].LeaveParty(attendee));
+
+                throw new PartyGoerWasInMultiplePartiesException($"The user {attendee} was in {partyKeys.Count} but was successfully removed from them");
+            }
+
+            if (partyKeys == null || partyKeys.Count == 0)
             {
                 throw new Exception($"The attendee: {attendee.Id} is not currently in a party");
             }
 
-            parties.First().LeaveParty(attendee);
+            _parties[partyKeys.First()].LeaveParty(attendee);
 
             return true;
         }
 
         public Task<List<Party>> GetPartiesWithMostListenersAsync(int count)
         {
-            _parties.Sort((r, l) => r.GetListenerCount() > l.GetListenerCount() ? 1 : 0);
+            List<Party> partyList = _parties.Select(p => p.Value).ToList();
+            partyList.Sort((r, l) => r.GetListenerCount() > l.GetListenerCount() ? 1 : 0);
 
-            return Task.FromResult(_parties.Take(count).ToList());
+            return Task.FromResult(partyList.Take(count).ToList());
         }
 
         public Task<Party> GetPartyWithCodeAsync(string partyCode)
         {
-            List<Party> parties = _parties.FindAll(p => p.GetPartyCode().Equals(partyCode, StringComparison.OrdinalIgnoreCase));
-
-            if (parties.Count > 1)
+            if (_parties.ContainsKey(partyCode))
             {
-                throw new Exception($"There is more than 1 party with the same party code of {partyCode}");
-            }
-
-            if (parties.Count == 1)
-            {
-                return Task.FromResult(parties.First());
+                return Task.FromResult(_parties[partyCode]);
             }
 
             return Task.FromResult<Party>(null);
@@ -154,13 +194,13 @@ namespace Persistence
 
         public Task RemoveHostFromPartyAsync(PartyGoer host)
         {
-            _parties.ForEach(p =>
+            foreach (string key in _parties.Keys)
             {
-                if (p.IsHost(host))
+                if (_parties[key].IsHost(host))
                 {
-                    p.LeaveParty(host);
+                    _parties[key].LeaveParty(host);
                 }
-            });
+            }
 
             return Task.CompletedTask;
         }

@@ -59,6 +59,20 @@ namespace SpotSync.Controllers
         }
 
         [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> StartParty()
+        {
+            if (await _partyService.IsUserPartyingAsync(await _partyGoerService.GetCurrentPartyGoerAsync()))
+            {
+                return StatusCode(409);
+            }
+
+            string partyCode = await _partyService.StartPartyAsync();
+
+            return Ok(new { partyCode = partyCode });
+        }
+
+        [Authorize]
         public async Task<IActionResult> TogglePlaybackState(string partyCode)
         {
             try
@@ -302,6 +316,40 @@ namespace SpotSync.Controllers
             {
                 return base.StatusCode(500);
             }
+        }
+
+        [Authorize]
+        public async Task<IActionResult> GetActiveParties()
+        {
+            List<TopPartyModel> topParties = ConvertToTopPartyModels(await _partyService.GetTopPartiesAsync(5));
+
+            return Ok(topParties);
+        }
+
+        private List<TopPartyModel> ConvertToTopPartyModels(List<Party> parties)
+        {
+            List<TopPartyModel> topParties = new List<TopPartyModel>();
+
+            foreach (Party party in parties)
+            {
+                topParties.Add(new TopPartyModel
+                {
+                    PartyCode = party.GetPartyCode(),
+                    ListenerCount = party.GetListenerCount(),
+                    CurrentSong = ConvertToSimpleTrackModel(party.GetCurrentSong())
+                });
+            }
+
+            return topParties;
+        }
+
+        private SimpleTrackModel ConvertToSimpleTrackModel(Track track)
+        {
+            return new SimpleTrackModel
+            {
+                Title = track.Name,
+                Artist = track.Artist
+            };
         }
     }
 }

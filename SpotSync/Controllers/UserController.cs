@@ -25,11 +25,14 @@ namespace SpotSync.Controllers
         private IPartyGoerService _partyGoerService;
         private ILogService _logService;
         private ISpotifyAuthentication _spotifyAuthentication;
-        public UserController(IPartyGoerService partyGoerService, ILogService logService, ISpotifyAuthentication spotifyAuthentication)
+        private IPartyService _partyService;
+
+        public UserController(IPartyGoerService partyGoerService, ILogService logService, ISpotifyAuthentication spotifyAuthentication, IPartyService partyService)
         {
             _partyGoerService = partyGoerService;
             _logService = logService;
             _spotifyAuthentication = spotifyAuthentication;
+            _partyService = partyService;
         }
 
         [HttpGet]
@@ -39,6 +42,24 @@ namespace SpotSync.Controllers
             List<Track> recommendedSongs = await _partyGoerService.GetRecommendedSongsAsync((await _partyGoerService.GetCurrentPartyGoerAsync()).Id);
 
             return new JsonResult(recommendedSongs);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetUserDetails()
+        {
+            PartyGoer currentUser = await _partyGoerService.GetCurrentPartyGoerAsync();
+
+            Party party = await _partyService.GetPartyWithAttendeeAsync(currentUser);
+
+            if (party != null)
+            {
+                return Ok(new { IsInParty = true, Party = new { PartyCode = party.GetPartyCode() }, UserDetails = currentUser });
+            }
+            else
+            {
+                return Ok(new { IsInParty = false, UserDetails = currentUser });
+            }
         }
 
         [HttpGet]
