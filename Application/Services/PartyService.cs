@@ -58,7 +58,7 @@ namespace SpotSync.Application.Services
             {
                 Party party = await _partyRepository.GetPartyWithCodeAsync(request.PartyCode);
 
-                party.AddTrackToQueue(request);
+                await party.AddTrackToQueueAsync(request);
 
                 return true;
             }

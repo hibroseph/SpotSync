@@ -6,9 +6,9 @@ const connectionHub = "/partyhub";
 const getAccessToken = (state) => {
   return state.user.accessToken;
 };
-export const setupPartyHub = setupSignalRConnection(connectionHub, {}, getAccessToken);
+export const setupPartyHub = (dispatch) => setupSignalRConnection(connectionHub, {}, getAccessToken)(dispatch);
 
 export default () => () => {
   const dispatch = useDispatch();
-  dispatch(setupEventsHub); // dispatch is coming from Redux
+  //dispatch(setupEventsHub); // dispatch is coming from Redux
 };

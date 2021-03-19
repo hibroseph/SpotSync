@@ -1,14 +1,16 @@
 import { JsonHubProtocol, HubConnectionState, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
+import { realTimeConnectionEstablished } from "../redux/actions/signalr";
+import { updateQueue, updateHistory } from "../redux/actions/party";
 
-const startSignalRConnection = async (connection) => {
+const startSignalRConnection = async (connection, dispatch) => {
   try {
     await connection.start();
     console.assert(connection.state === HubConnectionState.Connected);
-    console.log("SignalR connection established");
+    dispatch(realTimeConnectionEstablished(connection));
   } catch (err) {
     console.assert(connection.state === HubConnectionState.Disconnected);
     console.error("SignalR Connection Error: ", err);
-    setTimeout(() => startSignalRConnection(connection), 5000);
+    setTimeout(() => startSignalRConnection(connection, dispatch), 5000);
   }
 };
 
@@ -16,7 +18,6 @@ const startSignalRConnection = async (connection) => {
 // actionEventMap should be an object mapping event names, to eventHandlers that will
 // be dispatched with the message body.
 export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAccessToken) => (dispatch, getState) => {
-  console.log("Setting up signalR connection ");
   const options = {
     //accessTokenFactory: () => getAccessToken(getState),
   };
@@ -29,6 +30,8 @@ export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAc
     .withHubProtocol(new JsonHubProtocol())
     .configureLogging(LogLevel.Information)
     .build();
+
+  console.log("dispatch in setupSignalRConnectin", dispatch);
 
   // Note: to keep the connection open the serverTimeout should be
   // larger than the KeepAlive value that is set on the server
@@ -52,9 +55,59 @@ export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAc
     console.log("Connection reestablished. Connected with connectionId", connectionId);
   });
 
-  startSignalRConnection(connection);
+  startSignalRConnection(connection, dispatch);
 
-  connection.on("OnEvent", (res) => {
+  connection.on("UpdateParty", (res) => {
+    console.log("Update party endpoint");
+    console.log(res);
+    //const eventHandler = actionEventMap[res.eventType];
+    //eventHandler && dispatch(eventHandler(res));
+  });
+
+  connection.on("NewListener", (listener) => {
+    console.log("A new listener joined the party " + listener);
+    const eventHandler = actionEventMap[res.eventType];
+    eventHandler && dispatch(eventHandler(res));
+  });
+
+  console.log("registering update party view which is important");
+  connection.on("UpdatePartyView", (res, history, queue) => {
+    console.log("Updating party view");
+    console.log(res);
+    console.log(history);
+    console.log(queue);
+    dispatch(updateQueue(queue));
+    dispatch(updateHistory(history));
+    const eventHandler = actionEventMap[res.eventType];
+    eventHandler && dispatch(eventHandler(res));
+  });
+
+  connection.on("ExplicitSong", (res) => {
+    const eventHandler = actionEventMap[res.eventType];
+    eventHandler && dispatch(eventHandler(res));
+  });
+
+  connection.on("InitializeWebPlayer", (res) => {
+    const eventHandler = actionEventMap[res.eventType];
+    eventHandler && dispatch(eventHandler(res));
+  });
+
+  connection.on("ConnectSpotify", (res) => {
+    const eventHandler = actionEventMap[res.eventType];
+    eventHandler && dispatch(eventHandler(res));
+  });
+
+  connection.on("UserModifiedPlaylist", (res) => {
+    const eventHandler = actionEventMap[res.eventType];
+    eventHandler && dispatch(eventHandler(res));
+  });
+
+  connection.on("UpdateSong", (res) => {
+    const eventHandler = actionEventMap[res.eventType];
+    eventHandler && dispatch(eventHandler(res));
+  });
+
+  connection.on("UpdatePlaylist", (res) => {
     const eventHandler = actionEventMap[res.eventType];
     eventHandler && dispatch(eventHandler(res));
   });

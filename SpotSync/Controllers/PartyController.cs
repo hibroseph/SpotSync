@@ -40,26 +40,6 @@ namespace SpotSync.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> StartParty(BaseModel<DashboardModel> model)
-        {
-            PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-            if (await _partyService.GetPartyWithAttendeeAsync(user) != null)
-            {
-                return RedirectToAction("Index", "Dashboard", new { errorMessage = "Cannot create a party when you are joined in one. You need to leave the party you are currently in" });
-            }
-
-            //List<string> seedTrackUris = model.PageModel.SuggestedSongs.Where(p => p.Selected).Select(p => p.TrackUri).Take(5).ToList();
-
-            //string partyCode = await _partyService.StartPartyWithSeedSongsAsync(seedTrackUris, user);
-
-            string partyCode = await _partyService.StartPartyAsync();
-
-            return RedirectToAction("Index", new { PartyCode = partyCode });
-        }
-
-        [Authorize]
-        [HttpPost]
         public async Task<IActionResult> StartParty()
         {
             if (await _partyService.IsUserPartyingAsync(await _partyGoerService.GetCurrentPartyGoerAsync()))
@@ -267,13 +247,14 @@ namespace SpotSync.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> UpdateQueueForParty([FromBody]PartyCodeDTO partyCode)
+        public async Task<IActionResult> UpdateQueueForParty(string partyCode)
         {
             PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            if (await _partyService.IsUserPartyingAsync(user))
+            Party party = await _partyService.GetPartyWithCodeAsync(partyCode);
+
+            if (party.IsHost(user))
             {
-                Party party = await _partyService.GetPartyWithAttendeeAsync(user);
 
                 await UpdatePlaylistForEveryoneInPartyAsync(party, user);
 
@@ -281,9 +262,8 @@ namespace SpotSync.Controllers
             }
             else
             {
-                return new StatusCodeResult(400);
+                return new StatusCodeResult(401);
             }
-
         }
 
         [Authorize]

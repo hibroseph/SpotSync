@@ -47,7 +47,6 @@ namespace SpotSync.Classes.Hubs
 
             // Add the partier to real-time connection group
             await Groups.AddToGroupAsync(Context.ConnectionId, partyCode);
-            await Clients.Group(partyCode).SendAsync("UpdateParty", $"{Context.UserIdentifier} has joined the party {partyCode}");
             await Clients.Group(partyCode).SendAsync("NewListener", Context.UserIdentifier);
 
             Party party = await _partyService.GetPartyWithAttendeeAsync(partier);

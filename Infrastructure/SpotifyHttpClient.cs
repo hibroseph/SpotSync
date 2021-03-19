@@ -445,13 +445,34 @@ namespace SpotSync.Infrastructure
 
         public async Task<Domain.Errors.ServiceResult<UpdateSongError>> UpdateSongForPartyGoerAsync(PartyGoer partyGoer, List<string> songUris, int currentSongProgressInMs)
         {
-            HttpResponseMessage response = await SendHttpRequestAsync(partyGoer, _apiEndpoints[ApiEndpointType.PlaySong], new ApiParameters
+            string peferred_device_id = _partyGoerSettingsService.GetConfigurationSetting(partyGoer)?.PerferredDeviceId;
+
+            ApiParameters parameters = null;
+
+            if (!string.IsNullOrWhiteSpace(peferred_device_id))
             {
-                Parameters = new Dictionary<string, object>
+                parameters = new ApiParameters
+                {
+                    Parameters = new Dictionary<string, object>
                 {
                     {"device_id", _partyGoerSettingsService.GetConfigurationSetting(partyGoer).PerferredDeviceId }
+
                 }
-            }, new StartUserPlaybackSong { uris = songUris.Select(song => song.Contains("spotify:track:") ? song : $"spotify:track:{song}").ToList(), position_ms = currentSongProgressInMs });
+                };
+            }
+
+            HttpResponseMessage response = null;
+
+            if (parameters != null)
+            {
+                response = await SendHttpRequestAsync(partyGoer, _apiEndpoints[ApiEndpointType.PlaySong], parameters,
+                new StartUserPlaybackSong { uris = songUris.Select(song => song.Contains("spotify:track:") ? song : $"spotify:track:{song}").ToList(), position_ms = currentSongProgressInMs });
+            }
+            else
+            {
+                response = await SendHttpRequestAsync(partyGoer, _apiEndpoints[ApiEndpointType.PlaySong],
+                new StartUserPlaybackSong { uris = songUris.Select(song => song.Contains("spotify:track:") ? song : $"spotify:track:{song}").ToList(), position_ms = currentSongProgressInMs });
+            }
 
             Domain.Errors.ServiceResult<UpdateSongError> error = new Domain.Errors.ServiceResult<UpdateSongError>();
 

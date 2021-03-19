@@ -3,32 +3,57 @@ import Navigation from "./components/navigation/Navigation";
 import MainContent from "./components/main/MainContent";
 import connectToPartyHub, { setupPartyHub } from "./signalR/setupPartyHub";
 import { checkIfAuthenticated } from "./api/authentication";
-import { fetchUserDetails } from "./api/user";
+import { fetchUserDetails, getUserAccessToken } from "./api/user";
 import { connect } from "react-redux";
-import { getUser } from "./redux/reducers/reducers";
-import { JoinOrCreateParty } from "./components/main/JoinOrCreateParty";
+import { getRealtimeConnection, getUser, getPartyCode } from "./redux/reducers/reducers";
+import JoinOrCreateParty from "./components/main/JoinOrCreateParty";
+import { setUpPartyHubApi } from "./api/partyHub";
+import { connectToParty } from "./api/partyHub";
+import { setUpSpotifyWebPlayback } from "./api/spotify";
+
+const setUpProcess = (dispatch) => {
+  checkIfAuthenticated()(dispatch);
+  fetchUserDetails()(dispatch);
+  getUserAccessToken(dispatch);
+  setupPartyHub(dispatch);
+  //connectToPartyHub();
+};
+
+const addSpotifyPlaybackScriptToDom = () => {
+  console.log("adding script to dom");
+  const script = document.createElement("script");
+
+  script.src = "https://sdk.scdn.co/spotify-player.js";
+  script.async = true;
+
+  document.body.appendChild(script);
+};
+
+const checkToSeeIfUserIsInParty = (props) => {
+  console.log("checking to see if user is in party");
+  console.log(props);
+  if (props?.isUserInParty && props.realTimeConnection?.connection && props?.accessToken) {
+    console.log("connecting to party");
+    setUpSpotifyWebPlayback(props.accessToken, props.realTimeConnection.connection);
+    addSpotifyPlaybackScriptToDom();
+    connectToParty(props.partyCode, props.realTimeConnection.connection);
+  }
+};
 
 function App(props) {
-  console.log("The App is starting up");
-  console.log(props);
-
   useEffect(() => {
-    console.log("verify user is authenticated");
-    checkIfAuthenticated()(props.dispatch);
-    fetchUserDetails()(props.dispatch);
-    console.log("Setting up party hub");
-    setupPartyHub();
-    connectToPartyHub();
+    setUpProcess(props.dispatch);
   }, []);
 
   useEffect(() => {
-    console.log("user details has changed");
-    console.log(props);
-  }, props?.userDetails?.isInParty);
+    console.log("connection state or is in party changed");
+
+    checkToSeeIfUserIsInParty(props);
+  }, [props?.isUserInParty, props?.realTimeConnection?.connection]);
 
   return (
     <React.Fragment>
-      {!props?.userDetails?.isInParty && <JoinOrCreateParty></JoinOrCreateParty>}
+      {!props?.isUserInParty && <JoinOrCreateParty></JoinOrCreateParty>}
       <Navigation />
       <MainContent></MainContent>
     </React.Fragment>
@@ -36,7 +61,12 @@ function App(props) {
 }
 
 const mapStateToProps = (state) => {
-  return { userDetails: getUser(state)?.details };
+  return {
+    isUserInParty: getUser(state)?.isInParty,
+    realTimeConnection: getRealtimeConnection(state),
+    partyCode: getPartyCode(state),
+    accessToken: getUser(state)?.accessToken,
+  };
 };
 
 export default connect(mapStateToProps, null)(App);

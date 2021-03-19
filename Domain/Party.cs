@@ -147,7 +147,7 @@ namespace SpotSync.Domain
             _queue.Insert(request.NewTrackIndex, songToBeMoved);
         }
 
-        public void AddTrackToQueue(AddSongToQueueRequest request)
+        public async Task AddTrackToQueueAsync(AddSongToQueueRequest request)
         {
             _queue.Add(new Track
             {
@@ -158,6 +158,13 @@ namespace SpotSync.Domain
                 Name = request.Name,
                 Uri = request.TrackUri
             });
+
+
+            // check to see if music is playing, if not, lets start it
+            if (_currentTrack == null)
+            {
+                await StartQueueAsync();
+            }
         }
 
         public bool IsPartyPlayingMusic()
@@ -200,7 +207,7 @@ namespace SpotSync.Domain
         }
         public bool IsHost(PartyGoer hostInQuestion)
         {
-            return hostInQuestion == _host;
+            return hostInQuestion.Equals(_host);
         }
 
         public bool IsListener(PartyGoer listenerInQuestion)

@@ -1,31 +1,24 @@
 import React from "react";
-import QueueItem from "./QueueItem";
+import QueueItem from "../Queue/QueueItem";
 import { connect } from "react-redux";
 import { getParty } from "../../../redux/reducers/reducers";
 import Button from "../../shared/Button";
 import { generateQueue } from "../../../api/party";
 
-const Queue = (props) => {
-  console.log("queue");
-  console.log(props);
-
-  console.log("queue math");
-
-  console.log(props?.queue?.length > 0);
-
-  return props?.queue?.length > 0 ? (
+const History = (props) => {
+  return props?.history?.length > 0 ? (
     <React.Fragment>
-      {props.queue.map((song) => {
+      {props.history.map((song) => {
         return <QueueItem title={song.name} artist={song.artist}></QueueItem>;
       })}
     </React.Fragment>
   ) : (
     <React.Fragment>
-      <Button onClick={() => generateQueue(props.code)}>Generate Playlist</Button>
+      <p>There currently is no history</p>
     </React.Fragment>
   );
 };
 
 const mapStateToProps = (state) => getParty(state);
 
-export default connect(mapStateToProps, null)(Queue);
+export default connect(mapStateToProps, null)(History);

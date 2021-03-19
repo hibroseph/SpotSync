@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import DiscoverFrame from "../discover/DiscoverFrame";
 import Sidebar from "../sidebar/Sidebar";
+import NowPlaying from "./NowPlaying/NowPlaying";
 
 const $MainContent = styled.div`
   display: flex;
@@ -27,6 +28,7 @@ const MainContent = (props) => {
     <$MainContent>
       <$WideDiscoverFrame></$WideDiscoverFrame>
       <$SidebarWithWidth></$SidebarWithWidth>
+      <NowPlaying></NowPlaying>
     </$MainContent>
   );
 };

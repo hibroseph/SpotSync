@@ -22,7 +22,12 @@ namespace SpotSync.Application.Services
 
         public PartyGoerConfigurationSetting GetConfigurationSetting(PartyGoer partyGoer)
         {
-            return _settings[partyGoer.Id];
+            if (_settings.ContainsKey(partyGoer.Id))
+            {
+                return _settings[partyGoer.Id];
+            }
+
+            return null;
         }
     }
 }

@@ -31,8 +31,6 @@ const $Navigation = styled.nav`
 `;
 
 const Navigation = (props) => {
-  console.log("props in navigation");
-  console.log(props);
   return (
     <$Navigation>
       <div className="left-nav-item">

@@ -1,6 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 import Button from "../shared/Button";
+import { connect } from "react-redux";
+import { createParty } from "../../api/party";
 
 const $greyedOutBackground = styled.div`
   position: absolute;
@@ -21,13 +23,15 @@ const $popup = styled.div`
   padding: 20px;
 `;
 
-export const JoinOrCreateParty = (props) => {
+const JoinOrCreateParty = (props) => {
   return (
     <$greyedOutBackground>
       <$popup>
         Join or Create Party
-        <Button>Create Party</Button>
+        <Button onClick={() => createParty()(props.dispatch)}>Create Party</Button>
       </$popup>
     </$greyedOutBackground>
   );
 };
+
+export default connect(null, null)(JoinOrCreateParty);
