@@ -3,6 +3,11 @@ export const connectToParty = (partyCode, connection) => {
   connection.invoke("ConnectToParty", partyCode);
 };
 
+export const skipSong = (partyCode, connection) => {
+  console.log("user is skipping song");
+  connection.invoke("UserWantsToSkipSong", partyCode);
+};
+
 export const userAddSongToQueue = (song, user, partyCode, connection) => {
   console.log("adding song to queue");
   console.log(song);

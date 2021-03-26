@@ -25,6 +25,8 @@ namespace SpotSync.Domain
         public bool PausedMusic { get; set; }
         public bool Equals([AllowNull] PartyGoer other)
         {
+            if (other == null) return false;
+
             return other.Id.Equals(Id, StringComparison.OrdinalIgnoreCase);
         }
     }

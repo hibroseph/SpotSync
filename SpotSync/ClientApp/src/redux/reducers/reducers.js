@@ -4,11 +4,24 @@ import { IS_AUTHENTICATED, CHECKING_AUTHENTICATION } from "../actions/authentica
 import { UPDATE_USER_DETAILS, UPDATE_USER_ACCESS_TOKEN } from "../actions/user";
 import { AUTHENTICATED, AUTHENTICATION_PENDING, UNAUTHENTICATED } from "../../states/authentication";
 import { CONNECTED, DISCONNECTED } from "../../states/signalr";
-import { PARTY_JOINED, UPDATE_HISTORY, UPDATE_QUEUE, SEARCHED_SPOTIFY, TOGGLE_PLAYBACK } from "../actions/party";
+import { PARTY_JOINED, LEFT_PARTY, UPDATE_HISTORY, UPDATE_QUEUE, SEARCHED_SPOTIFY, TOGGLE_PLAYBACK } from "../actions/party";
 import { REALTIME_CONNECTION_ESTABLISHED } from "../actions/signalr";
 
 export default (state = initalState, action) => {
   switch (action.type) {
+    case LEFT_PARTY: {
+      return Object.assign(
+        {},
+        state,
+        state.user,
+        {
+          user: { details: { isInParty: false } },
+        },
+        state.party,
+        { party: null }
+      );
+    }
+
     case TOGGLE_PLAYBACK: {
       console.log("TOGGLE PLAYBACK");
       return Object.assign({}, state, { user: { details: Object.assign({}, state.user.details, { pausedMusic: !state.user.details.pausedMusic }) } });
@@ -41,7 +54,9 @@ export default (state = initalState, action) => {
     }
 
     case IS_AUTHENTICATED: {
-      return Object.assign({}, state, user, { user: { authentication: AUTHENTICATED, userName: action.userName } });
+      return Object.assign({}, state, state.user, {
+        user: Object.assign({}, { authentication: AUTHENTICATED }, state.user.details),
+      });
     }
 
     case UPDATE_USER_DETAILS: {
@@ -49,7 +64,10 @@ export default (state = initalState, action) => {
         {},
         state,
         {
-          user: { isInParty: action.isInParty, details: action.userDetails },
+          user: {
+            details: Object.assign({}, action.userDetails, { isInParty: action.isInParty }, state.user.details),
+            authentication: state.user.authentication,
+          },
         },
         state.party,
         { party: { code: action.party.partyCode } }
@@ -63,7 +81,8 @@ export default (state = initalState, action) => {
         {
           user: { details: { isInParty: true } },
         },
-        { partyDetails: { partyCode: action.partyCode } }
+        state.party,
+        { party: { code: action.partyCode } }
       );
     }
   }

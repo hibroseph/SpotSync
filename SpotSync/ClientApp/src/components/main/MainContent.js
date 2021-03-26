@@ -2,12 +2,13 @@ import React from "react";
 import styled from "styled-components";
 import DiscoverFrame from "../discover/DiscoverFrame";
 import Sidebar from "../sidebar/Sidebar";
-import NowPlaying from "./NowPlaying/NowPlaying";
 
 const $MainContent = styled.div`
   display: flex;
   width: 100%;
   flex-direction: row;
+  flex: 1 1 auto;
+  overflow-y: auto;
 `;
 
 const $WideDiscoverFrame = styled(DiscoverFrame)`
@@ -28,7 +29,6 @@ const MainContent = (props) => {
     <$MainContent>
       <$WideDiscoverFrame></$WideDiscoverFrame>
       <$SidebarWithWidth></$SidebarWithWidth>
-      <NowPlaying></NowPlaying>
     </$MainContent>
   );
 };

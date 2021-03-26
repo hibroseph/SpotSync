@@ -1,8 +1,15 @@
 export const PARTY_JOINED = "party_joined";
+export const LEFT_PARTY = "left_party";
 export const UPDATE_QUEUE = "update_queue";
 export const UPDATE_HISTORY = "update_history";
 export const SEARCHED_SPOTIFY = "SEARCHED_SPOTIFY";
 export const TOGGLE_PLAYBACK = "toggle_playback";
+
+export const partyLeft = () => {
+  return {
+    type: LEFT_PARTY,
+  };
+};
 
 export const partyJoined = (partyCode) => {
   return {

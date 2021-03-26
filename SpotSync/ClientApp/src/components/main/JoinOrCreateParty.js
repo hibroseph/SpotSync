@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Button from "../shared/Button";
 import { connect } from "react-redux";
 import { createParty } from "../../api/party";
+import { getRealtimeConnection } from "../../redux/reducers/reducers";
 
 const $greyedOutBackground = styled.div`
   position: absolute;
@@ -28,10 +29,14 @@ const JoinOrCreateParty = (props) => {
     <$greyedOutBackground>
       <$popup>
         Join or Create Party
-        <Button onClick={() => createParty()(props.dispatch)}>Create Party</Button>
+        <Button onClick={() => createParty(props.connection)(props.dispatch)}>Create Party</Button>
       </$popup>
     </$greyedOutBackground>
   );
 };
 
-export default connect(null, null)(JoinOrCreateParty);
+const mapStateToProps = (state) => {
+  return { connection: getRealtimeConnection(state).connection };
+};
+
+export default connect(mapStateToProps, null)(JoinOrCreateParty);

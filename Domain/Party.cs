@@ -175,6 +175,11 @@ namespace SpotSync.Domain
         public void JoinParty(PartyGoer partyGoer)
         {
             _listeners.TryAdd(partyGoer.Id, partyGoer);
+
+            if (_listeners.Count == 1)
+            {
+                _host = partyGoer;
+            }
         }
 
         public void LeaveParty(PartyGoer partyGoer)
@@ -183,7 +188,14 @@ namespace SpotSync.Domain
 
             if (IsHost(partyGoer))
             {
-                _host = _listeners.ElementAt(0).Value;
+                if (_listeners.Count > 0)
+                {
+                    _host = _listeners.First().Value;
+                }
+                else
+                {
+                    _host = null;
+                }
             }
 
         }

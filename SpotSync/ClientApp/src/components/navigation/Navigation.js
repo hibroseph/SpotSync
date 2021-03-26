@@ -3,8 +3,22 @@ import LinkButton from "../shared/LinkButton";
 import styled from "styled-components";
 import spotibroLogo from "../../../../wwwroot/assets/logo.svg";
 import { connect } from "react-redux";
-import { getUser } from "../../redux/reducers/reducers";
+import { getUser, getPartyCode } from "../../redux/reducers/reducers";
 import { AUTHENTICATED, UNAUTHENTICATED } from "../../states/authentication";
+import { leaveParty } from "../../api/party";
+
+import Button from "../shared/Button";
+
+const LeavePartyButton = styled(Button)`
+  background-color: #f2b727;
+  color: white;
+  margin-right: 10px;
+
+  &:hover {
+    background-color: #e2b727;
+  }
+`;
+
 const $Navigation = styled.nav`
   padding: 10px 30px;
   box-sizing: border-box;
@@ -13,6 +27,8 @@ const $Navigation = styled.nav`
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  flex: 0 1 auto;
 
   .left-nav-item {
     display: flex;
@@ -39,14 +55,22 @@ const Navigation = (props) => {
           <LinkButton title="Dashboard" link="/dashboard"></LinkButton>
         </div>
       </div>
-      {props.user.authentication == AUTHENTICATED && <LinkButton title="Logout" link="/account/logout"></LinkButton>}
-      {props.user.authentication == UNAUTHENTICATED && <LinkButton title="Login" link="/account/login"></LinkButton>}
+
+      <div>
+        {props?.user?.details?.isInParty && (
+          <LeavePartyButton selected onClick={() => leaveParty(props.partyCode)(props.dispatch)}>
+            Leave Party
+          </LeavePartyButton>
+        )}
+        {props.user.authentication == AUTHENTICATED && <LinkButton title="Logout" link="/account/logout"></LinkButton>}
+        {props.user.authentication == UNAUTHENTICATED && <LinkButton title="Login" link="/account/login"></LinkButton>}
+      </div>
     </$Navigation>
   );
 };
 
 const mapStateToProps = (state) => {
-  return { user: getUser(state) };
+  return { user: getUser(state), partyCode: getPartyCode(state) };
 };
 
 export default connect(mapStateToProps, null)(Navigation);

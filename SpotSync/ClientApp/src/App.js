@@ -10,7 +10,7 @@ import JoinOrCreateParty from "./components/main/JoinOrCreateParty";
 import { setUpPartyHubApi } from "./api/partyHub";
 import { connectToParty } from "./api/partyHub";
 import { setUpSpotifyWebPlayback } from "./api/spotify";
-
+import NowPlaying from "../src/components/main/NowPlaying/NowPlaying";
 const setUpProcess = (dispatch) => {
   checkIfAuthenticated()(dispatch);
   fetchUserDetails()(dispatch);
@@ -56,13 +56,14 @@ function App(props) {
       {!props?.isUserInParty && <JoinOrCreateParty></JoinOrCreateParty>}
       <Navigation />
       <MainContent></MainContent>
+      <NowPlaying></NowPlaying>
     </React.Fragment>
   );
 }
 
 const mapStateToProps = (state) => {
   return {
-    isUserInParty: getUser(state)?.isInParty,
+    isUserInParty: getUser(state)?.details?.isInParty,
     realTimeConnection: getRealtimeConnection(state),
     partyCode: getPartyCode(state),
     accessToken: getUser(state)?.accessToken,
