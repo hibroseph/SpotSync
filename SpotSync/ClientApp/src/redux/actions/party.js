@@ -4,6 +4,7 @@ export const UPDATE_QUEUE = "update_queue";
 export const UPDATE_HISTORY = "update_history";
 export const SEARCHED_SPOTIFY = "SEARCHED_SPOTIFY";
 export const TOGGLE_PLAYBACK = "toggle_playback";
+export const UPDATE_SONG = "update_song";
 
 export const partyLeft = () => {
   return {
@@ -42,5 +43,13 @@ export const saveSpotifySearchResults = (results) => {
 export const togglePlayback = () => {
   return {
     type: TOGGLE_PLAYBACK,
+  };
+};
+
+export const updateSong = (song, position) => {
+  return {
+    type: UPDATE_SONG,
+    position,
+    song,
   };
 };

@@ -9,7 +9,7 @@ const History = (props) => {
   return props?.history?.length > 0 ? (
     <React.Fragment>
       {props.history.map((song) => {
-        return <QueueItem title={song.name} artist={song.artist}></QueueItem>;
+        return <QueueItem key={song.uri} title={song.name} artist={song.artist}></QueueItem>;
       })}
     </React.Fragment>
   ) : (

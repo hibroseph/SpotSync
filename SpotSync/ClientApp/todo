@@ -1,4 +1,7 @@
 This is used to keep track of what is currently an issue and what I am working on.
 
-1. make it a spa, meaning page doesn't scroll (long queue)
+MVP 
+
 2. update queue accordingly as songs are skipped and played next
+3. join any party with party code
+4. refreshes do not actually refresh (joined in party but music doesnt play or queue doesn't load)

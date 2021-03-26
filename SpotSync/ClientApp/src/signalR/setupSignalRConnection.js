@@ -1,6 +1,6 @@
 import { JsonHubProtocol, HubConnectionState, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
 import { realTimeConnectionEstablished } from "../redux/actions/signalr";
-import { updateQueue, updateHistory } from "../redux/actions/party";
+import { updateQueue, updateHistory, updateSong } from "../redux/actions/party";
 
 const startSignalRConnection = async (connection, dispatch) => {
   try {
@@ -57,12 +57,7 @@ export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAc
 
   startSignalRConnection(connection, dispatch);
 
-  connection.on("UpdateParty", (res) => {
-    console.log("Update party endpoint");
-    console.log(res);
-    //const eventHandler = actionEventMap[res.eventType];
-    //eventHandler && dispatch(eventHandler(res));
-  });
+  connection.on("UpdateParty", (res) => {});
 
   connection.on("NewListener", (listener) => {
     console.log("A new listener joined the party " + listener);
@@ -72,10 +67,6 @@ export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAc
 
   console.log("registering update party view which is important");
   connection.on("UpdatePartyView", (res, history, queue) => {
-    console.log("Updating party view");
-    console.log(res);
-    console.log(history);
-    console.log(queue);
     dispatch(updateQueue(queue));
     dispatch(updateHistory(history));
     const eventHandler = actionEventMap[res.eventType];
@@ -102,9 +93,9 @@ export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAc
     eventHandler && dispatch(eventHandler(res));
   });
 
-  connection.on("UpdateSong", (res) => {
-    const eventHandler = actionEventMap[res.eventType];
-    eventHandler && dispatch(eventHandler(res));
+  connection.on("UpdateSong", (updateSongObj) => {
+    console.log("Updating the song bby");
+    dispatch(updateSong(updateSongObj.song, updateSongObj.position));
   });
 
   connection.on("UpdatePlaylist", (res) => {

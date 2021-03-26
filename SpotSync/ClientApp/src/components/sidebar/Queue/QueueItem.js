@@ -30,7 +30,7 @@ const QueueItem = (props) => {
   return (
     <$QueueItem>
       <div>
-        <p class="title">{props.title}</p>
+        <p className="title">{props.title}</p>
         <p>{props.artist}</p>
       </div>
       <Voting vote={props.vote}></Voting>

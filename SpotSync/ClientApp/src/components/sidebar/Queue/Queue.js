@@ -16,7 +16,7 @@ const Queue = (props) => {
   return props?.queue?.length > 0 ? (
     <React.Fragment>
       {props.queue.map((song) => {
-        return <QueueItem title={song.name} artist={song.artist}></QueueItem>;
+        return <QueueItem key={song.uri} title={song.name} artist={song.artist}></QueueItem>;
       })}
     </React.Fragment>
   ) : (

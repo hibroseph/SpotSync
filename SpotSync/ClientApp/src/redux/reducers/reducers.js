@@ -4,7 +4,7 @@ import { IS_AUTHENTICATED, CHECKING_AUTHENTICATION } from "../actions/authentica
 import { UPDATE_USER_DETAILS, UPDATE_USER_ACCESS_TOKEN } from "../actions/user";
 import { AUTHENTICATED, AUTHENTICATION_PENDING, UNAUTHENTICATED } from "../../states/authentication";
 import { CONNECTED, DISCONNECTED } from "../../states/signalr";
-import { PARTY_JOINED, LEFT_PARTY, UPDATE_HISTORY, UPDATE_QUEUE, SEARCHED_SPOTIFY, TOGGLE_PLAYBACK } from "../actions/party";
+import { PARTY_JOINED, LEFT_PARTY, UPDATE_HISTORY, UPDATE_QUEUE, SEARCHED_SPOTIFY, TOGGLE_PLAYBACK, UPDATE_SONG } from "../actions/party";
 import { REALTIME_CONNECTION_ESTABLISHED } from "../actions/signalr";
 
 export default (state = initalState, action) => {
@@ -17,13 +17,37 @@ export default (state = initalState, action) => {
         {
           user: { details: { isInParty: false } },
         },
-        state.party,
         { party: null }
       );
     }
 
+    case UPDATE_SONG: {
+      // move song in now playing to history
+      // remove song that came in action from queue
+      // move song to now playing
+      /*
+      return Object.assign({}, state, {
+        party: Object.assign({}, state.party, { queue: state.party.queue.map((song) => song.uri != action.song.uri) }),
+      });
+      */
+      console.log("updating song");
+
+      let indexOfSongToRemove = state.party.queue.findIndex((song) => song.uri == action.song.uri);
+
+      return Object.assign({}, state, {
+        party: Object.assign(
+          {},
+          state.party,
+          { nowPlaying: action.song },
+          {
+            queue: [...state.party.queue.slice(0, indexOfSongToRemove), ...state.party.queue.slice(indexOfSongToRemove + 1)],
+          },
+          { history: [...state.party.history, state.party.nowPlaying] }
+        ),
+      });
+    }
+
     case TOGGLE_PLAYBACK: {
-      console.log("TOGGLE PLAYBACK");
       return Object.assign({}, state, { user: { details: Object.assign({}, state.user.details, { pausedMusic: !state.user.details.pausedMusic }) } });
     }
 
@@ -36,8 +60,6 @@ export default (state = initalState, action) => {
     }
 
     case UPDATE_QUEUE: {
-      console.log("updating queue");
-      console.log(action.queue);
       return Object.assign({}, state, { party: Object.assign({}, state.party, { queue: action.queue }) });
     }
 
@@ -69,8 +91,7 @@ export default (state = initalState, action) => {
             authentication: state.user.authentication,
           },
         },
-        state.party,
-        { party: { code: action.party.partyCode } }
+        { party: Object.assign({}, { code: action.party.partyCode }, state.party) }
       );
     }
 
@@ -82,7 +103,7 @@ export default (state = initalState, action) => {
           user: { details: { isInParty: true } },
         },
         state.party,
-        { party: { code: action.partyCode } }
+        { party: Object.assign({}, { code: action.partyCode }, state.party) }
       );
     }
   }
@@ -98,5 +119,6 @@ export const getRealtimeConnection = (state) => {
     connection: state.connection,
   };
 };
+export const getCurrentSong = (state) => state?.party?.nowPlaying;
 export const getParty = (state) => state.party;
 export const getSpotifySearchResults = (state) => state.search_results;

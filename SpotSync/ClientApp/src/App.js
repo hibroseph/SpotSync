@@ -20,7 +20,6 @@ const setUpProcess = (dispatch) => {
 };
 
 const addSpotifyPlaybackScriptToDom = () => {
-  console.log("adding script to dom");
   const script = document.createElement("script");
 
   script.src = "https://sdk.scdn.co/spotify-player.js";
@@ -30,10 +29,7 @@ const addSpotifyPlaybackScriptToDom = () => {
 };
 
 const checkToSeeIfUserIsInParty = (props) => {
-  console.log("checking to see if user is in party");
-  console.log(props);
   if (props?.isUserInParty && props.realTimeConnection?.connection && props?.accessToken) {
-    console.log("connecting to party");
     setUpSpotifyWebPlayback(props.accessToken, props.realTimeConnection.connection);
     addSpotifyPlaybackScriptToDom();
     connectToParty(props.partyCode, props.realTimeConnection.connection);
