@@ -1,11 +1,13 @@
 ﻿using Database;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Persistence;
 using SpotSync.Application.Authentication;
 using SpotSync.Application.Services;
 using SpotSync.Classes;
+using SpotSync.Classes.Authorization;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Repositories;
 using SpotSync.Domain.Contracts.Services;
@@ -20,6 +22,7 @@ namespace SpotSync
     {
         public static void AddSpotSyncServices(this IServiceCollection serviceCollection, IConfiguration configuration)
         {
+            serviceCollection.AddTransient<IAuthorizationHandler, DiagnosticsKeyRequirementHandler>();
             serviceCollection.AddSingleton<ISpotifyAuthentication>(new SpotifyAuthentication(configuration["Spotify:ClientId"], configuration["Spotify:ClientSecret"], configuration["Spotify:RedirectUrl"]));
             serviceCollection.AddSingleton<IHttpClient>(new HttpClient());
 
@@ -33,6 +36,8 @@ namespace SpotSync
             serviceCollection.AddSingleton<ILogService, LogService>();
             serviceCollection.AddSingleton<IPartyService, PartyService>();
             serviceCollection.AddSingleton<IAuthenticationService, AuthenticationService>();
+
+            serviceCollection.AddSingleton<IDiagnosticsService, DiagnosticsService>();
 
             serviceCollection.AddSingleton<IHandles<ChangeTrack>, PartyHandler>();
             serviceCollection.AddSingleton<IHandles<PlaylistEnded>, PartyHandler>();

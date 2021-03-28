@@ -24,6 +24,11 @@ namespace SpotSync.Application.Services
             _logService = logService;
         }
 
+        public async Task<List<Party>> GetAllPartiesAsync()
+        {
+            return await _partyRepository.GetAllPartiesAsync();
+        }
+
         public async Task TogglePlaybackStateAsync(string partyCode, PartyGoer partyGoer)
         {
             try
@@ -89,6 +94,11 @@ namespace SpotSync.Application.Services
 
         public async Task<Party> GetPartyWithCodeAsync(string partyCode)
         {
+            if (string.IsNullOrWhiteSpace(partyCode))
+            {
+                return null;
+            }
+
             try
             {
                 return await _partyRepository.GetPartyWithCodeAsync(partyCode);

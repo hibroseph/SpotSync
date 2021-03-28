@@ -17,6 +17,11 @@ namespace Persistence
         // TODO: implement this as a dictionary for faster lookups
         private Dictionary<string, Party> _parties;
 
+        public Task<List<Party>> GetAllPartiesAsync()
+        {
+            return Task.FromResult(_parties.Select(pair => pair.Value).ToList());
+        }
+
         public PartyRepository()
         {
             _parties = new Dictionary<string, Party>();

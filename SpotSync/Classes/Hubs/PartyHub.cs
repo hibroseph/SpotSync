@@ -52,14 +52,19 @@ namespace SpotSync.Classes.Hubs
             Party party = await _partyService.GetPartyWithAttendeeAsync(partier);
 
             // Update the view of the partier to the current playlist
-            await Clients.Client(Context.ConnectionId).SendAsync("UpdatePartyView",
+            await Clients.Client(Context.ConnectionId).SendAsync("InitialPartyLoad",
             new
             {
                 Song = party.GetCurrentSong(),
                 Position = party.GetCurrentPositionInSong()
             },
             party.GetHistory(),
-            party.GetQueue()
+            party.GetQueue(),
+            new
+            {
+                PartyCode = party.GetPartyCode(),
+                Listeners = party.GetListeners()
+            }
             );
 
             // check for explicit music

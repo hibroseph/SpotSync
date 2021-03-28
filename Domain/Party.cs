@@ -36,6 +36,20 @@ namespace SpotSync.Domain
             _usersThatHaveRequestedSkip = new List<PartyGoer>();
         }
 
+        public PartyDiagnostics GetDiagnostics()
+        {
+            return new PartyDiagnostics
+            {
+                Host = _host,
+                Listeners = _listeners.Select(pair => pair.Value).ToList(),
+                PartyCode = _partyCode,
+                Queue = _queue,
+                History = _history,
+                CurrentTrack = _currentTrack,
+                UsersThatHaveRequestedSkip = _usersThatHaveRequestedSkip
+            };
+        }
+
         public void EndParty()
         {
             _nextTrackTimer = null;

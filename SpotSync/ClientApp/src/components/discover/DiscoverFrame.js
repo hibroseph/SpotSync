@@ -13,8 +13,6 @@ const $SearchResults = styled.div`
 `;
 
 const DiscoverFrame = (props) => {
-  console.log("discoverFrame");
-  console.log(props);
   return (
     <$DiscoverFrame className={props.className}>
       <Header>Discover</Header>

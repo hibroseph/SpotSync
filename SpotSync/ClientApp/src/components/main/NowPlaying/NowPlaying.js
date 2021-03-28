@@ -6,6 +6,7 @@ import { connect } from "react-redux";
 import { getUser, getPartyCode, getRealtimeConnection, getCurrentSong } from "../../../redux/reducers/reducers";
 import { togglePlaybackState } from "../../../api/party";
 import { skipSong } from "../../../api/partyHub";
+import Loader from "../../shared/Loader";
 
 const $NowPlaying = styled.div`
   box-sizing: border-box;
@@ -22,7 +23,9 @@ const $NowPlaying = styled.div`
 
 const $SongManagement = styled.div`
   display: flex;
+  flex: 1;
   align-items: center;
+  justify-content: center;
 `;
 
 const $PlayFontAwesomeIcon = styled(FontAwesomeIcon)`
@@ -43,6 +46,8 @@ const $SkipFontAwesomeIcon = styled(FontAwesomeIcon)`
 
 const $NowPlayingSong = styled.div`
   display: flex;
+  margin-right: auto;
+  flex: 1;
 
   .song-information {
     display: flex;
@@ -64,11 +69,16 @@ const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong }) => {
   return (
     <$NowPlaying>
       <$NowPlayingSong>
-        <img src={currentSong?.albumImageUrl} />
-        <div class="song-information">
-          <p>{currentSong?.name}</p>
-          <p>{currentSong?.artist}</p>
-        </div>
+        {currentSong && (
+          <React.Fragment>
+            <img src={currentSong?.albumImageUrl} />
+            <div className="song-information">
+              <p>{currentSong?.name}</p>
+              <p>{currentSong?.artist}</p>
+            </div>
+          </React.Fragment>
+        )}
+        {!currentSong && <Loader width={50} height={50}></Loader>}
       </$NowPlayingSong>
       <$SongManagement>
         {user?.details?.pausedMusic ? (
@@ -78,7 +88,7 @@ const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong }) => {
         )}
         <$SkipFontAwesomeIcon icon={faStepForward} onClick={() => skipSong(partyCode, connection)}></$SkipFontAwesomeIcon>
       </$SongManagement>
-      <div></div>
+      <div style={{ marginRight: "auto", flex: "1" }}></div>
     </$NowPlaying>
   );
 };

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SpotSync.Classes.Authorization;
 using SpotSync.Classes.Hubs;
 using SpotSync.Classes.Middleware;
 using SpotSync.Domain.Contracts.Services;
@@ -29,6 +30,13 @@ namespace SpotSync
             services.AddControllersWithViews();
             services.AddSpotSyncServices(Configuration);
             services.AddSpotSyncAuthentication();
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("DiagnosticsPolicy", policyBuilder =>
+                {
+                    policyBuilder.AddRequirements(new DiagnosticsKeyRequirement(Configuration["DiagnosticsApiKey"]));
+                });
+            });
             services.AddSignalR();
         }
 
@@ -55,9 +63,7 @@ namespace SpotSync
             app.UseStaticFiles();
 
             app.UseRouting();
-
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

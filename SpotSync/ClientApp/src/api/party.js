@@ -1,13 +1,28 @@
 import { partyJoined, partyLeft, togglePlayback } from "../redux/actions/party";
-import { connectToParty } from "./partyHub";
+import { connectToParty, userAddSongToQueue } from "./partyHub";
 import { saveSpotifySearchResults } from "../redux/actions/party";
-import { userAddSongToQueue } from "./partyHub";
 
 export const leaveParty = (partyCode) => {
   console.log("leaving party");
   return (dispatch) => {
     fetch(`/party/leaveparty?partyCode=${partyCode}`).then((res) => dispatch(partyLeft()));
   };
+};
+
+export const joinParty = (partyCode, connection) => {
+  return fetch(`/party/joinparty?partyCode=${partyCode}`)
+    .then((res) => res.json())
+    .then((json) => {
+      console.log(json);
+      if (json.succeeded == true) {
+        connectToParty(partyCode, connection);
+        return { succeeded: true };
+      } else {
+        if (json.message != undefined) {
+          return { succeeded: false, message: json.message };
+        }
+      }
+    });
 };
 
 export const createParty = (connection) => {

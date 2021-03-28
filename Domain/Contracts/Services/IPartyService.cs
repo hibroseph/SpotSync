@@ -28,5 +28,6 @@ namespace SpotSync.Domain.Contracts
         Task<string> StartPartyAsync();
         Task UserWantsToSkipSong(PartyGoer partyGoer, string partyCode);
         Task TogglePlaybackStateAsync(string partyCode, PartyGoer listener);
+        Task<List<Party>> GetAllPartiesAsync();
     }
 }

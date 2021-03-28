@@ -65,9 +65,15 @@ namespace SpotSync.Application.Services
             }
         }
 
+        /// <summary>
+        /// Accesses the current party goer. If no party goer is associated with the current session, null is returned
+        /// </summary>
+        /// <returns>A party goer, if unauthenticated, null</returns>
         public async Task<PartyGoer> GetCurrentPartyGoerAsync()
         {
             string partyGoerId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            if (string.IsNullOrWhiteSpace(partyGoerId)) return null;
 
             if (_partyGoerCache.ContainsKey(partyGoerId))
             {

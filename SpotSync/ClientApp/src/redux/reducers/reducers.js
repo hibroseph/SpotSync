@@ -13,9 +13,8 @@ export default (state = initalState, action) => {
       return Object.assign(
         {},
         state,
-        state.user,
         {
-          user: { details: { isInParty: false } },
+          user: Object.assign({}, state.user, { details: Object.assign({}, state.user.details, { isInParty: false }) }),
         },
         { party: null }
       );
@@ -33,7 +32,6 @@ export default (state = initalState, action) => {
       console.log("updating song");
 
       let indexOfSongToRemove = state.party.queue.findIndex((song) => song.uri == action.song.uri);
-
       return Object.assign({}, state, {
         party: Object.assign(
           {},
@@ -76,33 +74,38 @@ export default (state = initalState, action) => {
     }
 
     case IS_AUTHENTICATED: {
-      return Object.assign({}, state, state.user, {
-        user: Object.assign({}, { authentication: AUTHENTICATED }, state.user.details),
+      console.log("updating is authenticated");
+      return Object.assign({}, state, {
+        user: Object.assign({}, state.user, { authentication: AUTHENTICATED }),
       });
     }
 
     case UPDATE_USER_DETAILS: {
+      console.log("UPDATING USER DETAILS");
       return Object.assign(
         {},
         state,
         {
-          user: {
-            details: Object.assign({}, action.userDetails, { isInParty: action.isInParty }, state.user.details),
-            authentication: state.user.authentication,
-          },
+          user: Object.assign(
+            {},
+            {
+              details: Object.assign({}, action.userDetails, { isInParty: action.isInParty }, state.user.details),
+            },
+            state.user
+          ),
         },
         { party: Object.assign({}, { code: action.party.partyCode }, state.party) }
       );
     }
 
     case PARTY_JOINED: {
+      console.log("PARTY JOINED");
       return Object.assign(
         {},
         state,
         {
-          user: { details: { isInParty: true } },
+          user: Object.assign({}, state.user, { details: Object.assign({}, state.user.details, { isInParty: true }) }),
         },
-        state.party,
         { party: Object.assign({}, { code: action.partyCode }, state.party) }
       );
     }

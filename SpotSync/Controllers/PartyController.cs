@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using SpotSync.Classes.Hubs;
+using SpotSync.Classes.Responses.Common;
+using SpotSync.Classes.Responses.Party;
 using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
@@ -121,42 +123,51 @@ namespace SpotSync.Controllers
             };
         }
 
-        [Authorize]
+        /// <summary>
+        /// This endpoint is allowed to be accessed if you are not authenticated. If you are not authenticated, then you will be redirected to login
+        /// </summary>
+        /// <param name="partyCode"></param>
+        /// <returns></returns>
         public async Task<IActionResult> JoinParty(string partyCode)
         {
+            PartyGoer user = await _partyGoerService.GetCurrentPartyGoerAsync();
 
-            PartyCodeDTO partyCodeDto = new PartyCodeDTO
+            if (user == null)
             {
-                PartyCode = partyCode
-            };
+                return new JsonResult(new Result(false, "User is not authenticated"));
+            }
 
-            PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            if (partyCodeDto == null)
+            Party party = await _partyService.GetPartyWithCodeAsync(partyCode);
+
+            if (party == null)
             {
-                await _logService.LogUserActivityAsync(user.Id, $"Failed to join party with null party code");
-                return RedirectToAction("Index", "Dashboard");
+                await _logService.LogUserActivityAsync(user.Id, $"Failed to join party, party code did was not a valid party: {partyCode}");
+
+                return new JsonResult(new Result(false, "Party code was not valid"));
             }
 
             if (await _partyService.IsUserPartyingAsync(user))
             {
                 // User can only join 1 party at a time
-                return RedirectToAction("Index", "Dashboard", new { ErrorMessage = "You cannot join 2 parties. You must leave the first to join another" });
+                return new JsonResult(new Result(false, "You cannot join 2 parties. You must leave the first to join another"));
             }
 
-            if (await _partyService.JoinPartyAsync(partyCodeDto, user))
+            try
             {
-                //await _partyService.SyncUserWithSongAsync(user);
-                await _logService.LogUserActivityAsync(user.Id, $"Joined a party with code {partyCodeDto.PartyCode}");
+                party.JoinParty(user);
 
-                return RedirectToAction("Index", "Party", new { PartyCode = partyCode });
+                await _logService.LogUserActivityAsync(user.Id, $"Joined a party with code {partyCode}");
+
+                return new JsonResult(new Result<JoinedParty>(new JoinedParty { PartyCode = partyCode, SuccessfullyJoinedParty = true }));
+
             }
-            else
+            catch (Exception ex)
             {
-                await _logService.LogUserActivityAsync(user.Id, $"Failed to join party with code {partyCodeDto.PartyCode}");
-
-                return RedirectToAction("Index", "Dashboard", new { ErrorMessage = $"A party does not exist with the party code {partyCode}" });
+                await _logService.LogExceptionAsync(ex, $"{user.Id} failed to join party {partyCode}");
             }
+
+            return new JsonResult(new Result(false, "An error occurred while trying to join party"));
         }
 
         [Authorize]

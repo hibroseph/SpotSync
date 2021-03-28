@@ -1,6 +1,6 @@
 import { JsonHubProtocol, HubConnectionState, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
 import { realTimeConnectionEstablished } from "../redux/actions/signalr";
-import { updateQueue, updateHistory, updateSong } from "../redux/actions/party";
+import { updateQueue, updateHistory, updateSong, partyJoined } from "../redux/actions/party";
 
 const startSignalRConnection = async (connection, dispatch) => {
   try {
@@ -30,8 +30,6 @@ export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAc
     .withHubProtocol(new JsonHubProtocol())
     .configureLogging(LogLevel.Information)
     .build();
-
-  console.log("dispatch in setupSignalRConnectin", dispatch);
 
   // Note: to keep the connection open the serverTimeout should be
   // larger than the KeepAlive value that is set on the server
@@ -65,12 +63,10 @@ export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAc
     eventHandler && dispatch(eventHandler(res));
   });
 
-  console.log("registering update party view which is important");
-  connection.on("UpdatePartyView", (res, history, queue) => {
+  connection.on("InitialPartyLoad", (res, history, queue, details) => {
     dispatch(updateQueue(queue));
     dispatch(updateHistory(history));
-    const eventHandler = actionEventMap[res.eventType];
-    eventHandler && dispatch(eventHandler(res));
+    dispatch(partyJoined(details.partyCode));
   });
 
   connection.on("ExplicitSong", (res) => {
@@ -94,7 +90,6 @@ export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAc
   });
 
   connection.on("UpdateSong", (updateSongObj) => {
-    console.log("Updating the song bby");
     dispatch(updateSong(updateSongObj.song, updateSongObj.position));
   });
 

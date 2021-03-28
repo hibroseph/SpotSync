@@ -6,13 +6,6 @@ import Button from "../../shared/Button";
 import { generateQueue } from "../../../api/party";
 
 const Queue = (props) => {
-  console.log("queue");
-  console.log(props);
-
-  console.log("queue math");
-
-  console.log(props?.queue?.length > 0);
-
   return props?.queue?.length > 0 ? (
     <React.Fragment>
       {props.queue.map((song) => {

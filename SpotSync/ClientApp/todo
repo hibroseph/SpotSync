@@ -2,6 +2,5 @@ This is used to keep track of what is currently an issue and what I am working o
 
 MVP 
 
-2. update queue accordingly as songs are skipped and played next
-3. join any party with party code
-4. refreshes do not actually refresh (joined in party but music doesnt play or queue doesn't load)
+5. ISSUE: Initial playlist generated queue is not correct (UpdateSong gets called before the queue is loaded. History is broken)
+6. POSSIBLE ISSUE: If spotify is open and playing music, music will play out of that source first (maybe not issue)
