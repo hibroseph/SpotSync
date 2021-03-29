@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { searchSpotify } from "../../api/party";
+import { searchSpotify } from "../../../api/party";
 import { connect } from "react-redux";
 
 export const $SearchInput = styled.input`
@@ -15,12 +15,15 @@ export const $SearchInput = styled.input`
 }
 `;
 
-const onSearch = (event, dispatch) => {
-  searchSpotify(event.target.value, dispatch);
+const onSearch = (event, dispatch, setIsLoading) => {
+  if (event.target.value != "") {
+    setIsLoading(true);
+    searchSpotify(event.target.value, dispatch);
+  }
 };
 
 const SearchInput = (props) => {
-  return <$SearchInput placeholder={props.placeholder} onInput={(event) => onSearch(event, props.dispatch)}></$SearchInput>;
+  return <$SearchInput placeholder={props.placeholder} onInput={(event) => onSearch(event, props.dispatch, props.setIsLoading)}></$SearchInput>;
 };
 
 export default connect(null, null)(SearchInput);

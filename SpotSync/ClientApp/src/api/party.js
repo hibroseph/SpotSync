@@ -68,3 +68,15 @@ export const addSongToQueue = (song, user, partyCode, connection) => {
 export const togglePlaybackState = (partyCode, dispatch) => {
   fetch(`/party/TogglePlaybackState?partyCode=${partyCode}`).then((res) => dispatch(togglePlayback()));
 };
+
+export const getUserLikesDislikes = (partyCode) => {
+  return fetch(`/api/party/UsersLikesDislikes?partyCode=${partyCode}`)
+    .then((res) => res.json())
+    .then((json) => {
+      console.log("in user likes api");
+      console.log(json);
+      if (json.succeeded) {
+        return json.content;
+      }
+    });
+};

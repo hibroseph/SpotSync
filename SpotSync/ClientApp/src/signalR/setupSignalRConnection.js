@@ -1,6 +1,6 @@
 import { JsonHubProtocol, HubConnectionState, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
 import { realTimeConnectionEstablished } from "../redux/actions/signalr";
-import { updateQueue, updateHistory, updateSong, partyJoined } from "../redux/actions/party";
+import { updateQueue, updateHistory, updateSong, partyJoined, updateCurrentSong } from "../redux/actions/party";
 
 const startSignalRConnection = async (connection, dispatch) => {
   try {
@@ -67,6 +67,12 @@ export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAc
     dispatch(updateQueue(queue));
     dispatch(updateHistory(history));
     dispatch(partyJoined(details.partyCode));
+  });
+
+  connection.on("UpdatePartyView", (currentSong, history, queue) => {
+    dispatch(updateQueue(queue));
+    dispatch(updateHistory(history));
+    dispatch(updateCurrentSong(currentSong.song));
   });
 
   connection.on("ExplicitSong", (res) => {

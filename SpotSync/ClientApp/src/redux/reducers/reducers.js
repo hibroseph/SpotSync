@@ -4,11 +4,24 @@ import { IS_AUTHENTICATED, CHECKING_AUTHENTICATION } from "../actions/authentica
 import { UPDATE_USER_DETAILS, UPDATE_USER_ACCESS_TOKEN } from "../actions/user";
 import { AUTHENTICATED, AUTHENTICATION_PENDING, UNAUTHENTICATED } from "../../states/authentication";
 import { CONNECTED, DISCONNECTED } from "../../states/signalr";
-import { PARTY_JOINED, LEFT_PARTY, UPDATE_HISTORY, UPDATE_QUEUE, SEARCHED_SPOTIFY, TOGGLE_PLAYBACK, UPDATE_SONG } from "../actions/party";
+import {
+  PARTY_JOINED,
+  LEFT_PARTY,
+  UPDATE_HISTORY,
+  UPDATE_QUEUE,
+  SEARCHED_SPOTIFY,
+  TOGGLE_PLAYBACK,
+  UPDATE_SONG,
+  UPDATE_CURRENT_SONG,
+} from "../actions/party";
 import { REALTIME_CONNECTION_ESTABLISHED } from "../actions/signalr";
 
 export default (state = initalState, action) => {
   switch (action.type) {
+    case UPDATE_CURRENT_SONG: {
+      return Object.assign({}, state, { nowPlaying: action.track });
+    }
+
     case LEFT_PARTY: {
       return Object.assign(
         {},
@@ -32,13 +45,18 @@ export default (state = initalState, action) => {
       console.log("updating song");
 
       let indexOfSongToRemove = state.party.queue.findIndex((song) => song.uri == action.song.uri);
+
+      console.log("index of the song to remove " + indexOfSongToRemove);
       return Object.assign({}, state, {
         party: Object.assign(
           {},
           state.party,
           { nowPlaying: action.song },
           {
-            queue: [...state.party.queue.slice(0, indexOfSongToRemove), ...state.party.queue.slice(indexOfSongToRemove + 1)],
+            queue:
+              indexOfSongToRemove == -1
+                ? state.party.queue
+                : [...state.party.queue.slice(0, indexOfSongToRemove), ...state.party.queue.slice(indexOfSongToRemove + 1)],
           },
           { history: [...state.party.history, state.party.nowPlaying] }
         ),
@@ -58,6 +76,8 @@ export default (state = initalState, action) => {
     }
 
     case UPDATE_QUEUE: {
+      console.log("queue before updating");
+      console.log(state.party.queue);
       return Object.assign({}, state, { party: Object.assign({}, state.party, { queue: action.queue }) });
     }
 

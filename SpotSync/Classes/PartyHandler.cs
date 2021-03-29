@@ -83,7 +83,7 @@ namespace SpotSync.Classes
                 return;
             }
 
-            List<Track> playlistSongs = await GenerateNewPlaylist(party);
+            List<Track> playlistSongs = await GenerateNewPlaylist(party, args.LikedTracksUris);
 
             await party.AddNewQueueAsync(playlistSongs);
 
@@ -98,23 +98,17 @@ namespace SpotSync.Classes
             );
         }
 
-        private async Task<List<Track>> GenerateNewPlaylist(Party party)
+        private async Task<List<Track>> GenerateNewPlaylist(Party party, List<string> recommendedTrackUris)
         {
-            if (party.GetHistory().Count > 0)
+            if (recommendedTrackUris.Count > 0)
             {
-                return await _spotifyHttpClient.GetRecommendedSongsAsync(party.GetListeners().ElementAt(0).Id, party.GetHistory().ToList().GetRandomNItems(5).Select(p => p.Uri).ToList(), 0);
+                return await _spotifyHttpClient.GetRecommendedSongsAsync(party.GetHost().Id, recommendedTrackUris, 0);
             }
             else
             {
-                List<Track> songs = new List<Track>();
-
-                foreach (PartyGoer listener in party.GetListeners())
-                {
-                    songs.AddRange(await _partyGoerService.GetRecommendedSongsAsync(listener.Id, 2));
-                }
-
-                return await _spotifyHttpClient.GetRecommendedSongsAsync(party.GetListeners().ElementAt(0).Id, songs.GetRandomNItems(5).Select(p => p.Uri).ToList(), 0);
+                return await _spotifyHttpClient.GetRecommendedSongsAsync(party.GetHost().Id, (await _partyGoerService.GetRecommendedSongsAsync(party.GetHost().Id, 2)).Select(track => track.Uri).ToList(), 0);
             }
+
         }
     }
 }

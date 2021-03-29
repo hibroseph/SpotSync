@@ -35,6 +35,23 @@ namespace SpotSync.Classes.Hubs
             _partyGoerSettingsService = partyGoerSettingsService;
         }
 
+        public async Task LikeSong(string partyCode, string trackUri)
+        {
+            Party party = await _partyService.GetPartyWithCodeAsync(partyCode);
+            PartyGoer user = await _partyGoerService.GetCurrentPartyGoerAsync();
+
+            party.UserLikesSong(user, trackUri);
+        }
+
+        public async Task DislikeSong(string partyCode, string trackUri)
+        {
+
+            Party party = await _partyService.GetPartyWithCodeAsync(partyCode);
+            PartyGoer user = await _partyGoerService.GetCurrentPartyGoerAsync();
+
+            party.UserDislikesSong(user, trackUri);
+        }
+
         public async Task ConnectToParty(string partyCode)
         {
             PartyGoer partier = await _partyGoerService.GetCurrentPartyGoerAsync();

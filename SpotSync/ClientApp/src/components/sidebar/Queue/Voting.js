@@ -11,14 +11,20 @@ const $Voting = styled.div`
   align-items: center;
 `;
 
+const $StyledFontAwesomeIcon = styled(FontAwesomeIcon)`
+  &:hover {
+    transform: scale(1.2);
+  }
+`;
+
 const Voting = (props) => {
   const DeterminedVotingIcon = (type) => {};
 
   const DetermineVotingIcons = () => {
     return (
       <React.Fragment>
-        <FontAwesomeIcon icon={props?.vote == 1 ? fasThumbsUp : faThumbsUp}></FontAwesomeIcon>
-        <FontAwesomeIcon icon={props?.vote == 0 ? fasThumbsDown : faThumbsDown}></FontAwesomeIcon>
+        <$StyledFontAwesomeIcon onClick={() => props.onLike()} icon={props?.feeling == 1 ? fasThumbsUp : faThumbsUp}></$StyledFontAwesomeIcon>
+        <$StyledFontAwesomeIcon onClick={() => props.onDislike()} icon={props?.feeling == 0 ? fasThumbsDown : faThumbsDown}></$StyledFontAwesomeIcon>
       </React.Fragment>
     );
   };

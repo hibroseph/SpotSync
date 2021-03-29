@@ -55,6 +55,33 @@ namespace SpotSync.Controllers
         }
 
         [Authorize]
+        [HttpGet("api/[controller]/UsersLikesDislikes")]
+        public async Task<IActionResult> GetUsersLikesDislikes(string partyCode)
+        {
+            try
+            {
+                Party party = await _partyService.GetPartyWithCodeAsync(partyCode);
+                PartyGoer user = await _partyGoerService.GetCurrentPartyGoerAsync();
+
+                return new JsonResult(new Result<LikedDislikedSongs>(ConvertUsersLikedDislikesToDto(party.GetUsersLikesDislikes(user))));
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, "Error occurred while trying to get users likes and dislikes");
+                return new JsonResult(new Result(false, "Unable to get your liked and disliked songs"));
+            }
+        }
+
+        private LikedDislikedSongs ConvertUsersLikedDislikesToDto(LikesDislikes likedDislikedSongs)
+        {
+            return new LikedDislikedSongs
+            {
+                LikedSongs = likedDislikedSongs.GetLikedSongs(),
+                DislikedSongs = likedDislikedSongs.GetDislikedSongs()
+            };
+        }
+
+        [Authorize]
         public async Task<IActionResult> TogglePlaybackState(string partyCode)
         {
             try
@@ -284,15 +311,9 @@ namespace SpotSync.Controllers
             return View();
         }
 
-        private List<Track> CleansePlaylist(List<Track> playlist)
-        {
-            var newPlaylist = playlist.ToList();
-            return newPlaylist.Select(song => { song.Uri = song.Uri.Substring(14); return song; }).ToList();
-        }
-
         private async Task UpdatePlaylistForEveryoneInPartyAsync(Party party, PartyGoer partyGoer)
         {
-            await DomainEvents.RaiseAsync(new PlaylistEnded { PartyCode = party.GetPartyCode() });
+            await DomainEvents.RaiseAsync(new PlaylistEnded { PartyCode = party.GetPartyCode(), LikedTracksUris = party.GetLikedTracksUris(5) });
         }
 
         private async Task<IActionResult> UpdateCurrentSongForEveryoneInPartyAsync(Party party, PartyGoer partyGoer)

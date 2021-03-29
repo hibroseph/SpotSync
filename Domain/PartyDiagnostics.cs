@@ -14,5 +14,6 @@ namespace SpotSync.Domain
         public Track CurrentTrack { get; set; }
 
         public List<PartyGoer> UsersThatHaveRequestedSkip { get; set; }
+        public List<string> LikedSongs { get; set; }
     }
 }

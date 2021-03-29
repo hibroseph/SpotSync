@@ -33,7 +33,7 @@ const QueueItem = (props) => {
         <p className="title">{props.title}</p>
         <p>{props.artist}</p>
       </div>
-      <Voting vote={props.vote}></Voting>
+      <Voting feeling={props.feeling} onDislike={props.onDislike} onLike={props.onLike} vote={props.vote}></Voting>
     </$QueueItem>
   );
 };

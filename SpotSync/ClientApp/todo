@@ -4,3 +4,4 @@ MVP
 
 5. ISSUE: Initial playlist generated queue is not correct (UpdateSong gets called before the queue is loaded. History is broken)
 6. POSSIBLE ISSUE: If spotify is open and playing music, music will play out of that source first (maybe not issue)
+7. Adding song to queue from seach doesn't show in the queue (but it is there)

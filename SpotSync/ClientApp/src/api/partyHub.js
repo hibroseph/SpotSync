@@ -23,3 +23,11 @@ export const userAddSongToQueue = (song, user, partyCode, connection) => {
     Explicit: song.explicit,
   });
 };
+
+export const userLikesSong = (partyCode, trackUri, connection) => {
+  connection.invoke("LikeSong", partyCode, trackUri);
+};
+
+export const userDislikesSong = (partyCode, trackUri, connection) => {
+  connection.invoke("DislikeSong", partyCode, trackUri);
+};

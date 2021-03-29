@@ -1,6 +1,7 @@
 ﻿using SpotSync.Domain.Events;
 using SpotSync.Domain.Types;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -23,6 +24,8 @@ namespace SpotSync.Domain
         private Stopwatch _trackPositionTime;
         private Timer _nextTrackTimer;
         private List<PartyGoer> _usersThatHaveRequestedSkip;
+        private Dictionary<string, LikesDislikes> _usersLikesAndDislikes;
+        private List<string> _likedSongs;
 
         public Party(PartyGoer host)
         {
@@ -34,6 +37,25 @@ namespace SpotSync.Domain
             _history = new List<Track>();
             _nextTrackTimer = new Timer(async (obj) => await NextTrackAsync());
             _usersThatHaveRequestedSkip = new List<PartyGoer>();
+            _usersLikesAndDislikes = new Dictionary<string, LikesDislikes>();
+            _likedSongs = new List<string>();
+        }
+
+        public LikesDislikes GetUsersLikesDislikes(PartyGoer partyGoer)
+        {
+            if (_usersLikesAndDislikes.ContainsKey(partyGoer.Id))
+            {
+                return _usersLikesAndDislikes[partyGoer.Id];
+            }
+            else
+            {
+                return new LikesDislikes();
+            }
+        }
+
+        public PartyGoer GetHost()
+        {
+            return _host;
         }
 
         public PartyDiagnostics GetDiagnostics()
@@ -46,8 +68,42 @@ namespace SpotSync.Domain
                 Queue = _queue,
                 History = _history,
                 CurrentTrack = _currentTrack,
-                UsersThatHaveRequestedSkip = _usersThatHaveRequestedSkip
+                UsersThatHaveRequestedSkip = _usersThatHaveRequestedSkip,
+                LikedSongs = _likedSongs
             };
+        }
+
+        public void UserLikesSong(PartyGoer partyGoer, string trackUri)
+        {
+            if (_usersLikesAndDislikes.ContainsKey(partyGoer.Id))
+            {
+                _usersLikesAndDislikes[partyGoer.Id].LikeSong(trackUri);
+            }
+            else
+            {
+                _usersLikesAndDislikes[partyGoer.Id] = new LikesDislikes();
+                _usersLikesAndDislikes[partyGoer.Id].LikeSong(trackUri);
+            }
+
+            _likedSongs.Add(trackUri);
+        }
+
+        public void UserDislikesSong(PartyGoer partyGoer, string trackUri)
+        {
+            if (_usersLikesAndDislikes.ContainsKey(partyGoer.Id))
+            {
+                _usersLikesAndDislikes[partyGoer.Id].DislikeSong(trackUri);
+            }
+            else
+            {
+                _usersLikesAndDislikes[partyGoer.Id] = new LikesDislikes();
+                _usersLikesAndDislikes[partyGoer.Id].DislikeSong(trackUri);
+            }
+
+            if (_likedSongs.Contains(trackUri))
+            {
+                _likedSongs.Remove(trackUri);
+            }
         }
 
         public void EndParty()
@@ -92,15 +148,16 @@ namespace SpotSync.Domain
         {
             if (_queue.Count > 0)
             {
-                _history.Add(_queue.First());
-
-                _queue.RemoveAt(0);
+                if (_currentTrack != null)
+                {
+                    _history.Add(_currentTrack);
+                }
             }
 
             if (_queue.Count > 0)
             {
                 _currentTrack = _queue.First();
-
+                _queue.RemoveAt(0);
                 _nextTrackTimer.Change(_currentTrack.Length, Timeout.Infinite);
 
                 _trackPositionTime.Restart();
@@ -111,14 +168,26 @@ namespace SpotSync.Domain
             }
             else
             {
-                await DomainEvents.RaiseAsync(new PlaylistEnded { PartyCode = _partyCode });
+                await DomainEvents.RaiseAsync(new PlaylistEnded { PartyCode = _partyCode, LikedTracksUris = GetLikedTracksUris(5) });
+            }
+        }
+
+        public List<string> GetLikedTracksUris(int amount)
+        {
+            if (_likedSongs.Count > 0)
+            {
+                return _likedSongs.GetRandomNItems(amount);
+            }
+            else
+            {
+                return _history.GetRandomNItems(amount).Select(track => track.Uri).ToList();
             }
         }
 
         private async Task StartQueueAsync()
         {
             _currentTrack = _queue.First();
-
+            _queue.RemoveAt(0);
             _nextTrackTimer.Change(_currentTrack.Length, Timeout.Infinite);
 
             _trackPositionTime.Restart();
