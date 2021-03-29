@@ -3,11 +3,10 @@ import styled from "styled-components";
 
 const $Button = styled.button`
   border-radius: 10px;
-  background-color: ${(props) => props.selected && "#e5e5e5"};
+  background-color: ${(props) => (props.selected ? "#e5e5e5" : props.white ? "white" : "#e9e9e9")};
   border: none;
   font-weight: bold;
   padding: 10px;
-
   &:hover {
     background-color: #e0e0e0;
   }
@@ -15,7 +14,7 @@ const $Button = styled.button`
 
 const Button = (props) => {
   return (
-    <$Button selected={props.selected} className={props.className} onClick={props.onClick}>
+    <$Button white={props.white} selected={props.selected} className={props.className} onClick={props.onClick}>
       {props.children}
     </$Button>
   );

@@ -13,7 +13,7 @@ const Tabs = (props) => {
     <$Tabs>
       {props.tabs.map((tab) => {
         return (
-          <Button selected={tab.title == props.selected} key={tab.title} onClick={() => props.onClick(tab.title)}>
+          <Button white={true} selected={tab.title == props.selected} key={tab.title} onClick={() => props.onClick(tab.title)}>
             {tab.title}
           </Button>
         );

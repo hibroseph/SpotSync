@@ -6,13 +6,14 @@ import { connect } from "react-redux";
 import { getUser, getPartyCode } from "../../redux/reducers/reducers";
 import { AUTHENTICATED, UNAUTHENTICATED } from "../../states/authentication";
 import { leaveParty } from "../../api/party";
+import Subtitle from "../shared/Subtitle";
 
 import Button from "../shared/Button";
 
 const LeavePartyButton = styled(Button)`
   background-color: #f2b727;
   color: white;
-  margin-right: 10px;
+  margin: 0px 10px;
 
   &:hover {
     background-color: #e2b727;
@@ -51,16 +52,16 @@ const Navigation = (props) => {
     <$Navigation>
       <div className="left-nav-item">
         <img className="logo" src={spotibroLogo}></img>
-        <div className="button-spacing">
-          <LinkButton title="Dashboard" link="/dashboard"></LinkButton>
-        </div>
+        <div className="button-spacing">{/*<LinkButton title="Dashboard" link="/dashboard"></LinkButton>*/}</div>
       </div>
-
+      <Subtitle>{props?.partyCode}</Subtitle>
       <div>
         {props?.user?.details?.isInParty && (
-          <LeavePartyButton selected onClick={() => leaveParty(props.partyCode)(props.dispatch)}>
-            Leave Party
-          </LeavePartyButton>
+          <React.Fragment>
+            <LeavePartyButton selected onClick={() => leaveParty(props.partyCode)(props.dispatch)}>
+              Leave Party
+            </LeavePartyButton>
+          </React.Fragment>
         )}
         {props.user.authentication == AUTHENTICATED && <LinkButton title="Logout" link="/account/logout"></LinkButton>}
         {props.user.authentication == UNAUTHENTICATED && <LinkButton title="Login" link="/account/login"></LinkButton>}

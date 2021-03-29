@@ -25,6 +25,12 @@ const $Track = styled.div`
   }
 `;
 
+const $StyledFontAwesomeIcon = styled(FontAwesomeIcon)`
+  &:hover {
+    transform: scale(1.2);
+  }
+`;
+
 const Track = (props) => {
   return (
     <$Track>
@@ -32,10 +38,7 @@ const Track = (props) => {
         <p className="title">{props.track.name}</p>
         <p className="artist">{props.track.artist}</p>
       </div>
-      <FontAwesomeIcon
-        icon={faPlus}
-        onClick={() => addSongToQueue(props.track, props.user.details.id, props.partyCode, props.connection)}
-      ></FontAwesomeIcon>
+      <$StyledFontAwesomeIcon icon={faPlus} onClick={() => addSongToQueue(props.track, props.user.details.id, props.partyCode, props.connection)} />
     </$Track>
   );
 };
