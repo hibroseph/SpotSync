@@ -5,7 +5,8 @@ import Queue from "./Queue/Queue";
 import History from "./History/History";
 import { getUserLikesDislikes } from "../../api/party";
 import { connect } from "react-redux";
-import { getPartyCode } from "../../redux/reducers/reducers";
+import { getPartyCode, getSongFeelings } from "../../redux/reducers/reducers";
+import { setSongFeelings } from "../../redux/actions/party";
 
 const $Sidebar = styled.div`
   margin: 0 5px 5px 0;
@@ -57,14 +58,8 @@ const ConvertUserLikesDislikesFromServerToClient = (res) => {
   return songFeelings;
 };
 
-const Sidebar = ({ partyCode, className }) => {
+const Sidebar = ({ partyCode, className, songFeelings, dispatch }) => {
   const [currentTabView, setTabView] = useState("Queue");
-  const [songFeelings, setSongFeelings] = useState({});
-
-  useEffect(() => {
-    console.log("song feelings");
-    console.log(songFeelings);
-  }, [songFeelings]);
 
   useEffect(() => {
     if (partyCode != undefined) {
@@ -72,7 +67,7 @@ const Sidebar = ({ partyCode, className }) => {
       getUserLikesDislikes(partyCode).then((res) => {
         console.log("got the users likes ");
         console.log(res);
-        setSongFeelings(ConvertUserLikesDislikesFromServerToClient(res));
+        dispatch(setSongFeelings(ConvertUserLikesDislikesFromServerToClient(res)));
       });
     }
   }, [partyCode]);
@@ -84,9 +79,9 @@ const Sidebar = ({ partyCode, className }) => {
   const GetSideBarContent = () => {
     switch (currentTabView) {
       case "Queue":
-        return <Queue songFeelings={songFeelings} setSongFeelings={setSongFeelings}></Queue>;
+        return <Queue songFeelings={songFeelings}></Queue>;
       case "History":
-        return <History songFeelings={songFeelings} setSongFeelings={setSongFeelings}></History>;
+        return <History songFeelings={songFeelings}></History>;
       case "Listeners":
         return <p>Not Implemented</p>;
     }
@@ -101,8 +96,10 @@ const Sidebar = ({ partyCode, className }) => {
 };
 
 const mapStateToProps = (state) => {
+  console.log("STATE TO PROPS IN SIDEBARRRRRRRRRRRR");
   return {
     partyCode: getPartyCode(state),
+    songFeelings: getSongFeelings(state),
   };
 };
 export default connect(mapStateToProps, null)(Sidebar);

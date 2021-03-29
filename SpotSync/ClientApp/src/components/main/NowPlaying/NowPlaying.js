@@ -3,9 +3,12 @@ import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlayCircle, faStepForward, faPauseCircle } from "@fortawesome/free-solid-svg-icons";
 import { connect } from "react-redux";
-import { getUser, getPartyCode, getRealtimeConnection, getCurrentSong } from "../../../redux/reducers/reducers";
+import { getUser, getPartyCode, getRealtimeConnection, getCurrentSong, getSongFeelings } from "../../../redux/reducers/reducers";
 import { togglePlaybackState } from "../../../api/party";
 import { skipSong } from "../../../api/partyHub";
+import { userLikesSong, userDislikesSong } from "../../../api/partyHub";
+import ThumbsUp from "../../shared/ThumbsUp";
+import ThumbsDown from "../../shared/ThumbsDown";
 import Loader from "../../shared/Loader";
 
 const $NowPlaying = styled.div`
@@ -65,7 +68,13 @@ const $NowPlayingSong = styled.div`
   }
 `;
 
-const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong }) => {
+const $ThumbsContainer = styled.div`
+  display: flex;
+  width: 50px;
+  justify-content: space-around;
+  align-items: center;
+`;
+const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFeelings }) => {
   return (
     <$NowPlaying>
       <$NowPlayingSong>
@@ -76,6 +85,16 @@ const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong }) => {
               <p>{currentSong?.name}</p>
               <p>{currentSong?.artist}</p>
             </div>
+
+            {songFeelings && currentSong && (
+              <$ThumbsContainer>
+                <ThumbsDown
+                  onDislike={() => userDislikesSong(partyCode, currentSong.uri, connection, dispatch)}
+                  feeling={songFeelings[currentSong?.uri]}
+                />
+                <ThumbsUp onLike={() => userLikesSong(partyCode, currentSong.uri, connection, dispatch)} feeling={songFeelings[currentSong?.uri]} />
+              </$ThumbsContainer>
+            )}
           </React.Fragment>
         )}
         {!currentSong && <Loader width={50} height={50}></Loader>}
@@ -99,6 +118,7 @@ const mapStateToProps = (state) => {
     partyCode: getPartyCode(state),
     connection: getRealtimeConnection(state).connection,
     currentSong: getCurrentSong(state),
+    songFeelings: getSongFeelings(state),
   };
 };
 

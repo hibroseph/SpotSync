@@ -18,13 +18,30 @@ namespace SpotSync.Domain
 
         public void LikeSong(string trackUri)
         {
-            _likedSongs.Add(trackUri);
+            if (_dislikedSongs.Contains(trackUri))
+            {
+                _dislikedSongs.Remove(trackUri);
+            }
+
+            if (!_likedSongs.Contains(trackUri))
+            {
+                _likedSongs.Add(trackUri);
+            }
         }
 
         public void DislikeSong(string trackUri)
         {
-            _dislikedSongs.Add(trackUri);
+            if (_likedSongs.Contains(trackUri))
+            {
+                _likedSongs.Remove(trackUri);
+            }
+
+            if (!_dislikedSongs.Contains(trackUri))
+            {
+                _dislikedSongs.Add(trackUri);
+            }
         }
+
 
         public List<string> GetLikedSongs()
         {

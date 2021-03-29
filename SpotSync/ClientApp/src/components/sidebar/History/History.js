@@ -1,15 +1,28 @@
 import React from "react";
 import QueueItem from "../Queue/QueueItem";
 import { connect } from "react-redux";
-import { getParty } from "../../../redux/reducers/reducers";
-import Button from "../../shared/Button";
-import { generateQueue } from "../../../api/party";
+import { getParty, getRealtimeConnection } from "../../../redux/reducers/reducers";
 
-const History = (props) => {
-  return props?.history?.length > 0 ? (
+import { userLikesSong, userDislikesSong } from "../../../api/partyHub";
+
+const History = ({ songFeelings, party, connection, dispatch }) => {
+  return party?.history?.length > 0 ? (
     <React.Fragment>
-      {props.history.map((song) => {
-        return <QueueItem key={song.uri} title={song.name} artist={song.artist}></QueueItem>;
+      {party?.history.map((song) => {
+        return (
+          <QueueItem
+            onLike={() => {
+              userLikesSong(party.code, song.uri, connection, dispatch);
+            }}
+            onDislike={() => {
+              userDislikesSong(party.code, song.uri, connection, dispatch);
+            }}
+            key={song.uri}
+            title={song.name}
+            artist={song.artist}
+            feeling={songFeelings[song.uri]}
+          ></QueueItem>
+        );
       })}
     </React.Fragment>
   ) : (
@@ -19,6 +32,8 @@ const History = (props) => {
   );
 };
 
-const mapStateToProps = (state) => getParty(state);
+const mapStateToProps = (state) => {
+  return { party: getParty(state), connection: getRealtimeConnection(state).connection };
+};
 
 export default connect(mapStateToProps, null)(History);

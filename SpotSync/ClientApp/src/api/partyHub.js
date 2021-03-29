@@ -1,3 +1,5 @@
+import { userLikesSong as userLikesSongAction, userDislikesSong as userDislikesSongAction } from "../redux/actions/party";
+
 export const connectToParty = (partyCode, connection) => {
   console.log("invoking connect to party");
   connection.invoke("ConnectToParty", partyCode);
@@ -24,10 +26,12 @@ export const userAddSongToQueue = (song, user, partyCode, connection) => {
   });
 };
 
-export const userLikesSong = (partyCode, trackUri, connection) => {
+export const userLikesSong = (partyCode, trackUri, connection, dispatch) => {
+  dispatch(userLikesSongAction(trackUri));
   connection.invoke("LikeSong", partyCode, trackUri);
 };
 
-export const userDislikesSong = (partyCode, trackUri, connection) => {
+export const userDislikesSong = (partyCode, trackUri, connection, dispatch) => {
+  dispatch(userDislikesSongAction(trackUri));
   connection.invoke("DislikeSong", partyCode, trackUri);
 };

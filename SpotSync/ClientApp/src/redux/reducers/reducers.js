@@ -13,11 +13,32 @@ import {
   TOGGLE_PLAYBACK,
   UPDATE_SONG,
   UPDATE_CURRENT_SONG,
+  USER_LIKES_SONG,
+  USER_DISLIKES_SONG,
+  SET_SONG_FEELINGS,
 } from "../actions/party";
 import { REALTIME_CONNECTION_ESTABLISHED } from "../actions/signalr";
 
 export default (state = initalState, action) => {
   switch (action.type) {
+    case SET_SONG_FEELINGS: {
+      return Object.assign({}, state, {
+        party: Object.assign({}, state.party, { songFeelings: action.songFeelings }),
+      });
+    }
+
+    case USER_LIKES_SONG: {
+      return Object.assign({}, state, {
+        party: Object.assign({}, state.party, { songFeelings: Object.assign({}, state.party.songFeelings, { [action.trackUri]: 1 }) }),
+      });
+    }
+
+    case USER_DISLIKES_SONG: {
+      return Object.assign({}, state, {
+        party: Object.assign({}, state.party, { songFeelings: Object.assign({}, state.party.songFeelings, { [action.trackUri]: 0 }) }),
+      });
+    }
+
     case UPDATE_CURRENT_SONG: {
       return Object.assign({}, state, { nowPlaying: action.track });
     }
@@ -46,6 +67,9 @@ export default (state = initalState, action) => {
 
       let indexOfSongToRemove = state.party.queue.findIndex((song) => song.uri == action.song.uri);
 
+      console.log("WHAT DOES HISTORY EQUAL?");
+      console.log(state.party.nowPlaying ? "hello" : "goodbye");
+
       console.log("index of the song to remove " + indexOfSongToRemove);
       return Object.assign({}, state, {
         party: Object.assign(
@@ -58,7 +82,7 @@ export default (state = initalState, action) => {
                 ? state.party.queue
                 : [...state.party.queue.slice(0, indexOfSongToRemove), ...state.party.queue.slice(indexOfSongToRemove + 1)],
           },
-          { history: [...state.party.history, state.party.nowPlaying] }
+          { history: state.party.nowPlaying ? [...state.party.history, state.party.nowPlaying] : state.party.history }
         ),
       });
     }
@@ -136,6 +160,7 @@ export default (state = initalState, action) => {
 export const getAuthentication = (state) => state.user.authentication;
 export const getUser = (state) => state.user;
 export const getPartyCode = (state) => state?.party?.code;
+export const getSongFeelings = (state) => state?.party?.songFeelings;
 export const getRealtimeConnection = (state) => {
   return {
     connectionState: state.connectionState,

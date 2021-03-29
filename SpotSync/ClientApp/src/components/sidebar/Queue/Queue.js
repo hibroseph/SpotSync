@@ -6,21 +6,17 @@ import Button from "../../shared/Button";
 import { generateQueue } from "../../../api/party";
 import { userLikesSong, userDislikesSong } from "../../../api/partyHub";
 
-const Queue = ({ party, connection, songFeelings, setSongFeelings }) => {
+const Queue = ({ party, connection, songFeelings, dispatch }) => {
   return party?.queue?.length > 0 ? (
     <React.Fragment>
       {party.queue.map((song) => {
         return (
           <QueueItem
             onLike={() => {
-              console.log("mmmm liking this song " + song.uri);
-              setSongFeelings(Object.assign({}, songFeelings, { [song.uri]: 1 }));
-              userLikesSong(party.code, song.uri, connection);
+              userLikesSong(party.code, song.uri, connection, dispatch);
             }}
             onDislike={() => {
-              console.log("ew disliking this song " + song.uri);
-              setSongFeelings(Object.assign({}, songFeelings, { [song.uri]: 0 }));
-              userDislikesSong(party.code, song.uri, connection);
+              userDislikesSong(party.code, song.uri, connection, dispatch);
             }}
             key={song.uri}
             title={song.name}

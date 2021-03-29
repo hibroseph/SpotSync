@@ -6,10 +6,34 @@ export const SEARCHED_SPOTIFY = "SEARCHED_SPOTIFY";
 export const TOGGLE_PLAYBACK = "toggle_playback";
 export const UPDATE_SONG = "update_song";
 export const UPDATE_CURRENT_SONG = "update_current_song";
+export const USER_LIKES_SONG = "user_likes_song";
+export const USER_DISLIKES_SONG = "user_dislikes_song";
+export const SET_SONG_FEELINGS = "set_song_feelings";
+
+export const setSongFeelings = (songFeelings) => {
+  return {
+    type: SET_SONG_FEELINGS,
+    songFeelings,
+  };
+};
 
 export const partyLeft = () => {
   return {
     type: LEFT_PARTY,
+  };
+};
+
+export const userLikesSong = (trackUri) => {
+  return {
+    type: USER_LIKES_SONG,
+    trackUri,
+  };
+};
+
+export const userDislikesSong = (trackUri) => {
+  return {
+    type: USER_DISLIKES_SONG,
+    trackUri,
   };
 };
 

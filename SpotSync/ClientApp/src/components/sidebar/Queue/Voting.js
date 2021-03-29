@@ -1,8 +1,7 @@
 import React from "react";
 import styled from "styled-components";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faThumbsUp as fasThumbsUp, faThumbsDown as fasThumbsDown } from "@fortawesome/free-solid-svg-icons";
-import { faThumbsUp, faThumbsDown } from "@fortawesome/free-regular-svg-icons";
+import ThumbsUp from "../../shared/ThumbsUp";
+import ThumbsDown from "../../shared/ThumbsDown";
 
 const $Voting = styled.div`
   width: 50px;
@@ -11,20 +10,12 @@ const $Voting = styled.div`
   align-items: center;
 `;
 
-const $StyledFontAwesomeIcon = styled(FontAwesomeIcon)`
-  &:hover {
-    transform: scale(1.2);
-  }
-`;
-
-const Voting = (props) => {
-  const DeterminedVotingIcon = (type) => {};
-
+const Voting = ({ onLike, onDislike, feeling, vote }) => {
   const DetermineVotingIcons = () => {
     return (
       <React.Fragment>
-        <$StyledFontAwesomeIcon onClick={() => props.onLike()} icon={props?.feeling == 1 ? fasThumbsUp : faThumbsUp}></$StyledFontAwesomeIcon>
-        <$StyledFontAwesomeIcon onClick={() => props.onDislike()} icon={props?.feeling == 0 ? fasThumbsDown : faThumbsDown}></$StyledFontAwesomeIcon>
+        <ThumbsUp onLike={onLike} feeling={feeling} />
+        <ThumbsDown onDislike={onDislike} feeling={feeling} />
       </React.Fragment>
     );
   };
