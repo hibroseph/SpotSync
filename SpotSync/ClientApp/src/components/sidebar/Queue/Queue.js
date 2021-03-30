@@ -6,7 +6,7 @@ import Button from "../../shared/Button";
 import { generateQueue } from "../../../api/party";
 import { userLikesSong, userDislikesSong } from "../../../api/partyHub";
 
-const Queue = ({ party, connection, songFeelings, dispatch }) => {
+const Queue = ({ party, connection, songFeelings = {}, dispatch }) => {
   return party?.queue?.length > 0 ? (
     <React.Fragment>
       {party.queue.map((song) => {

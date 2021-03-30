@@ -50,7 +50,7 @@ export default (state = initalState, action) => {
         {
           user: Object.assign({}, state.user, { details: Object.assign({}, state.user.details, { isInParty: false }) }),
         },
-        { party: null }
+        { party: { queue: [], history: [] } }
       );
     }
 
