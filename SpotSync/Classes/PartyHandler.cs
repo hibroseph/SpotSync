@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace SpotSync.Classes
 {
-    public class PartyHandler : IHandles<ChangeTrack>, IHandles<PlaylistEnded>, IHandles<ToggleMusicState>
+    public class PartyHandler : IHandles<ChangeTrack>, IHandles<QueueEnded>, IHandles<ToggleMusicState>
     {
         private readonly ISpotifyHttpClient _spotifyHttpClient;
         private readonly IHubContext<PartyHub> _partyHubContext;
@@ -71,7 +71,7 @@ namespace SpotSync.Classes
             }
         }
 
-        public async Task HandleAsync(PlaylistEnded args)
+        public async Task HandleAsync(QueueEnded args)
         {
             await _logService.LogAppActivityAsync($"Playlist has ended for party with code {args.PartyCode}. Sending to all listeners");
 

@@ -49,7 +49,7 @@ namespace SpotSync.Application.Services
             {
                 Party party = await _partyRepository.GetPartyWithCodeAsync(partyCode);
 
-                await party.RequestSkip(partyGoer);
+                await party.RequestSkipAsync(partyGoer);
             }
             catch (Exception ex)
             {
@@ -72,24 +72,6 @@ namespace SpotSync.Application.Services
                 await _logService.LogExceptionAsync(ex, "Error occured in AddNewSongToQueue");
                 return false;
             }
-        }
-
-        public async Task<bool> RearrangeQueue(RearrangeQueueRequest request)
-        {
-            try
-            {
-                Party party = await _partyRepository.GetPartyWithCodeAsync(request.PartyCode);
-
-                party.RearrangeTrackInQueue(request);
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                await _logService.LogExceptionAsync(ex, "Error occured in RearrangeQueue");
-                return false;
-            }
-
         }
 
         public async Task<Party> GetPartyWithCodeAsync(string partyCode)

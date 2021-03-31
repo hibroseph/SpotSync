@@ -16,6 +16,12 @@ namespace SpotSync.Domain
             _dislikedSongs = new List<string>();
         }
 
+        public LikesDislikes(List<string> likedSongsUris, List<string> dislikedSongUris)
+        {
+            _likedSongs = likedSongsUris;
+            _dislikedSongs = dislikedSongUris;
+        }
+
         public void LikeSong(string trackUri)
         {
             if (_dislikedSongs.Contains(trackUri))

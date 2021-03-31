@@ -40,7 +40,7 @@ namespace SpotSync
             serviceCollection.AddSingleton<IDiagnosticsService, DiagnosticsService>();
 
             serviceCollection.AddSingleton<IHandles<ChangeTrack>, PartyHandler>();
-            serviceCollection.AddSingleton<IHandles<PlaylistEnded>, PartyHandler>();
+            serviceCollection.AddSingleton<IHandles<QueueEnded>, PartyHandler>();
             serviceCollection.AddSingleton<IHandles<ToggleMusicState>, PartyHandler>();
 
             serviceCollection.AddHttpContextAccessor();

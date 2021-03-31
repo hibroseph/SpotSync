@@ -40,7 +40,7 @@ namespace SpotSync.Classes.Hubs
             Party party = await _partyService.GetPartyWithCodeAsync(partyCode);
             PartyGoer user = await _partyGoerService.GetCurrentPartyGoerAsync();
 
-            party.UserLikesSong(user, trackUri);
+            await party.UserLikesTrackAsync(user, trackUri);
         }
 
         public async Task DislikeSong(string partyCode, string trackUri)
@@ -49,7 +49,7 @@ namespace SpotSync.Classes.Hubs
             Party party = await _partyService.GetPartyWithCodeAsync(partyCode);
             PartyGoer user = await _partyGoerService.GetCurrentPartyGoerAsync();
 
-            party.UserDislikesSong(user, trackUri);
+            await party.UserDislikesTrackAsync(user, trackUri);
         }
 
         public async Task ConnectToParty(string partyCode)
@@ -126,32 +126,6 @@ namespace SpotSync.Classes.Hubs
             bool successfullyAddedSongToQueue = await _partyService.AddNewSongToQueue(request);
 
             if (successfullyAddedSongToQueue)
-            {
-                Party party = await _partyService.GetPartyWithAttendeeAsync(partier);
-
-                // Update the view of the partier to the current playlist
-                await Clients.Group(party.GetPartyCode()).SendAsync("UpdatePartyView",
-                new
-                {
-                    Song = party.GetCurrentSong(),
-                    Position = party.GetCurrentPositionInSong()
-                },
-                party.GetHistory(),
-                party.GetQueue()
-                );
-            }
-            else
-            {
-                await Clients.Client(Context.ConnectionId).SendAsync("UserModifiedPlaylist", new { error = true });
-            }
-        }
-
-        public async Task UserModifiedPlaylist(RearrangeQueueRequest queueRequest)
-        {
-            var partier = new PartyGoer(Context.UserIdentifier);
-            bool successfullyRearrangedQueue = await _partyService.RearrangeQueue(queueRequest);
-
-            if (successfullyRearrangedQueue)
             {
                 Party party = await _partyService.GetPartyWithAttendeeAsync(partier);
 

@@ -82,7 +82,10 @@ export default (state = initalState, action) => {
                 ? state.party.queue
                 : [...state.party.queue.slice(0, indexOfSongToRemove), ...state.party.queue.slice(indexOfSongToRemove + 1)],
           },
-          { history: state.party.nowPlaying ? [...state.party.history, state.party.nowPlaying] : state.party.history }
+          {
+            history:
+              state.party.nowPlaying && !state?.user?.details?.pausedMusic ? [...state.party.history, state.party.nowPlaying] : state.party.history,
+          }
         ),
       });
     }

@@ -313,7 +313,7 @@ namespace SpotSync.Controllers
 
         private async Task UpdatePlaylistForEveryoneInPartyAsync(Party party, PartyGoer partyGoer)
         {
-            await DomainEvents.RaiseAsync(new PlaylistEnded { PartyCode = party.GetPartyCode(), LikedTracksUris = party.GetLikedTracksUris(5) });
+            await DomainEvents.RaiseAsync(new QueueEnded { PartyCode = party.GetPartyCode(), LikedTracksUris = party.GetLikedTracksUris(5) });
         }
 
         private async Task<IActionResult> UpdateCurrentSongForEveryoneInPartyAsync(Party party, PartyGoer partyGoer)
