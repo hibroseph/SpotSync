@@ -44,11 +44,11 @@ steps:
     command: 'publish'
     projects: '**/SpotSync.csproj'
 
-- task: DotNetCoreCLI@2
-  displayName: "Test SpotSync"
-  inputs:
-    command: 'test'
-    projects: '**/SpotSync.Tests.csproj'
+#- task: DotNetCoreCLI@2
+#  displayName: "Test SpotSync"
+#  inputs:
+#    command: 'test'
+#    projects: '**/SpotSync.Tests.csproj'
 
 - task: Docker@2
   inputs:
