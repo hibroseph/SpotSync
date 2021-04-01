@@ -2,6 +2,10 @@ import { userLikesSong as userLikesSongAction, userDislikesSong as userDislikesS
 
 export const connectToParty = (partyCode, connection) => {
   console.log("invoking connect to party");
+
+  console.log("partycode: " + partyCode);
+  console.log(connection);
+
   connection.invoke("ConnectToParty", partyCode);
 };
 
