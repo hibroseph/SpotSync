@@ -8,5 +8,6 @@ namespace SpotSync.Domain
     {
         public string Id { get; set; }
         public bool ShouldFilterExplicitSongs { get; set; }
+        public string Market { get; set; }
     }
 }

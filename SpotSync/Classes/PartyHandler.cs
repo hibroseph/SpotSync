@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using SpotSync.Domain.DTO;
 
 namespace SpotSync.Classes
 {
@@ -83,7 +84,7 @@ namespace SpotSync.Classes
                 return;
             }
 
-            List<Track> playlistSongs = await GenerateNewPlaylist(party, args.LikedTracksUris);
+            List<Track> playlistSongs = await _partyService.GenerateNewPlaylist(party, args.LikedTracksUris);
 
             await party.AddNewQueueAsync(playlistSongs);
 
@@ -98,17 +99,6 @@ namespace SpotSync.Classes
             );
         }
 
-        private async Task<List<Track>> GenerateNewPlaylist(Party party, List<string> recommendedTrackUris)
-        {
-            if (recommendedTrackUris.Count > 0)
-            {
-                return await _spotifyHttpClient.GetRecommendedSongsAsync(party.GetHost().Id, recommendedTrackUris, 0);
-            }
-            else
-            {
-                return await _spotifyHttpClient.GetRecommendedSongsAsync(party.GetHost().Id, (await _partyGoerService.GetRecommendedSongsAsync(party.GetHost().Id, 2)).Select(track => track.Uri).ToList(), 0);
-            }
 
-        }
     }
 }

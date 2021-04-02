@@ -8,10 +8,12 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Configuration;
 using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
+using SpotSync.Domain.Contracts.Services.PartyGoerSetting;
 using SpotSync.Models.Account;
 
 namespace SpotSync.Controllers
@@ -23,15 +25,17 @@ namespace SpotSync.Controllers
         private readonly IPartyService _partyService;
         private readonly ILogService _logService;
         private readonly IPartyGoerService _partyGoerService;
+        private readonly IPartyGoerDetailsService _partyGoerSettingsService;
 
         public AccountController(Domain.Contracts.IAuthenticationService authenticationService, IConfiguration configuration, IPartyService partyService,
-        ILogService logService, IPartyGoerService partyGoerService)
+        ILogService logService, IPartyGoerService partyGoerService, IPartyGoerDetailsService partyGoerSettingsService)
         {
             _authenticationService = authenticationService;
             _configuration = configuration;
             _partyService = partyService;
             _logService = logService;
             _partyGoerService = partyGoerService;
+            _partyGoerSettingsService = partyGoerSettingsService;
         }
 
         [HttpGet]
@@ -59,7 +63,9 @@ namespace SpotSync.Controllers
             try
             {
                 PartyGoerDetails partyGoerDetails = await _authenticationService.AuthenticateUserWithAccessCodeAsync(code);
+                PartyGoer partyGoer = new PartyGoer(partyGoerDetails.Id);
 
+                _partyGoerSettingsService.SetMarket(partyGoer, partyGoerDetails.Market);
                 _partyGoerService.SavePartyGoer(partyGoerDetails);
 
                 // Get details from spotify of user 
@@ -70,7 +76,7 @@ namespace SpotSync.Controllers
 
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-                await _logService.LogUserActivityAsync(new PartyGoer(partyGoerDetails.Id), "Successfully authenticated through Spotify");
+                await _logService.LogUserActivityAsync(partyGoer, "Successfully authenticated through Spotify");
 
                 return RedirectToAction("App", "Party");
             }

@@ -26,7 +26,7 @@ namespace SpotSync
             serviceCollection.AddSingleton<ISpotifyAuthentication>(new SpotifyAuthentication(configuration["Spotify:ClientId"], configuration["Spotify:ClientSecret"], configuration["Spotify:RedirectUrl"]));
             serviceCollection.AddSingleton<IHttpClient>(new HttpClient());
 
-            serviceCollection.AddSingleton<IPartyGoerSettingsService, PartyGoerSettingsService>();
+            serviceCollection.AddSingleton<IPartyGoerDetailsService, PartyGoerDetailsService>();
 
             serviceCollection.AddSingleton<ISpotifyHttpClient, SpotifyHttpClient>();
             serviceCollection.AddSingleton<ILogRepository>(new LogRepository(configuration["DatabaseConnection"]));

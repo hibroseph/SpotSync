@@ -15,8 +15,8 @@ namespace SpotSync.Domain.Contracts
         Task<Errors.ServiceResult<UpdateSongError>> UpdateSongForPartyGoerAsync(PartyGoer user, List<string> songUris, int currentSongProgressInMs);
         Task<bool> UpdateSongForPartyGoerAsync(string partyGoerId, string songUri, int currentSongProgressInMs);
         Task<List<string>> GetUserTopTrackIdsAsync(string spotifyId, int count = 10);
-        Task<List<string>> GetRecommendedTrackUrisAsync(string spotifyId, List<string> seedTrackUris, float minimumEnergy = 0.0f);
-        Task<List<Track>> GetRecommendedSongsAsync(string spotifyId, List<string> seedTrackIds, float minimumEnergy);
+        Task<List<string>> GetRecommendedTrackUrisAsync(string spotifyId, GetRecommendedSongs recommendedSongs);
+        Task<List<Track>> GetRecommendedSongsAsync(string spotifyId, GetRecommendedSongs recommendedSongs);
         Task<List<Track>> GetUserTopTracksAsync(string spotifyId, int limit = 10);
         Task<string> GetUsersActiveDeviceAsync(string spotifyId);
         Task<IEnumerable<ISpotifyQueryResult>> QuerySpotifyAsync(PartyGoer user, string searchQuery, SpotifyQueryType queryType, int limit);

@@ -24,9 +24,9 @@ namespace SpotSync.Classes.Hubs
         private IPartyGoerService _partyGoerService;
         private ISpotifyHttpClient _spotifyHttpClient;
         private ILogService _logService;
-        private IPartyGoerSettingsService _partyGoerSettingsService;
+        private IPartyGoerDetailsService _partyGoerSettingsService;
 
-        public PartyHub(IPartyService partyService, ISpotifyHttpClient spotifyHttpClient, ILogService logService, IPartyGoerService partyGoerService, IPartyGoerSettingsService partyGoerSettingsService)
+        public PartyHub(IPartyService partyService, ISpotifyHttpClient spotifyHttpClient, ILogService logService, IPartyGoerService partyGoerService, IPartyGoerDetailsService partyGoerSettingsService)
         {
             _partyService = partyService;
             _spotifyHttpClient = spotifyHttpClient;
@@ -109,7 +109,7 @@ namespace SpotSync.Classes.Hubs
         {
             PartyGoer partyGoer = await _partyGoerService.GetCurrentPartyGoerAsync();
 
-            _partyGoerSettingsService.SetConfigurationSetting(partyGoer, new PartyGoerConfigurationSetting { PerferredDeviceId = device_id });
+            _partyGoerSettingsService.SetPerferredDeviceId(partyGoer, device_id);
 
             await _partyService.SyncListenerWithSongAsync(partyGoer);
 

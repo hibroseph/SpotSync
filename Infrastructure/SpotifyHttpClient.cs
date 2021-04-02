@@ -30,10 +30,10 @@ namespace SpotSync.Infrastructure
         private IHttpClient _httpClient;
         private ISpotifyAuthentication _spotifyAuthentication;
         private ILogService _logService;
-        private IPartyGoerSettingsService _partyGoerSettingsService;
+        private IPartyGoerDetailsService _partyGoerSettingsService;
         private Dictionary<ApiEndpointType, SpotifyEndpoint> _apiEndpoints;
 
-        public SpotifyHttpClient(ISpotifyAuthentication spotifyAuthentication, IHttpClient httpClient, ILogService logService, IPartyGoerSettingsService partyGoerSettingsService)
+        public SpotifyHttpClient(ISpotifyAuthentication spotifyAuthentication, IHttpClient httpClient, ILogService logService, IPartyGoerDetailsService partyGoerSettingsService)
         {
             _httpClient = httpClient;
             _spotifyAuthentication = spotifyAuthentication;
@@ -71,7 +71,8 @@ namespace SpotSync.Infrastructure
             return new PartyGoerDetails
             {
                 ShouldFilterExplicitSongs = jObject["explicit_content"]["filter_enabled"].Value<bool>(),
-                Id = jObject["id"].ToString()
+                Id = jObject["id"].ToString(),
+                Market = jObject["country"].ToString()
             };
         }
 
@@ -243,15 +244,12 @@ namespace SpotSync.Infrastructure
             return recommendedTrackUris;
         }
 
-        public async Task<List<string>> GetRecommendedTrackUrisAsync(string spotifyId, List<string> seedTrackIds, float minimumEnergy)
+        public async Task<List<string>> GetRecommendedTrackUrisAsync(string spotifyId, GetRecommendedSongs recommendedSongs)
         {
-            if (seedTrackIds.Count > 5)
+            if (recommendedSongs.SeedTrackUris.Count > 5)
                 throw new ArgumentException("Seed tracks cannot exeed 5");
 
-            if (minimumEnergy > 1 && minimumEnergy < 0)
-                throw new ArgumentException("Minimum Energy must be between 0 and 1");
-
-            var response = await SendHttpRequestAsync(spotifyId, _apiEndpoints[ApiEndpointType.GetRecommendedTracks], $"seed_tracks={HttpUtility.UrlEncode(ConvertToCommaDelimitedString(seedTrackIds))}&min_energy={minimumEnergy}", true);
+            var response = await SendHttpRequestAsync(spotifyId, _apiEndpoints[ApiEndpointType.GetRecommendedTracks], AddRecommendedSongsApiParmeters(recommendedSongs), true);
 
             JObject json = JObject.Parse(await response.Content.ReadAsStringAsync());
 
@@ -264,16 +262,18 @@ namespace SpotSync.Infrastructure
             return recommendedTrackUris;
         }
 
-        public async Task<List<Track>> GetRecommendedSongsAsync(string spotifyId, List<string> seedTrackIds, float minimumEnergy)
+        public async Task<List<Track>> GetRecommendedSongsAsync(string spotifyId, GetRecommendedSongs getRecommendedSongs)
         {
-            if (seedTrackIds.Count > 5)
+            List<string> seedTrackUris = getRecommendedSongs.SeedTrackUris;
+
+            if (seedTrackUris.Count > 5)
+            {
                 throw new ArgumentException("Seed tracks cannot exeed 5");
+            }
 
-            if (minimumEnergy > 1 && minimumEnergy < 0)
-                throw new ArgumentException("Minimum Energy must be between 0 and 1");
+            seedTrackUris = seedTrackUris.Select(p => p.Replace("spotify:track:", "")).ToList();
 
-            seedTrackIds = seedTrackIds.Select(p => p.Replace("spotify:track:", "")).ToList();
-            var response = await SendHttpRequestAsync(spotifyId, _apiEndpoints[ApiEndpointType.GetRecommendedTracks], $"seed_tracks={HttpUtility.UrlEncode(ConvertToCommaDelimitedString(seedTrackIds))}", true);
+            var response = await SendHttpRequestAsync(spotifyId, _apiEndpoints[ApiEndpointType.GetRecommendedTracks], AddRecommendedSongsApiParmeters(getRecommendedSongs), true);
 
             JObject json = JObject.Parse(await response.Content.ReadAsStringAsync());
 
@@ -293,6 +293,10 @@ namespace SpotSync.Infrastructure
             return recommendedSongs.ToList();
         }
 
+        private string AddRecommendedSongsApiParmeters(GetRecommendedSongs getRecommendedSongs)
+        {
+            return $"seed_tracks={ HttpUtility.UrlEncode(ConvertToCommaDelimitedString(getRecommendedSongs.SeedTrackUris))}{(!string.IsNullOrWhiteSpace(getRecommendedSongs.Market) ? $"&{getRecommendedSongs.Market}" : string.Empty)}";
+        }
         private string ConvertToCommaDelimitedString(List<string> items)
         {
             return string.Join(",", items);
@@ -366,6 +370,7 @@ namespace SpotSync.Infrastructure
             {
                 Id = currentUser["id"].ToString(),
                 ShouldFilterExplicitSongs = currentUser["explicit_content"]["filter_enabled"].Value<bool>(),
+                Market = currentUser["country"].ToString()
             };
         }
 
@@ -445,17 +450,17 @@ namespace SpotSync.Infrastructure
 
         public async Task<Domain.Errors.ServiceResult<UpdateSongError>> UpdateSongForPartyGoerAsync(PartyGoer partyGoer, List<string> songUris, int currentSongProgressInMs)
         {
-            string peferred_device_id = _partyGoerSettingsService.GetConfigurationSetting(partyGoer)?.PerferredDeviceId;
+            string perferredDeviceId = _partyGoerSettingsService.GetPerferredDeviceId(partyGoer);
 
             ApiParameters parameters = null;
 
-            if (!string.IsNullOrWhiteSpace(peferred_device_id))
+            if (!string.IsNullOrWhiteSpace(perferredDeviceId))
             {
                 parameters = new ApiParameters
                 {
                     Parameters = new Dictionary<string, object>
                 {
-                    {"device_id", _partyGoerSettingsService.GetConfigurationSetting(partyGoer).PerferredDeviceId }
+                    {"device_id", perferredDeviceId }
 
                 }
                 };

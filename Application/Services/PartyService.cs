@@ -1,10 +1,12 @@
 ﻿using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
+using SpotSync.Domain.Contracts.Services.PartyGoerSetting;
 using SpotSync.Domain.DTO;
 using SpotSync.Domain.Errors;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SpotSync.Application.Services
@@ -15,13 +17,15 @@ namespace SpotSync.Application.Services
         private IPartyGoerService _partyGoerService;
         private ISpotifyHttpClient _spotifyHttpClient;
         private ILogService _logService;
+        private IPartyGoerDetailsService _partyGoerDetailsService;
 
-        public PartyService(IPartyRepository partyRepository, ISpotifyHttpClient spotifyHttpClient, ILogService logService, IPartyGoerService partyGoerService)
+        public PartyService(IPartyRepository partyRepository, ISpotifyHttpClient spotifyHttpClient, ILogService logService, IPartyGoerService partyGoerService, IPartyGoerDetailsService partyGoerDetailsService)
         {
             _partyRepository = partyRepository;
             _spotifyHttpClient = spotifyHttpClient;
             _partyGoerService = partyGoerService;
             _logService = logService;
+            _partyGoerDetailsService = partyGoerDetailsService;
         }
 
         public async Task<List<Party>> GetAllPartiesAsync()
@@ -157,6 +161,28 @@ namespace SpotSync.Application.Services
                 return false;
             }
         }
+
+        public async Task<List<Track>> GenerateNewPlaylist(Party party, List<string> recommendedTrackUris)
+        {
+            if (recommendedTrackUris.Count > 0)
+            {
+                return await _spotifyHttpClient.GetRecommendedSongsAsync(party.GetHost().Id, new GetRecommendedSongs
+                {
+                    SeedTrackUris = recommendedTrackUris,
+                    Market = _partyGoerDetailsService.GetMarket(party.GetHost())
+                });
+            }
+            else
+            {
+                return await _spotifyHttpClient.GetRecommendedSongsAsync(party.GetHost().Id, new GetRecommendedSongs
+                {
+                    SeedTrackUris = (await _partyGoerService.GetRecommendedSongsAsync(party.GetHost().Id, 5)).Select(track => track.Uri).ToList(),
+                    Market = _partyGoerDetailsService.GetMarket(party.GetHost())
+                });
+            }
+
+        }
+
 
         public async Task<bool> JoinPartyAsync(PartyCodeDTO partyCode, PartyGoer attendee)
         {

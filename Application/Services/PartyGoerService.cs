@@ -24,7 +24,8 @@ namespace SpotSync.Application.Services
         private Dictionary<string, PartyGoer> _partyGoerCache;
         private ILogService _logService;
 
-        public PartyGoerService(ISpotifyHttpClient spotifyHttpClient, IHttpContextAccessor httpContextAccessor, ISpotifyAuthentication spotifyAuthentication, ILogService logService)
+        public PartyGoerService(ISpotifyHttpClient spotifyHttpClient, IHttpContextAccessor httpContextAccessor,
+        ISpotifyAuthentication spotifyAuthentication, ILogService logService)
         {
             _spotifyHttpClient = spotifyHttpClient;
             _httpContextAccessor = httpContextAccessor;

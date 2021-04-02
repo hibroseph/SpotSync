@@ -4,9 +4,12 @@ using System.Text;
 
 namespace SpotSync.Domain.Contracts.Services.PartyGoerSetting
 {
-    public interface IPartyGoerSettingsService
+    public interface IPartyGoerDetailsService
     {
-        PartyGoerConfigurationSetting GetConfigurationSetting(PartyGoer partyGoer);
-        void SetConfigurationSetting(PartyGoer partyGoer, PartyGoerConfigurationSetting setting);
+        void SetMarket(PartyGoer partyGoer, string market);
+        string GetMarket(PartyGoer partyGoer);
+
+        void SetPerferredDeviceId(PartyGoer partyGoer, string perferredDeviceId);
+        string GetPerferredDeviceId(PartyGoer partyGoer);
     }
 }

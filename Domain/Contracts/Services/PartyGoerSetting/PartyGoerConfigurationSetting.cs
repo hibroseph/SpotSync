@@ -7,5 +7,6 @@ namespace SpotSync.Domain.Contracts.Services.PartyGoerSetting
     public class PartyGoerConfigurationSetting
     {
         public string PerferredDeviceId { get; set; }
+        public string Market { get; set; }
     }
 }
