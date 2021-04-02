@@ -59,8 +59,6 @@ export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAc
 
   connection.on("NewListener", (listener) => {
     console.log("A new listener joined the party " + listener);
-    const eventHandler = actionEventMap[res.eventType];
-    eventHandler && dispatch(eventHandler(res));
   });
 
   connection.on("InitialPartyLoad", (res, history, queue, details) => {

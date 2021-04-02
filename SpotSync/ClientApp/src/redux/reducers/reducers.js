@@ -122,7 +122,7 @@ export default (state = initalState, action) => {
             state.user
           ),
         },
-        { party: Object.assign({}, { code: action.party.partyCode }, state.party) }
+        { party: action.isInParty ? Object.assign({}, { code: action.party.partyCode }, state.party) : state.party }
       );
     }
 
@@ -150,7 +150,7 @@ export const getRealtimeConnection = (state) => {
     connection: state.connection,
   };
 };
-export const isHost = (state) => state?.party?.host?.id == state?.user?.details?.id;
+export const isHost = (state) => state?.party?.host?.id == state?.user?.details?.id && state?.party?.host != undefined;
 export const getCurrentSong = (state) => state?.party?.nowPlaying;
 export const getParty = (state) => state.party;
 export const getSpotifySearchResults = (state) => state.search_results;
