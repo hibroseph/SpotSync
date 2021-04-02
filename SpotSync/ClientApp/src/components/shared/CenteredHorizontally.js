@@ -6,6 +6,7 @@ const $centered = styled.div`
   width: 100%;
   justify-content: center;
   padding: 10px;
+  box-sizing: border-box;
 `;
 
 export default (props) => {

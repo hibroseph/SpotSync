@@ -15636,7 +15636,7 @@ var CenteredHorizontally_templateObject;
 
 
 
-var $centered = styled_components_browser_esm.div(CenteredHorizontally_templateObject || (CenteredHorizontally_templateObject = _taggedTemplateLiteral(["\n  display: flex;\n  width: 100%;\n  justify-content: center;\n  padding: 10px;\n"])));
+var $centered = styled_components_browser_esm.div(CenteredHorizontally_templateObject || (CenteredHorizontally_templateObject = _taggedTemplateLiteral(["\n  display: flex;\n  width: 100%;\n  justify-content: center;\n  padding: 10px;\n  box-sizing: border-box;\n"])));
 /* harmony default export */ const CenteredHorizontally = (function (props) {
   return /*#__PURE__*/react.createElement($centered, null, props.children);
 });
@@ -16787,8 +16787,10 @@ var QueueItem = function QueueItem(props) {
 
 
 
+
+
 var Queue = function Queue(_ref) {
-  var _party$queue;
+  var _party$queue, _party$history;
 
   var party = _ref.party,
       connection = _ref.connection,
@@ -16808,7 +16810,7 @@ var Queue = function Queue(_ref) {
       artist: song.artist,
       feeling: songFeelings[song.uri]
     });
-  })) : /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement(shared_Button, {
+  })) : (party === null || party === void 0 ? void 0 : (_party$history = party.history) === null || _party$history === void 0 ? void 0 : _party$history.length) > 0 ? /*#__PURE__*/react.createElement(CenteredHorizontally, null, /*#__PURE__*/react.createElement(Subtitle, null, "A new queue will be generated from your liked songs next song.")) : /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement(shared_Button, {
     onClick: function onClick() {
       return generateQueue(party.code);
     }

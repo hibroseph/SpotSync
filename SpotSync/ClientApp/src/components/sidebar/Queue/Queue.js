@@ -5,6 +5,8 @@ import { getParty, getRealtimeConnection } from "../../../redux/reducers/reducer
 import Button from "../../shared/Button";
 import { generateQueue } from "../../../api/party";
 import { userLikesSong, userDislikesSong } from "../../../api/partyHub";
+import Subtitle from "../../shared/Subtitle";
+import CenteredHorizontally from "../../shared/CenteredHorizontally";
 
 const Queue = ({ party, connection, songFeelings = {}, dispatch }) => {
   return party?.queue?.length > 0 ? (
@@ -26,6 +28,10 @@ const Queue = ({ party, connection, songFeelings = {}, dispatch }) => {
         );
       })}
     </React.Fragment>
+  ) : party?.history?.length > 0 ? (
+    <CenteredHorizontally>
+      <Subtitle>A new queue will be generated from your liked songs next song.</Subtitle>
+    </CenteredHorizontally>
   ) : (
     <React.Fragment>
       <Button onClick={() => generateQueue(party.code)}>Generate Playlist</Button>
