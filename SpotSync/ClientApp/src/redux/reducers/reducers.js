@@ -55,22 +55,7 @@ export default (state = initalState, action) => {
     }
 
     case UPDATE_SONG: {
-      // move song in now playing to history
-      // remove song that came in action from queue
-      // move song to now playing
-      /*
-      return Object.assign({}, state, {
-        party: Object.assign({}, state.party, { queue: state.party.queue.map((song) => song.uri != action.song.uri) }),
-      });
-      */
-      console.log("updating song");
-
       let indexOfSongToRemove = state.party.queue.findIndex((song) => song.uri == action.song.uri);
-
-      console.log("WHAT DOES HISTORY EQUAL?");
-      console.log(state.party.nowPlaying ? "hello" : "goodbye");
-
-      console.log("index of the song to remove " + indexOfSongToRemove);
       return Object.assign({}, state, {
         party: Object.assign(
           {},
@@ -103,8 +88,6 @@ export default (state = initalState, action) => {
     }
 
     case UPDATE_QUEUE: {
-      console.log("queue before updating");
-      console.log(state.party.queue);
       return Object.assign({}, state, { party: Object.assign({}, state.party, { queue: action.queue }) });
     }
 
@@ -121,14 +104,12 @@ export default (state = initalState, action) => {
     }
 
     case IS_AUTHENTICATED: {
-      console.log("updating is authenticated");
       return Object.assign({}, state, {
         user: Object.assign({}, state.user, { authentication: AUTHENTICATED }),
       });
     }
 
     case UPDATE_USER_DETAILS: {
-      console.log("UPDATING USER DETAILS");
       return Object.assign(
         {},
         state,
@@ -146,14 +127,13 @@ export default (state = initalState, action) => {
     }
 
     case PARTY_JOINED: {
-      console.log("PARTY JOINED");
       return Object.assign(
         {},
         state,
         {
           user: Object.assign({}, state.user, { details: Object.assign({}, state.user.details, { isInParty: true }) }),
         },
-        { party: Object.assign({}, { code: action.partyCode }, state.party) }
+        { party: Object.assign({}, { code: action.partyCode }, state.party, { host: action.host, listeners: action.listeners }) }
       );
     }
   }
@@ -170,6 +150,7 @@ export const getRealtimeConnection = (state) => {
     connection: state.connection,
   };
 };
+export const isHost = (state) => state?.party?.host?.id == state?.user?.details?.id;
 export const getCurrentSong = (state) => state?.party?.nowPlaying;
 export const getParty = (state) => state.party;
 export const getSpotifySearchResults = (state) => state.search_results;

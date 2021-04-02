@@ -6,8 +6,6 @@ export const checkIfAuthenticated = () => {
 
     fetch("/account/isauthenticated")
       .then((res) => {
-        console.log("response from is authenticated");
-        console.log(res);
         if (res.status == 200) {
           return res.json();
         }
@@ -16,8 +14,6 @@ export const checkIfAuthenticated = () => {
         dispatch(isAuthenticated(json.userName));
       })
       .catch((res) => {
-        console.log("opps");
-        console.log(res);
         // TODO: error handling
         //window.location = "/account/login";
       });

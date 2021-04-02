@@ -12,7 +12,6 @@ export const fetchUserDetails = () => {
 };
 
 export const getUserAccessToken = (dispatch) => {
-  console.log("getting user access token");
   fetch("/api/user/GetPartyGoerSpotifyAccessToken")
     .then((json) => json.json())
     .then((res) => dispatch(setUserAccessToken(res.accessToken)));

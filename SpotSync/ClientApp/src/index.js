@@ -7,10 +7,12 @@ import { createStore } from "redux";
 import rootReducer from "./redux/reducers/reducers";
 
 const store = createStore(rootReducer);
+
 store.subscribe((state) => {
-  console.log("New State Baby");
+  console.log("New state was published");
   console.log(store.getState());
 });
+
 ReactDOM.render(
   <Provider store={store}>
     <App />

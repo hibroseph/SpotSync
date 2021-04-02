@@ -44,10 +44,12 @@ export const updateCurrentSong = (track) => {
   };
 };
 
-export const partyJoined = (partyCode) => {
+export const partyJoined = (partyCode, listeners, host) => {
   return {
     type: PARTY_JOINED,
     partyCode,
+    listeners,
+    host,
   };
 };
 

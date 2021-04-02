@@ -54,6 +54,7 @@ namespace SpotSync.Classes.Hubs
 
         public async Task ConnectToParty(string partyCode)
         {
+
             PartyGoer partier = await _partyGoerService.GetCurrentPartyGoerAsync();
             if (!await _partyService.IsUserPartyingAsync(partier) && !await _partyService.IsUserHostingAPartyAsync(partier))
             {
@@ -80,7 +81,8 @@ namespace SpotSync.Classes.Hubs
             new
             {
                 PartyCode = party.GetPartyCode(),
-                Listeners = party.GetListeners()
+                Listeners = party.GetListeners(),
+                Host = party.GetHost()
             }
             );
 

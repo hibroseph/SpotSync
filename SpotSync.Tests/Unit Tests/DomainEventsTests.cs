@@ -62,8 +62,16 @@ namespace SpotSync.Tests.Unit_Tests
                 }
             });
 
+            DomainEvents.ClearCallbacks();
+
             // If event doesn't get raised, 
             Assert.Fail();
+        }
+
+        [TearDown]
+        public void CleanUp()
+        {
+            DomainEvents.ClearCallbacks();
         }
     }
 }

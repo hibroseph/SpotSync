@@ -66,7 +66,7 @@ export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAc
   connection.on("InitialPartyLoad", (res, history, queue, details) => {
     dispatch(updateQueue(queue));
     dispatch(updateHistory(history));
-    dispatch(partyJoined(details.partyCode));
+    dispatch(partyJoined(details.partyCode, details.listeners, details.host));
   });
 
   connection.on("UpdatePartyView", (currentSong, history, queue) => {

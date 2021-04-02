@@ -52,9 +52,6 @@ const ConvertUserLikesDislikesFromServerToClient = (res) => {
 
   res.dislikedSongs.map((dislikedTrackUri) => (songFeelings = Object.assign({}, songFeelings, { [dislikedTrackUri]: 0 })));
   res.likedSongs.map((likedTrackUri) => (songFeelings = Object.assign({}, songFeelings, { [likedTrackUri]: 1 })));
-
-  console.log("AFTER CONVERSION");
-  console.log(songFeelings);
   return songFeelings;
 };
 
@@ -63,10 +60,7 @@ const Sidebar = ({ partyCode, className, songFeelings, dispatch }) => {
 
   useEffect(() => {
     if (partyCode != undefined) {
-      console.log("getting users lieks");
       getUserLikesDislikes(partyCode).then((res) => {
-        console.log("got the users likes ");
-        console.log(res);
         dispatch(setSongFeelings(ConvertUserLikesDislikesFromServerToClient(res)));
       });
     }
@@ -96,7 +90,6 @@ const Sidebar = ({ partyCode, className, songFeelings, dispatch }) => {
 };
 
 const mapStateToProps = (state) => {
-  console.log("STATE TO PROPS IN SIDEBARRRRRRRRRRRR");
   return {
     partyCode: getPartyCode(state),
     songFeelings: getSongFeelings(state),

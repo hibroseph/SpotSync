@@ -23,6 +23,7 @@ namespace SpotSync.Domain
         private TrackWithFeelings _currentTrack;
         private Stopwatch _trackPositionTime;
         private Timer _nextTrackTimer;
+        private List<PartyGoer> _usersThatDislikeCurrentSong;
 
         public Party(PartyGoer host)
         {
@@ -33,6 +34,7 @@ namespace SpotSync.Domain
             _queue = new Queue();
             _history = new List<Track>();
             _nextTrackTimer = new Timer(async (obj) => await NextTrackAsync());
+            _usersThatDislikeCurrentSong = new List<PartyGoer>();
         }
 
         public LikesDislikes GetUsersLikesDislikes(PartyGoer partyGoer)
@@ -72,7 +74,25 @@ namespace SpotSync.Domain
 
             if (IsNowPlayingTrack(trackUri))
             {
-                await RequestSkipAsync(partyGoer);
+                if (IsHost(partyGoer))
+                {
+                    await RequestSkipAsync(partyGoer);
+                    return;
+                }
+
+                await UserDislikesCurrentSongAsync(partyGoer);
+
+            }
+        }
+
+        private async Task UserDislikesCurrentSongAsync(PartyGoer partyGoer)
+        {
+            _usersThatDislikeCurrentSong.Add(partyGoer);
+
+            if (_usersThatDislikeCurrentSong.Count >= 0.5 * _listeners.Count)
+            {
+                _usersThatDislikeCurrentSong.Clear();
+                await NextTrackAsync();
             }
         }
 
@@ -146,6 +166,7 @@ namespace SpotSync.Domain
             }
             else
             {
+                _currentTrack = null;
                 await DomainEvents.RaiseAsync(new QueueEnded { PartyCode = _partyCode, LikedTracksUris = GetLikedTracksUris(5) });
             }
         }

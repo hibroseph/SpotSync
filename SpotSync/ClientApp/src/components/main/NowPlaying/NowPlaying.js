@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlayCircle, faStepForward, faPauseCircle } from "@fortawesome/free-solid-svg-icons";
 import { connect } from "react-redux";
-import { getUser, getPartyCode, getRealtimeConnection, getCurrentSong, getSongFeelings } from "../../../redux/reducers/reducers";
+import { getUser, getPartyCode, getRealtimeConnection, getCurrentSong, getSongFeelings, isHost } from "../../../redux/reducers/reducers";
 import { togglePlaybackState } from "../../../api/party";
 import { skipSong } from "../../../api/partyHub";
 import { userLikesSong, userDislikesSong } from "../../../api/partyHub";
@@ -74,7 +74,7 @@ const $ThumbsContainer = styled.div`
   justify-content: space-around;
   align-items: center;
 `;
-const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFeelings }) => {
+const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFeelings, isHost }) => {
   return (
     <$NowPlaying>
       <$NowPlayingSong>
@@ -105,7 +105,7 @@ const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFe
         ) : (
           <$PlayFontAwesomeIcon icon={faPauseCircle} onClick={() => togglePlaybackState(partyCode, dispatch)} />
         )}
-        <$SkipFontAwesomeIcon icon={faStepForward} onClick={() => skipSong(partyCode, connection)}></$SkipFontAwesomeIcon>
+        {isHost && <$SkipFontAwesomeIcon icon={faStepForward} onClick={() => skipSong(partyCode, connection)}></$SkipFontAwesomeIcon>}
       </$SongManagement>
       <div style={{ marginRight: "auto", flex: "1" }}></div>
     </$NowPlaying>
@@ -119,6 +119,7 @@ const mapStateToProps = (state) => {
     connection: getRealtimeConnection(state).connection,
     currentSong: getCurrentSong(state),
     songFeelings: getSongFeelings(state),
+    isHost: isHost(state),
   };
 };
 

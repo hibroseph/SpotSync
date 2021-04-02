@@ -42,8 +42,6 @@ function App(props) {
   }, []);
 
   useEffect(() => {
-    console.log("connection state or is in party changed");
-
     checkToSeeIfUserIsInParty(props);
   }, [props?.isUserInParty, props?.realTimeConnection?.connection]);
 

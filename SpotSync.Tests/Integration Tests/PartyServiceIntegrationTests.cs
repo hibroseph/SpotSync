@@ -179,6 +179,7 @@ namespace SpotSync.Tests
             Assert.AreEqual(1, (await _partyService.GetPartyWithHostAsync(PartyHost3)).GetListenerCount());
         }
 
+        [Ignore("Test needs to be rewritten")]
         [Test]
         public async Task PartyGoerAttendingFindsPartyWithAttendee()
         {
