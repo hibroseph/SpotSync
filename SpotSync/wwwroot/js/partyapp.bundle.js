@@ -6197,7 +6197,10 @@ var SET_SONG_FEELINGS = "set_song_feelings";
 var LISTENER_JOINED = "listener_joined";
 var LISTENER_LEFT = "listener_left";
 var listenerLeft = function listenerLeft(name) {
-  type: LISTENER_LEFT, name;
+  return {
+    type: LISTENER_LEFT,
+    name: name
+  };
 };
 var listenerJoined = function listenerJoined(name) {
   return {
@@ -20659,7 +20662,7 @@ var JoinOrCreateParty_templateObject, JoinOrCreateParty_templateObject2, JoinOrC
 
 
 var $greyedOutBackground = styled_components_browser_esm.div(JoinOrCreateParty_templateObject || (JoinOrCreateParty_templateObject = _taggedTemplateLiteral(["\n  position: absolute;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background-color: #000000;\n  opacity: 0.7;\n"])));
-var $popup = styled_components_browser_esm.div(JoinOrCreateParty_templateObject2 || (JoinOrCreateParty_templateObject2 = _taggedTemplateLiteral(["\n  background-color: #ffffff;\n  border-radius: 10px;\n  padding: 20px;\n  width: 450px;\n  height: 100px;\n"])));
+var $popup = styled_components_browser_esm.div(JoinOrCreateParty_templateObject2 || (JoinOrCreateParty_templateObject2 = _taggedTemplateLiteral(["\n  background-color: #ffffff;\n  border-radius: 10px;\n  padding: 20px;\n  width: 500px;\n  height: 100px;\n"])));
 var $flexContainer = styled_components_browser_esm.div(JoinOrCreateParty_templateObject3 || (JoinOrCreateParty_templateObject3 = _taggedTemplateLiteral(["\n  display: flex;\n  width: 100%;\n  padding: 20px;\n  box-sizing: border-box;\n  justify-content: center;\n"])));
 var $marginedButton = styled_components_browser_esm(shared_Button)(_templateObject4 || (_templateObject4 = _taggedTemplateLiteral(["\n  margin: 10px;\n"])));
 var $verticalBar = styled_components_browser_esm.div(_templateObject5 || (_templateObject5 = _taggedTemplateLiteral(["\n  border-left: 2px solid #e2e2e2;\n"])));

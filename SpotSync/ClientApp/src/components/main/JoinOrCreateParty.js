@@ -25,7 +25,7 @@ const $popup = styled.div`
   background-color: #ffffff;
   border-radius: 10px;
   padding: 20px;
-  width: 450px;
+  width: 500px;
   height: 100px;
 `;
 

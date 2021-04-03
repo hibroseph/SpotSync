@@ -13,7 +13,10 @@ export const LISTENER_JOINED = "listener_joined";
 export const LISTENER_LEFT = "listener_left";
 
 export const listenerLeft = (name) => {
-  type: LISTENER_LEFT, name;
+  return {
+    type: LISTENER_LEFT,
+    name,
+  };
 };
 
 export const listenerJoined = (name) => {
