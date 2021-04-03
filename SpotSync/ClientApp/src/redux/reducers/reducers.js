@@ -16,11 +16,30 @@ import {
   USER_LIKES_SONG,
   USER_DISLIKES_SONG,
   SET_SONG_FEELINGS,
+  LISTENER_JOINED,
+  LISTENER_LEFT,
 } from "../actions/party";
 import { REALTIME_CONNECTION_ESTABLISHED } from "../actions/signalr";
 
 export default (state = initalState, action) => {
   switch (action.type) {
+    case LISTENER_LEFT: {
+      let indexOfListenerToRemove = state.party.listeners.findIndex((name) => name == action.name);
+      return Object.assign({}, state, {
+        party: Object.assign({}, state.party, {
+          listeners: [...state.party.listeners.slice(0, indexOfListenerToRemove), ...state.party.queue.slice(indexOfListenerToRemove + 1)],
+        }),
+      });
+    }
+
+    case LISTENER_JOINED: {
+      return Object.assign({}, state, {
+        party: Object.assign({}, state.party, {
+          listeners: state.party.listeners != undefined ? [action.name, ...state.party.listeners] : [action.name],
+        }),
+      });
+    }
+
     case SET_SONG_FEELINGS: {
       return Object.assign({}, state, {
         party: Object.assign({}, state.party, { songFeelings: action.songFeelings }),
@@ -127,13 +146,21 @@ export default (state = initalState, action) => {
     }
 
     case PARTY_JOINED: {
+      console.log("PARTY JOINED");
+      console.log("listeners");
+      console.log(state.party.listeners);
       return Object.assign(
         {},
         state,
         {
           user: Object.assign({}, state.user, { details: Object.assign({}, state.user.details, { isInParty: true }) }),
         },
-        { party: Object.assign({}, { code: action.partyCode }, state.party, { host: action.host, listeners: action.listeners }) }
+        {
+          party: Object.assign({}, { code: action.partyCode }, state.party, {
+            host: action.host,
+            listeners: state.party.listeners != undefined ? [...state.party.listeners, ...action.listeners] : action.listeners,
+          }),
+        }
       );
     }
   }
@@ -150,7 +177,9 @@ export const getRealtimeConnection = (state) => {
     connection: state.connection,
   };
 };
-export const isHost = (state) => state?.party?.host?.id == state?.user?.details?.id && state?.party?.host != undefined;
+export const isHost = (state) => state?.party?.host == state?.user?.details?.id && state?.party?.host != undefined;
+export const getHost = (state) => state?.party?.host;
+export const getListeners = (state) => state?.party?.listeners;
 export const getCurrentSong = (state) => state?.party?.nowPlaying;
 export const getParty = (state) => state.party;
 export const getSpotifySearchResults = (state) => state.search_results;

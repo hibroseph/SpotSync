@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Navigation from "./components/navigation/Navigation";
 import MainContent from "./components/main/MainContent";
-import connectToPartyHub, { setupPartyHub } from "./signalR/setupPartyHub";
+import { setupPartyHub } from "./signalR/setupPartyHub";
 import { checkIfAuthenticated } from "./api/authentication";
 import { fetchUserDetails, getUserAccessToken } from "./api/user";
 import { connect } from "react-redux";
@@ -16,7 +16,6 @@ const setUpProcess = (dispatch) => {
   fetchUserDetails()(dispatch);
   getUserAccessToken(dispatch);
   setupPartyHub(dispatch);
-  //connectToPartyHub();
 };
 
 const addSpotifyPlaybackScriptToDom = () => {
@@ -32,7 +31,8 @@ const checkToSeeIfUserIsInParty = (props) => {
   if (props?.isUserInParty && props.realTimeConnection?.connection && props?.accessToken) {
     setUpSpotifyWebPlayback(props.accessToken, props.realTimeConnection.connection);
     addSpotifyPlaybackScriptToDom();
-    connectToParty(props.partyCode, props.realTimeConnection.connection);
+    console.log("app.js");
+    //connectToParty(props.partyCode, props.realTimeConnection.connection);
   }
 };
 

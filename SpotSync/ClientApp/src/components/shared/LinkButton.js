@@ -6,6 +6,7 @@ const $LinkButton = styled.a`
   background-color: #e5e5e5;
   border: none;
   font-weight: bold;
+  font-size: 18px;
   padding: 10px;
   color: black;
   text-decoration: none; /* no underline */

@@ -31,7 +31,7 @@ export const createParty = (connection, user) => {
       .then((res) => res.json())
       .then((json) => {
         connectToParty(json.partyCode, connection);
-        dispatch(partyJoined(json.partyCode, [], user));
+        //dispatch(partyJoined(json.partyCode, [], user));
       });
   };
 };

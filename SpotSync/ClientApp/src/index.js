@@ -9,8 +9,8 @@ import rootReducer from "./redux/reducers/reducers";
 const store = createStore(rootReducer);
 
 store.subscribe((state) => {
-  //console.log("New state was published");
-  //console.log(store.getState());
+  console.log("New state was published");
+  console.log(store.getState());
 });
 
 ReactDOM.render(

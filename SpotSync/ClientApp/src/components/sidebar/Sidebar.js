@@ -7,6 +7,7 @@ import { getUserLikesDislikes } from "../../api/party";
 import { connect } from "react-redux";
 import { getPartyCode, getSongFeelings } from "../../redux/reducers/reducers";
 import { setSongFeelings } from "../../redux/actions/party";
+import Listeners from "./Listeners";
 
 const $Sidebar = styled.div`
   margin: 0 5px 5px 0;
@@ -77,7 +78,7 @@ const Sidebar = ({ partyCode, className, songFeelings, dispatch }) => {
       case "History":
         return <History songFeelings={songFeelings}></History>;
       case "Listeners":
-        return <p>Not Implemented</p>;
+        return <Listeners />;
     }
   };
 

@@ -1,6 +1,6 @@
 import { JsonHubProtocol, HubConnectionState, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
 import { realTimeConnectionEstablished } from "../redux/actions/signalr";
-import { updateQueue, updateHistory, updateSong, partyJoined, updateCurrentSong } from "../redux/actions/party";
+import { updateQueue, updateHistory, updateSong, partyJoined, updateCurrentSong, listenerJoined, listenerLeft } from "../redux/actions/party";
 
 const startSignalRConnection = async (connection, dispatch) => {
   try {
@@ -59,14 +59,21 @@ export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAc
 
   connection.on("NewListener", (listener) => {
     console.log("A new listener joined the party " + listener);
+    dispatch(listenerJoined(listener));
   });
 
   connection.on("InitialPartyLoad", (res, history, queue, details) => {
+    console.log("INITIAL PARTY LOAD");
     dispatch(updateQueue(queue));
     dispatch(updateHistory(history));
     dispatch(partyJoined(details.partyCode, details.listeners, details.host));
   });
 
+  connection.on("ListenerLeft", (name) => {
+    console.log("SOMEONE DISCONNECTED");
+    console.log(name);
+    dispatch(listenerLeft(name));
+  });
   connection.on("UpdatePartyView", (currentSong, history, queue) => {
     dispatch(updateQueue(queue));
     dispatch(updateHistory(history));

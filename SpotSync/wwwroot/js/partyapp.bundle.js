@@ -4195,7 +4195,7 @@ var _templateObject;
 
 
 
-var $LinkButton = styled_components_browser_esm.a(_templateObject || (_templateObject = _taggedTemplateLiteral(["\n  border-radius: 10px;\n  background-color: #e5e5e5;\n  border: none;\n  font-weight: bold;\n  padding: 10px;\n  color: black;\n  text-decoration: none; /* no underline */\n\n  &:hover {\n    background-color: #e0e0e0;\n  }\n"])));
+var $LinkButton = styled_components_browser_esm.a(_templateObject || (_templateObject = _taggedTemplateLiteral(["\n  border-radius: 10px;\n  background-color: #e5e5e5;\n  border: none;\n  font-weight: bold;\n  font-size: 18px;\n  padding: 10px;\n  color: black;\n  text-decoration: none; /* no underline */\n\n  &:hover {\n    background-color: #e0e0e0;\n  }\n"])));
 
 var LinkButton = function LinkButton(props) {
   return /*#__PURE__*/react.createElement($LinkButton, {
@@ -5931,7 +5931,7 @@ function createDispatchHook(context) {
  * }
  */
 
-var useDispatch_useDispatch = /*#__PURE__*/(/* unused pure expression or super */ null && (createDispatchHook()));
+var useDispatch = /*#__PURE__*/(/* unused pure expression or super */ null && (createDispatchHook()));
 // CONCATENATED MODULE: ./node_modules/react-redux/es/hooks/useSelector.js
 
 
@@ -6082,6 +6082,21 @@ var useSelector = /*#__PURE__*/(/* unused pure expression or super */ null && (c
 
 setBatch(react_dom.unstable_batchedUpdates);
 
+// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/defineProperty.js
+function defineProperty_defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/arrayLikeToArray.js
 function _arrayLikeToArray(arr, len) {
   if (len == null || len > arr.length) len = arr.length;
@@ -6122,21 +6137,6 @@ function _nonIterableSpread() {
 
 function _toConsumableArray(arr) {
   return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
-}
-// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/defineProperty.js
-function defineProperty_defineProperty(obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-
-  return obj;
 }
 // CONCATENATED MODULE: ./ClientApp/src/redux/actions/authentication.js
 var CHECKING_AUTHENTICATION = "CHECKING_AUTHENTICATION";
@@ -6194,6 +6194,17 @@ var UPDATE_CURRENT_SONG = "update_current_song";
 var USER_LIKES_SONG = "user_likes_song";
 var USER_DISLIKES_SONG = "user_dislikes_song";
 var SET_SONG_FEELINGS = "set_song_feelings";
+var LISTENER_JOINED = "listener_joined";
+var LISTENER_LEFT = "listener_left";
+var listenerLeft = function listenerLeft(name) {
+  type: LISTENER_LEFT, name;
+};
+var listenerJoined = function listenerJoined(name) {
+  return {
+    type: LISTENER_JOINED,
+    name: name
+  };
+};
 var setSongFeelings = function setSongFeelings(songFeelings) {
   return {
     type: SET_SONG_FEELINGS,
@@ -6292,6 +6303,27 @@ var initalState = {
   var action = arguments.length > 1 ? arguments[1] : undefined;
 
   switch (action.type) {
+    case LISTENER_LEFT:
+      {
+        var indexOfListenerToRemove = state.party.listeners.findIndex(function (name) {
+          return name == action.name;
+        });
+        return Object.assign({}, state, {
+          party: Object.assign({}, state.party, {
+            listeners: [].concat(_toConsumableArray(state.party.listeners.slice(0, indexOfListenerToRemove)), _toConsumableArray(state.party.queue.slice(indexOfListenerToRemove + 1)))
+          })
+        });
+      }
+
+    case LISTENER_JOINED:
+      {
+        return Object.assign({}, state, {
+          party: Object.assign({}, state.party, {
+            listeners: state.party.listeners != undefined ? [action.name].concat(_toConsumableArray(state.party.listeners)) : [action.name]
+          })
+        });
+      }
+
     case SET_SONG_FEELINGS:
       {
         return Object.assign({}, state, {
@@ -6448,6 +6480,9 @@ var initalState = {
 
     case PARTY_JOINED:
       {
+        console.log("PARTY JOINED");
+        console.log("listeners");
+        console.log(state.party.listeners);
         return Object.assign({}, state, {
           user: Object.assign({}, state.user, {
             details: Object.assign({}, state.user.details, {
@@ -6459,7 +6494,7 @@ var initalState = {
             code: action.partyCode
           }, state.party, {
             host: action.host,
-            listeners: action.listeners
+            listeners: state.party.listeners != undefined ? [].concat(_toConsumableArray(state.party.listeners), _toConsumableArray(action.listeners)) : action.listeners
           })
         });
       }
@@ -6490,14 +6525,24 @@ var getRealtimeConnection = function getRealtimeConnection(state) {
   };
 };
 var isHost = function isHost(state) {
-  var _state$party3, _state$party3$host, _state$user2, _state$user2$details, _state$party4;
+  var _state$party3, _state$user2, _state$user2$details, _state$party4;
 
-  return (state === null || state === void 0 ? void 0 : (_state$party3 = state.party) === null || _state$party3 === void 0 ? void 0 : (_state$party3$host = _state$party3.host) === null || _state$party3$host === void 0 ? void 0 : _state$party3$host.id) == (state === null || state === void 0 ? void 0 : (_state$user2 = state.user) === null || _state$user2 === void 0 ? void 0 : (_state$user2$details = _state$user2.details) === null || _state$user2$details === void 0 ? void 0 : _state$user2$details.id) && (state === null || state === void 0 ? void 0 : (_state$party4 = state.party) === null || _state$party4 === void 0 ? void 0 : _state$party4.host) != undefined;
+  return (state === null || state === void 0 ? void 0 : (_state$party3 = state.party) === null || _state$party3 === void 0 ? void 0 : _state$party3.host) == (state === null || state === void 0 ? void 0 : (_state$user2 = state.user) === null || _state$user2 === void 0 ? void 0 : (_state$user2$details = _state$user2.details) === null || _state$user2$details === void 0 ? void 0 : _state$user2$details.id) && (state === null || state === void 0 ? void 0 : (_state$party4 = state.party) === null || _state$party4 === void 0 ? void 0 : _state$party4.host) != undefined;
 };
-var getCurrentSong = function getCurrentSong(state) {
+var getHost = function getHost(state) {
   var _state$party5;
 
-  return state === null || state === void 0 ? void 0 : (_state$party5 = state.party) === null || _state$party5 === void 0 ? void 0 : _state$party5.nowPlaying;
+  return state === null || state === void 0 ? void 0 : (_state$party5 = state.party) === null || _state$party5 === void 0 ? void 0 : _state$party5.host;
+};
+var getListeners = function getListeners(state) {
+  var _state$party6;
+
+  return state === null || state === void 0 ? void 0 : (_state$party6 = state.party) === null || _state$party6 === void 0 ? void 0 : _state$party6.listeners;
+};
+var getCurrentSong = function getCurrentSong(state) {
+  var _state$party7;
+
+  return state === null || state === void 0 ? void 0 : (_state$party7 = state.party) === null || _state$party7 === void 0 ? void 0 : _state$party7.nowPlaying;
 };
 var getParty = function getParty(state) {
   return state.party;
@@ -6508,6 +6553,7 @@ var getSpotifySearchResults = function getSpotifySearchResults(state) {
 // CONCATENATED MODULE: ./ClientApp/src/api/partyHub.js
 
 var connectToParty = function connectToParty(partyCode, connection) {
+  console.log("Invoking connect to party");
   connection.invoke("ConnectToParty", partyCode);
 };
 var skipSong = function skipSong(partyCode, connection) {
@@ -6570,8 +6616,7 @@ var createParty = function createParty(connection, user) {
     }).then(function (res) {
       return res.json();
     }).then(function (json) {
-      connectToParty(json.partyCode, connection);
-      dispatch(partyJoined(json.partyCode, [], user));
+      connectToParty(json.partyCode, connection); //dispatch(partyJoined(json.partyCode, [], user));
     });
   };
 };
@@ -6621,7 +6666,7 @@ var Button_templateObject;
 
 
 
-var $Button = styled_components_browser_esm.button(Button_templateObject || (Button_templateObject = _taggedTemplateLiteral(["\n  border-radius: 10px;\n  background-color: ", ";\n  border: none;\n  font-weight: bold;\n  padding: 10px;\n  &:hover {\n    background-color: #e0e0e0;\n  }\n"])), function (props) {
+var $Button = styled_components_browser_esm.button(Button_templateObject || (Button_templateObject = _taggedTemplateLiteral(["\n  border-radius: 10px;\n  background-color: ", ";\n  border: none;\n  font-size: 18px;\n  font-weight: bold;\n  padding: 10px;\n  &:hover {\n    background-color: #e0e0e0;\n  }\n"])), function (props) {
   return props.selected ? "#e5e5e5" : props.white ? "white" : "#e9e9e9";
 });
 
@@ -15592,7 +15637,7 @@ var Track_templateObject, Track_templateObject2;
 
 
 
-var $Track = styled_components_browser_esm.div(Track_templateObject || (Track_templateObject = _taggedTemplateLiteral(["\n  background-color: #e0e0e0;\n  border-radius: 10px;\n  margin: 5px;\n  padding: 5px;\n  width: 150px;\n  font-size: 12px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n\n  .title {\n    margin: 0px;\n  }\n\n  .artist {\n    color: grey;\n    margin: 0px;\n  }\n"])));
+var $Track = styled_components_browser_esm.div(Track_templateObject || (Track_templateObject = _taggedTemplateLiteral(["\n  background-color: #e0e0e0;\n  border-radius: 10px;\n  margin: 5px;\n  padding: 5px;\n  width: 150px;\n  font-size: 14px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n\n  .title {\n    margin: 0px;\n  }\n\n  .artist {\n    color: grey;\n    margin: 0px;\n  }\n"])));
 var $StyledFontAwesomeIcon = styled_components_browser_esm(FontAwesomeIcon)(Track_templateObject2 || (Track_templateObject2 = _taggedTemplateLiteral(["\n  &:hover {\n    transform: scale(1.2);\n  }\n"])));
 
 var Track = function Track(props) {
@@ -15649,7 +15694,7 @@ var SearchInput_templateObject;
 
 
 
-var $SearchInput = styled_components_browser_esm.input(SearchInput_templateObject || (SearchInput_templateObject = _taggedTemplateLiteral(["\n  border: none;\n  text-decoration: none;\n  background-color: #e0e0e0;\n  color: black;\n  padding: 10px;\n  width: 100%;\n  box-sizing: border-box;\n  border-radius: 10px;\n}\n"])));
+var $SearchInput = styled_components_browser_esm.input(SearchInput_templateObject || (SearchInput_templateObject = _taggedTemplateLiteral(["\n  border: none;\n  text-decoration: none;\n  background-color: #e0e0e0;\n  color: black;\n  padding: 10px;\n  width: 100%;\n  box-sizing: border-box;\n  border-radius: 10px;\n  font-size: 15px;\n}\n"])));
 
 var onSearch = function onSearch(event, dispatch, setIsLoading) {
   if (event.target.value != "") {
@@ -16763,7 +16808,7 @@ var QueueItem_templateObject, QueueItem_templateObject2;
 
 
 
-var $QueueItem = styled_components_browser_esm.div(QueueItem_templateObject || (QueueItem_templateObject = _taggedTemplateLiteral(["\n  width: 100%;\n  padding: 10px 8px;\n  margin: 5px 0px;\n  border-radius: 10px;\n  background-color: #f4f4f4;\n  display: flex;\n  justify-content: space-between;\n  box-sizing: border-box;\n\n  p {\n    margin: 0px;\n    font-size: 10px;\n  }\n\n  .title {\n    font-weight: bold;\n    margin-bottom: 3px;\n  }\n"])));
+var $QueueItem = styled_components_browser_esm.div(QueueItem_templateObject || (QueueItem_templateObject = _taggedTemplateLiteral(["\n  width: 100%;\n  padding: 10px 8px;\n  margin: 5px 0px;\n  border-radius: 10px;\n  background-color: #f4f4f4;\n  display: flex;\n  justify-content: space-between;\n  box-sizing: border-box;\n\n  p {\n    margin: 0px;\n    font-size: 15px;\n  }\n\n  .title {\n    font-weight: bold;\n    margin-bottom: 3px;\n  }\n"])));
 var $VotingContainer = styled_components_browser_esm.div(QueueItem_templateObject2 || (QueueItem_templateObject2 = _taggedTemplateLiteral(["\n  display: flex;\n"])));
 
 var QueueItem = function QueueItem(props) {
@@ -16863,12 +16908,63 @@ var History_mapStateToProps = function mapStateToProps(state) {
 };
 
 /* harmony default export */ const History_History = (connect(History_mapStateToProps, null)(History));
+// CONCATENATED MODULE: ./ClientApp/src/components/shared/Bubble.js
+
+
+var Bubble_templateObject;
+
+
+
+var $bubble = styled_components_browser_esm.div(Bubble_templateObject || (Bubble_templateObject = _taggedTemplateLiteral(["\n  background-color: ", ";\n  margin: 5px;\n  font-size: 12px;\n  padding: 2px 5px;\n  border-radius: 10px;\n"])), function (props) {
+  return props.color;
+});
+/* harmony default export */ const Bubble = (function (_ref) {
+  var color = _ref.color,
+      children = _ref.children;
+  return /*#__PURE__*/react.createElement($bubble, {
+    color: color
+  }, children);
+});
+// CONCATENATED MODULE: ./ClientApp/src/components/sidebar/Listeners.js
+
+
+var Listeners_templateObject;
+
+
+
+
+
+
+
+var $listener = styled_components_browser_esm.div(Listeners_templateObject || (Listeners_templateObject = _taggedTemplateLiteral(["\n  display: flex;\n  align-items: center;\n  width: 90%;\n  height: 45px;\n"])));
+
+var Listeners = function Listeners(_ref) {
+  var listeners = _ref.listeners,
+      host = _ref.host;
+  return /*#__PURE__*/react.createElement(react.Fragment, null, listeners != undefined ? listeners.map(function (name) {
+    return /*#__PURE__*/react.createElement($listener, {
+      key: name
+    }, /*#__PURE__*/react.createElement(Subtitle, null, name), name == host ? /*#__PURE__*/react.createElement(Bubble, {
+      color: "#e2b727"
+    }, "Host") : null);
+  }) : /*#__PURE__*/react.createElement(Subtitle, null, "There are no listeners"));
+};
+
+var Listeners_mapStateToProps = function mapStateToProps(state) {
+  return {
+    host: getHost(state),
+    listeners: getListeners(state)
+  };
+};
+
+/* harmony default export */ const sidebar_Listeners = (connect(Listeners_mapStateToProps, null)(Listeners));
 // CONCATENATED MODULE: ./ClientApp/src/components/sidebar/Sidebar.js
 
 
 
 
 var Sidebar_templateObject, Sidebar_templateObject2;
+
 
 
 
@@ -16936,7 +17032,7 @@ var Sidebar = function Sidebar(_ref) {
         });
 
       case "Listeners":
-        return /*#__PURE__*/react.createElement("p", null, "Not Implemented");
+        return /*#__PURE__*/react.createElement(sidebar_Listeners, null);
     }
   };
 
@@ -20427,11 +20523,18 @@ var setupSignalRConnection = function setupSignalRConnection(connectionHub) {
     connection.on("UpdateParty", function (res) {});
     connection.on("NewListener", function (listener) {
       console.log("A new listener joined the party " + listener);
+      dispatch(listenerJoined(listener));
     });
     connection.on("InitialPartyLoad", function (res, history, queue, details) {
+      console.log("INITIAL PARTY LOAD");
       dispatch(updateQueue(queue));
       dispatch(updateHistory(history));
       dispatch(partyJoined(details.partyCode, details.listeners, details.host));
+    });
+    connection.on("ListenerLeft", function (name) {
+      console.log("SOMEONE DISCONNECTED");
+      console.log(name);
+      dispatch(listenerLeft(name));
     });
     connection.on("UpdatePartyView", function (currentSong, history, queue) {
       dispatch(updateQueue(queue));
@@ -20476,11 +20579,6 @@ var getAccessToken = function getAccessToken(state) {
 var setupPartyHub = function setupPartyHub(dispatch) {
   return setupSignalRConnection(connectionHub, {}, getAccessToken)(dispatch);
 };
-/* harmony default export */ const signalR_setupPartyHub = (function () {
-  return function () {
-    var dispatch = useDispatch(); //dispatch(setupEventsHub); // dispatch is coming from Redux
-  };
-});
 // CONCATENATED MODULE: ./ClientApp/src/api/authentication.js
 
 var checkIfAuthenticated = function checkIfAuthenticated() {
@@ -20561,11 +20659,11 @@ var JoinOrCreateParty_templateObject, JoinOrCreateParty_templateObject2, JoinOrC
 
 
 var $greyedOutBackground = styled_components_browser_esm.div(JoinOrCreateParty_templateObject || (JoinOrCreateParty_templateObject = _taggedTemplateLiteral(["\n  position: absolute;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background-color: #000000;\n  opacity: 0.7;\n"])));
-var $popup = styled_components_browser_esm.div(JoinOrCreateParty_templateObject2 || (JoinOrCreateParty_templateObject2 = _taggedTemplateLiteral(["\n  background-color: #ffffff;\n  border-radius: 10px;\n  padding: 20px;\n  width: 400px;\n  height: 200px;\n"])));
+var $popup = styled_components_browser_esm.div(JoinOrCreateParty_templateObject2 || (JoinOrCreateParty_templateObject2 = _taggedTemplateLiteral(["\n  background-color: #ffffff;\n  border-radius: 10px;\n  padding: 20px;\n  width: 450px;\n  height: 100px;\n"])));
 var $flexContainer = styled_components_browser_esm.div(JoinOrCreateParty_templateObject3 || (JoinOrCreateParty_templateObject3 = _taggedTemplateLiteral(["\n  display: flex;\n  width: 100%;\n  padding: 20px;\n  box-sizing: border-box;\n  justify-content: center;\n"])));
 var $marginedButton = styled_components_browser_esm(shared_Button)(_templateObject4 || (_templateObject4 = _taggedTemplateLiteral(["\n  margin: 10px;\n"])));
 var $verticalBar = styled_components_browser_esm.div(_templateObject5 || (_templateObject5 = _taggedTemplateLiteral(["\n  border-left: 2px solid #e2e2e2;\n"])));
-var $styledInput = styled_components_browser_esm(shared_Input)(_templateObject6 || (_templateObject6 = _taggedTemplateLiteral(["\n  margin-left: 5px;\n"])));
+var $styledInput = styled_components_browser_esm(shared_Input)(_templateObject6 || (_templateObject6 = _taggedTemplateLiteral(["\n  margin-left: 10px;\n"])));
 
 var JoinParty = function JoinParty(partyCode, setLoading, connection) {
   setLoading(true);
@@ -20769,7 +20867,7 @@ var setUpProcess = function setUpProcess(dispatch) {
   checkIfAuthenticated()(dispatch);
   fetchUserDetails()(dispatch);
   getUserAccessToken(dispatch);
-  setupPartyHub(dispatch); //connectToPartyHub();
+  setupPartyHub(dispatch);
 };
 
 var addSpotifyPlaybackScriptToDom = function addSpotifyPlaybackScriptToDom() {
@@ -20785,7 +20883,7 @@ var checkToSeeIfUserIsInParty = function checkToSeeIfUserIsInParty(props) {
   if (props !== null && props !== void 0 && props.isUserInParty && (_props$realTimeConnec = props.realTimeConnection) !== null && _props$realTimeConnec !== void 0 && _props$realTimeConnec.connection && props !== null && props !== void 0 && props.accessToken) {
     setUpSpotifyWebPlayback(props.accessToken, props.realTimeConnection.connection);
     addSpotifyPlaybackScriptToDom();
-    connectToParty(props.partyCode, props.realTimeConnection.connection);
+    console.log("app.js"); //connectToParty(props.partyCode, props.realTimeConnection.connection);
   }
 };
 
@@ -20939,8 +21037,9 @@ function unregister() {
 
 
 var store = createStore(reducers);
-store.subscribe(function (state) {//console.log("New state was published");
-  //console.log(store.getState());
+store.subscribe(function (state) {
+  console.log("New state was published");
+  console.log(store.getState());
 });
 react_dom.render( /*#__PURE__*/react.createElement(components_Provider, {
   store: store

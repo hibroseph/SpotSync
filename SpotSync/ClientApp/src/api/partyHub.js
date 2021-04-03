@@ -1,6 +1,7 @@
 import { userLikesSong as userLikesSongAction, userDislikesSong as userDislikesSongAction } from "../redux/actions/party";
 
 export const connectToParty = (partyCode, connection) => {
+  console.log("Invoking connect to party");
   connection.invoke("ConnectToParty", partyCode);
 };
 

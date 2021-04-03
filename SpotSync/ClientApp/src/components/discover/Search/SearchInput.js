@@ -12,6 +12,7 @@ export const $SearchInput = styled.input`
   width: 100%;
   box-sizing: border-box;
   border-radius: 10px;
+  font-size: 15px;
 }
 `;
 

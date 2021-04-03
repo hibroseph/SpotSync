@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Policy;
 using System.Threading.Tasks;
+using SpotSync.Models.Party;
 
 namespace SpotSync.Classes.Hubs
 {
@@ -65,7 +66,7 @@ namespace SpotSync.Classes.Hubs
 
             // Add the partier to real-time connection group
             await Groups.AddToGroupAsync(Context.ConnectionId, partyCode);
-            await Clients.Group(partyCode).SendAsync("NewListener", Context.UserIdentifier);
+            await Clients.GroupExcept(partyCode, new List<string> { Context.ConnectionId }).SendAsync("NewListener", Context.UserIdentifier);
 
             Party party = await _partyService.GetPartyWithAttendeeAsync(partier);
 
@@ -81,8 +82,8 @@ namespace SpotSync.Classes.Hubs
             new
             {
                 PartyCode = party.GetPartyCode(),
-                Listeners = party.GetListeners(),
-                Host = party.GetHost()
+                Listeners = ConvertToListenerModel(party.GetListeners()),
+                Host = party.GetHost().Id
             }
             );
 
@@ -103,6 +104,31 @@ namespace SpotSync.Classes.Hubs
             await _logService.LogUserActivityAsync(partier, $"Joined real time collobration in party with code {partyCode}");
             return;
 
+        }
+
+        public override async Task OnDisconnectedAsync(Exception exception)
+        {
+            Party party = await _partyService.GetPartyWithAttendeeAsync(new PartyGoer(Context.UserIdentifier));
+
+            if (party != null)
+            {
+                await Clients.Group(party.GetPartyCode()).SendAsync("ListenerLeft", Context.UserIdentifier);
+                party.LeaveParty(new PartyGoer(Context.UserIdentifier));
+            }
+
+            await base.OnDisconnectedAsync(exception);
+        }
+
+        private List<string> ConvertToListenerModel(List<PartyGoer> partyGoers)
+        {
+            List<string> listeners = new List<string>();
+
+            foreach (PartyGoer partyGoer in partyGoers)
+            {
+                listeners.Add(partyGoer.Id);
+            }
+
+            return listeners;
         }
 
         public async Task WebPlayerInitialized(string device_id)

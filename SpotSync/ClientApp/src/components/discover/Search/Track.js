@@ -10,7 +10,7 @@ const $Track = styled.div`
   margin: 5px;
   padding: 5px;
   width: 150px;
-  font-size: 12px;
+  font-size: 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;

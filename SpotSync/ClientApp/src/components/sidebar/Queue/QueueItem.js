@@ -14,7 +14,7 @@ const $QueueItem = styled.div`
 
   p {
     margin: 0px;
-    font-size: 10px;
+    font-size: 15px;
   }
 
   .title {

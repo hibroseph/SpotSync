@@ -25,8 +25,8 @@ const $popup = styled.div`
   background-color: #ffffff;
   border-radius: 10px;
   padding: 20px;
-  width: 400px;
-  height: 200px;
+  width: 450px;
+  height: 100px;
 `;
 
 const $flexContainer = styled.div`
@@ -46,7 +46,7 @@ const $verticalBar = styled.div`
 `;
 
 const $styledInput = styled(Input)`
-  margin-left: 5px;
+  margin-left: 10px;
 `;
 
 const JoinParty = (partyCode, setLoading, connection) => {

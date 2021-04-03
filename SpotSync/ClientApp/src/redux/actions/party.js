@@ -9,6 +9,19 @@ export const UPDATE_CURRENT_SONG = "update_current_song";
 export const USER_LIKES_SONG = "user_likes_song";
 export const USER_DISLIKES_SONG = "user_dislikes_song";
 export const SET_SONG_FEELINGS = "set_song_feelings";
+export const LISTENER_JOINED = "listener_joined";
+export const LISTENER_LEFT = "listener_left";
+
+export const listenerLeft = (name) => {
+  type: LISTENER_LEFT, name;
+};
+
+export const listenerJoined = (name) => {
+  return {
+    type: LISTENER_JOINED,
+    name,
+  };
+};
 
 export const setSongFeelings = (songFeelings) => {
   return {
