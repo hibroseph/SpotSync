@@ -1,29 +1,28 @@
-﻿using System;
+﻿using SpotSync.Domain.Events;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SpotSync.Domain
 {
     public class Queue
     {
         private List<TrackWithFeelings> _tracks;
-        private Dictionary<string, List<string>> _usersLikedTracks;
-        private Dictionary<string, List<string>> _usersDislikedTracks;
+        private UsersLikesDislikes _usersLikesDislikes;
 
         public Queue(List<Track> tracks)
         {
             _tracks = tracks.Select(p => new TrackWithFeelings(p)).ToList();
-            _usersLikedTracks = new Dictionary<string, List<string>>();
-            _usersDislikedTracks = new Dictionary<string, List<string>>();
+            _usersLikesDislikes = new UsersLikesDislikes();
         }
 
         public Queue()
         {
             _tracks = new List<TrackWithFeelings>();
-            _usersLikedTracks = new Dictionary<string, List<string>>();
-            _usersDislikedTracks = new Dictionary<string, List<string>>();
+            _usersLikesDislikes = new UsersLikesDislikes();
         }
 
         public List<Track> GetAllTracks()
@@ -47,9 +46,9 @@ namespace SpotSync.Domain
 
         public bool TracksAreLiked()
         {
-            foreach (KeyValuePair<string, List<string>> pairs in _usersLikedTracks)
+            foreach (TrackWithFeelings track in _tracks)
             {
-                if (_usersLikedTracks[pairs.Key].Count > 0)
+                if (track.DoUsersLikeSong())
                 {
                     return true;
                 }
@@ -65,133 +64,45 @@ namespace SpotSync.Domain
 
         public LikesDislikes GetUsersTrackFeelings(PartyGoer user)
         {
-            List<string> likedTracks;
-            List<string> dislikedTracks;
-
-            if (HasUserDislikedTracksBefore(user))
-            {
-                dislikedTracks = _usersDislikedTracks[user.Id];
-            }
-            else
-            {
-                dislikedTracks = new List<string>();
-            }
-
-            if (HasUserLikedTracksBefore(user))
-            {
-                likedTracks = _usersLikedTracks[user.Id];
-
-            }
-            else
-            {
-                likedTracks = new List<string>();
-
-            }
-
-            return new LikesDislikes(likedTracks, dislikedTracks);
+            return _usersLikesDislikes.GetUsersTrackFeelings(user);
         }
 
-        public List<string> GetLikedTracksUris()
+        public async Task UserLikesTrackAsync(PartyGoer user, string trackUri, string partyCode)
         {
-            List<string> likedTracks = new List<string>();
+            _usersLikesDislikes.UserLikesTrack(user, trackUri);
 
-            foreach (KeyValuePair<string, List<string>> pair in _usersLikedTracks)
-            {
-                likedTracks.AddRange(_usersLikedTracks[pair.Key]);
-            }
+            _tracks.Find(p => p.GetTrackWithoutFeelings().Uri.Equals(trackUri, StringComparison.OrdinalIgnoreCase)).UserLikesTrack();
 
-            return likedTracks.Distinct().ToList();
+            _tracks.Sort(new ReorderQueueComparer());
+
+            await DomainEvents.RaiseAsync(new UpdateQueue { Tracks = _tracks.Select(p => p.GetTrackWithoutFeelings()).ToList(), PartyCode = partyCode });
         }
 
-        public void UserDislikesTrack(PartyGoer user, string trackUri)
+        public async Task UserDislikesTrackAsync(PartyGoer user, string trackUri, int listenerCount, string partyCode)
         {
-            if (HasUserDislikedTracksBefore(user))
+            _usersLikesDislikes.UserDislikesTrack(user, trackUri);
+
+            if (_tracks.Find(p => p.GetTrackWithoutFeelings().Uri.Equals(trackUri, StringComparison.OrdinalIgnoreCase)).DislikeCount() + 1 > listenerCount * 0.5)
             {
-                if (!_usersDislikedTracks[user.Id].Contains(trackUri))
+                _tracks.RemoveAll(p => p.GetTrackWithoutFeelings().Uri.Equals(trackUri, StringComparison.OrdinalIgnoreCase));
+
+                await DomainEvents.RaiseAsync(new UpdateQueue { Tracks = _tracks.Select(p => p.GetTrackWithoutFeelings()).ToList(), PartyCode = partyCode });
+            }
+        }
+
+        public List<string> GetLikedTrackUris()
+        {
+            List<string> likedTrackUris = new List<string>();
+
+            foreach (TrackWithFeelings track in _tracks)
+            {
+                if (track.DoUsersLikeSong())
                 {
-                    _usersDislikedTracks[user.Id].Add(trackUri);
+                    likedTrackUris.Add(track.GetTrackWithoutFeelings().Uri);
                 }
             }
-            else
-            {
-                _usersDislikedTracks[user.Id] = new List<string> { trackUri };
-            }
 
-            // If the user used to dislike this song, remove it from that list
-            if (DoesUserLikeTrack(user, trackUri))
-            {
-                UserDoesntLikeTrackAnymore(user, trackUri);
-            }
-
-            // reorder queue
-        }
-
-        public void UserLikesTrack(PartyGoer user, string trackUri)
-        {
-            if (HasUserLikedTracksBefore(user))
-            {
-                if (!_usersLikedTracks[user.Id].Contains(trackUri))
-                {
-                    _usersLikedTracks[user.Id].Add(trackUri);
-                }
-            }
-            else
-            {
-                _usersLikedTracks[user.Id] = new List<string> { trackUri };
-            }
-
-            // If the user used to dislike this song, remove it from that list
-            if (DoesUserDislikeTrack(user, trackUri))
-            {
-                UserDoesntDislikeTrackAnymore(user, trackUri);
-            }
-
-            // reorder queue
-        }
-
-        private bool HasUserDislikedTracksBefore(PartyGoer user)
-        {
-            return _usersDislikedTracks.ContainsKey(user.Id);
-        }
-        private bool HasUserLikedTracksBefore(PartyGoer user)
-        {
-            return _usersLikedTracks.ContainsKey(user.Id);
-        }
-
-        private void UserDoesntDislikeTrackAnymore(PartyGoer user, string trackUri)
-        {
-            if (_usersDislikedTracks.ContainsKey(user.Id))
-            {
-                _usersDislikedTracks[user.Id].Remove(trackUri);
-            }
-        }
-
-        private bool DoesUserDislikeTrack(PartyGoer partyGoer, string trackUri)
-        {
-            if (_usersDislikedTracks.ContainsKey(partyGoer.Id))
-            {
-                return _usersDislikedTracks[partyGoer.Id].Contains(trackUri);
-            }
-
-            return false;
-        }
-
-        private void UserDoesntLikeTrackAnymore(PartyGoer user, string trackUri)
-        {
-            if (_usersLikedTracks.ContainsKey(user.Id))
-            {
-                _usersLikedTracks[user.Id].Remove(trackUri);
-            }
-        }
-
-        private bool DoesUserLikeTrack(PartyGoer partyGoer, string trackUri)
-        {
-            if (_usersLikedTracks.ContainsKey(partyGoer.Id))
-            {
-                return _usersLikedTracks[partyGoer.Id].Contains(trackUri);
-            }
-
-            return false;
+            return likedTrackUris;
         }
 
         public bool HasExplicitTracks()

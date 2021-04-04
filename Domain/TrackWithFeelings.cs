@@ -30,5 +30,20 @@ namespace SpotSync.Domain
         {
             return _track;
         }
+
+        public bool DoUsersLikeSong()
+        {
+            return _likes > 0;
+        }
+
+        public int DislikeCount()
+        {
+            return _dislikes;
+        }
+
+        public int LikeCount()
+        {
+            return _likes;
+        }
     }
 }

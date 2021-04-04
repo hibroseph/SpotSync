@@ -6398,11 +6398,11 @@ var initalState = {
     case TOGGLE_PLAYBACK:
       {
         return Object.assign({}, state, {
-          user: {
+          user: Object.assign({}, {
             details: Object.assign({}, state.user.details, {
               pausedMusic: !state.user.details.pausedMusic
             })
-          }
+          }, state.user)
         });
       }
 
@@ -20527,6 +20527,9 @@ var setupSignalRConnection = function setupSignalRConnection(connectionHub) {
     connection.on("NewListener", function (listener) {
       console.log("A new listener joined the party " + listener);
       dispatch(listenerJoined(listener));
+    });
+    connection.on("UpdateQueue", function (queue) {
+      dispatch(updateQueue(queue));
     });
     connection.on("InitialPartyLoad", function (res, history, queue, details) {
       console.log("INITIAL PARTY LOAD");

@@ -57,20 +57,18 @@ namespace SpotSync.Domain
                 Queue = _queue.GetAllTracks(),
                 History = _history,
                 CurrentTrack = _currentTrack.GetTrackWithoutFeelings(),
-                LikedSongs = _queue.GetLikedTracksUris()
+                LikedSongs = _queue.GetLikedTrackUris()
             };
         }
 
-        public Task UserLikesTrackAsync(PartyGoer partyGoer, string trackUri)
+        public async Task UserLikesTrackAsync(PartyGoer partyGoer, string trackUri)
         {
-            _queue.UserLikesTrack(partyGoer, trackUri);
-
-            return Task.CompletedTask;
+            await _queue.UserLikesTrackAsync(partyGoer, trackUri, _partyCode);
         }
 
         public async Task UserDislikesTrackAsync(PartyGoer partyGoer, string trackUri)
         {
-            _queue.UserDislikesTrack(partyGoer, trackUri);
+            await _queue.UserDislikesTrackAsync(partyGoer, trackUri, _listeners.Count(), _partyCode);
 
             if (IsNowPlayingTrack(trackUri))
             {

@@ -95,7 +95,9 @@ export default (state = initalState, action) => {
     }
 
     case TOGGLE_PLAYBACK: {
-      return Object.assign({}, state, { user: { details: Object.assign({}, state.user.details, { pausedMusic: !state.user.details.pausedMusic }) } });
+      return Object.assign({}, state, {
+        user: Object.assign({}, { details: Object.assign({}, state.user.details, { pausedMusic: !state.user.details.pausedMusic }) }, state.user),
+      });
     }
 
     case UPDATE_USER_ACCESS_TOKEN: {

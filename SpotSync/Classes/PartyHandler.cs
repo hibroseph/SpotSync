@@ -13,7 +13,7 @@ using SpotSync.Domain.DTO;
 
 namespace SpotSync.Classes
 {
-    public class PartyHandler : IHandles<ChangeTrack>, IHandles<QueueEnded>, IHandles<ToggleMusicState>
+    public class PartyHandler : IHandles<ChangeTrack>, IHandles<QueueEnded>, IHandles<ToggleMusicState>, IHandles<UpdateQueue>
     {
         private readonly ISpotifyHttpClient _spotifyHttpClient;
         private readonly IHubContext<PartyHub> _partyHubContext;
@@ -99,6 +99,9 @@ namespace SpotSync.Classes
             );
         }
 
-
+        public async Task HandleAsync(UpdateQueue args)
+        {
+            await _partyHubContext.Clients.Group(args.PartyCode).SendAsync("UpdateQueue", args.Tracks);
+        }
     }
 }

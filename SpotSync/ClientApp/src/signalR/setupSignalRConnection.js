@@ -62,6 +62,10 @@ export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAc
     dispatch(listenerJoined(listener));
   });
 
+  connection.on("UpdateQueue", (queue) => {
+    dispatch(updateQueue(queue));
+  });
+
   connection.on("InitialPartyLoad", (res, history, queue, details) => {
     console.log("INITIAL PARTY LOAD");
     dispatch(updateQueue(queue));
