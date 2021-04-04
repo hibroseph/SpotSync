@@ -128,7 +128,7 @@ namespace SpotSync.Domain
             }
         }
 
-        private bool DoesUserDislikeTrack(PartyGoer partyGoer, string trackUri)
+        public bool DoesUserDislikeTrack(PartyGoer partyGoer, string trackUri)
         {
             if (_usersDislikedTracks.ContainsKey(partyGoer.Id))
             {
@@ -146,7 +146,7 @@ namespace SpotSync.Domain
             }
         }
 
-        private bool DoesUserLikeTrack(PartyGoer partyGoer, string trackUri)
+        public bool DoesUserLikeTrack(PartyGoer partyGoer, string trackUri)
         {
             if (_usersLikedTracks.ContainsKey(partyGoer.Id))
             {

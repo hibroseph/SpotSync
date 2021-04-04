@@ -16,6 +16,7 @@ namespace SpotSync.Domain
         public Queue(List<Track> tracks)
         {
             _tracks = tracks.Select(p => new TrackWithFeelings(p)).ToList();
+            _tracks.Sort(new ReorderQueueComparer());
             _usersLikesDislikes = new UsersLikesDislikes();
         }
 
@@ -69,24 +70,30 @@ namespace SpotSync.Domain
 
         public async Task UserLikesTrackAsync(PartyGoer user, string trackUri, string partyCode)
         {
-            _usersLikesDislikes.UserLikesTrack(user, trackUri);
+            if (!_usersLikesDislikes.DoesUserLikeTrack(user, trackUri))
+            {
+                _usersLikesDislikes.UserLikesTrack(user, trackUri);
 
-            _tracks.Find(p => p.GetTrackWithoutFeelings().Uri.Equals(trackUri, StringComparison.OrdinalIgnoreCase)).UserLikesTrack();
+                _tracks.Find(p => p.GetTrackWithoutFeelings().Uri.Equals(trackUri, StringComparison.OrdinalIgnoreCase)).UserLikesTrack();
 
-            _tracks.Sort(new ReorderQueueComparer());
+                _tracks.Sort(new ReorderQueueComparer());
 
-            await DomainEvents.RaiseAsync(new UpdateQueue { Tracks = _tracks.Select(p => p.GetTrackWithoutFeelings()).ToList(), PartyCode = partyCode });
+                await DomainEvents.RaiseAsync(new UpdateQueue { Tracks = _tracks.Select(p => p.GetTrackWithoutFeelings()).ToList(), PartyCode = partyCode });
+            }
         }
 
         public async Task UserDislikesTrackAsync(PartyGoer user, string trackUri, int listenerCount, string partyCode)
         {
-            _usersLikesDislikes.UserDislikesTrack(user, trackUri);
-
-            if (_tracks.Find(p => p.GetTrackWithoutFeelings().Uri.Equals(trackUri, StringComparison.OrdinalIgnoreCase)).DislikeCount() + 1 > listenerCount * 0.5)
+            if (!_usersLikesDislikes.DoesUserDislikeTrack(user, trackUri))
             {
-                _tracks.RemoveAll(p => p.GetTrackWithoutFeelings().Uri.Equals(trackUri, StringComparison.OrdinalIgnoreCase));
+                _usersLikesDislikes.UserDislikesTrack(user, trackUri);
 
-                await DomainEvents.RaiseAsync(new UpdateQueue { Tracks = _tracks.Select(p => p.GetTrackWithoutFeelings()).ToList(), PartyCode = partyCode });
+                if (_tracks.Find(p => p.GetTrackWithoutFeelings().Uri.Equals(trackUri, StringComparison.OrdinalIgnoreCase)).DislikeCount() + 1 > listenerCount * 0.5)
+                {
+                    _tracks.RemoveAll(p => p.GetTrackWithoutFeelings().Uri.Equals(trackUri, StringComparison.OrdinalIgnoreCase));
+
+                    await DomainEvents.RaiseAsync(new UpdateQueue { Tracks = _tracks.Select(p => p.GetTrackWithoutFeelings()).ToList(), PartyCode = partyCode });
+                }
             }
         }
 

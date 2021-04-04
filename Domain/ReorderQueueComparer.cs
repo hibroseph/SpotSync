@@ -9,11 +9,22 @@ namespace SpotSync.Domain
     {
         public int Compare([AllowNull] TrackWithFeelings x, [AllowNull] TrackWithFeelings y)
         {
-            if (x.LikeCount() > y.LikeCount())
+            // Sort by likes
+            if ((x.LikeCount() - x.DislikeCount()) > (y.LikeCount() - y.DislikeCount()))
             {
                 return -1;
             }
-            else if (x.LikeCount() < y.LikeCount())
+            else if ((x.LikeCount() - x.DislikeCount()) < (y.LikeCount() - y.DislikeCount()))
+            {
+                return 1;
+            }
+
+            // Sort by time added
+            if (x.GetTimeAdded() > y.GetTimeAdded())
+            {
+                return -1;
+            }
+            else if (x.GetTimeAdded() < y.GetTimeAdded())
             {
                 return 1;
             }
