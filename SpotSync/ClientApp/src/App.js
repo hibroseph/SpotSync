@@ -7,10 +7,9 @@ import { fetchUserDetails, getUserAccessToken } from "./api/user";
 import { connect } from "react-redux";
 import { getRealtimeConnection, getUser, getPartyCode } from "./redux/reducers/reducers";
 import JoinOrCreateParty from "./components/main/JoinOrCreateParty";
-import { setUpPartyHubApi } from "./api/partyHub";
-import { connectToParty } from "./api/partyHub";
 import { setUpSpotifyWebPlayback } from "./api/spotify";
 import NowPlaying from "../src/components/main/NowPlaying/NowPlaying";
+
 const setUpProcess = (dispatch) => {
   checkIfAuthenticated()(dispatch);
   fetchUserDetails()(dispatch);
@@ -31,8 +30,6 @@ const checkToSeeIfUserIsInParty = (props) => {
   if (props?.isUserInParty && props.realTimeConnection?.connection && props?.accessToken) {
     setUpSpotifyWebPlayback(props.accessToken, props.realTimeConnection.connection);
     addSpotifyPlaybackScriptToDom();
-    console.log("app.js");
-    //connectToParty(props.partyCode, props.realTimeConnection.connection);
   }
 };
 

@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import DiscoverFrame from "../discover/DiscoverFrame";
 import Sidebar from "../sidebar/Sidebar";
+import { ToastContainer, toast } from "react-toastify";
 
 const $MainContent = styled.div`
   display: flex;

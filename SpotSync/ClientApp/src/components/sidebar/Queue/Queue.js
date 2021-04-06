@@ -7,6 +7,7 @@ import { generateQueue } from "../../../api/party";
 import { userLikesSong, userDislikesSong } from "../../../api/partyHub";
 import Subtitle from "../../shared/Subtitle";
 import CenteredHorizontally from "../../shared/CenteredHorizontally";
+import toast from "../../../api/notify";
 
 const Queue = ({ party, connection, songFeelings = {}, dispatch }) => {
   return party?.queue?.length > 0 ? (
@@ -16,9 +17,11 @@ const Queue = ({ party, connection, songFeelings = {}, dispatch }) => {
           <QueueItem
             onLike={() => {
               userLikesSong(party.code, song.uri, connection, dispatch);
+              toast(`We will play more songs like ${song.name}`);
             }}
             onDislike={() => {
               userDislikesSong(party.code, song.uri, connection, dispatch);
+              toast(`We will play less songs like ${song.name}`);
             }}
             key={song.uri}
             title={song.name}

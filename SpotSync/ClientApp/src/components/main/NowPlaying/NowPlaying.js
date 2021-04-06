@@ -10,6 +10,8 @@ import { userLikesSong, userDislikesSong } from "../../../api/partyHub";
 import ThumbsUp from "../../shared/ThumbsUp";
 import ThumbsDown from "../../shared/ThumbsDown";
 import Loader from "../../shared/Loader";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.min.css";
 
 const $NowPlaying = styled.div`
   box-sizing: border-box;
@@ -76,39 +78,53 @@ const $ThumbsContainer = styled.div`
 `;
 const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFeelings, isHost }) => {
   return (
-    <$NowPlaying>
-      <$NowPlayingSong>
-        {currentSong && (
-          <React.Fragment>
-            <img src={currentSong?.albumImageUrl} />
-            <div className="song-information">
-              <p>{currentSong?.name}</p>
-              <p>{currentSong?.artist}</p>
-            </div>
+    <React.Fragment>
+      <ToastContainer
+        position="bottom-center"
+        style={{ bottom: "100px" }}
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      ></ToastContainer>
+      <$NowPlaying>
+        <$NowPlayingSong>
+          {currentSong && (
+            <React.Fragment>
+              <img src={currentSong?.albumImageUrl} />
+              <div className="song-information">
+                <p>{currentSong?.name}</p>
+                <p>{currentSong?.artist}</p>
+              </div>
 
-            {songFeelings && currentSong && (
-              <$ThumbsContainer>
-                <ThumbsDown
-                  onDislike={() => userDislikesSong(partyCode, currentSong.uri, connection, dispatch)}
-                  feeling={songFeelings[currentSong?.uri]}
-                />
-                <ThumbsUp onLike={() => userLikesSong(partyCode, currentSong.uri, connection, dispatch)} feeling={songFeelings[currentSong?.uri]} />
-              </$ThumbsContainer>
-            )}
-          </React.Fragment>
-        )}
-        {!currentSong && <Loader width={50} height={50}></Loader>}
-      </$NowPlayingSong>
-      <$SongManagement>
-        {user?.details?.pausedMusic ? (
-          <$PlayFontAwesomeIcon icon={faPlayCircle} onClick={() => togglePlaybackState(partyCode, dispatch)} />
-        ) : (
-          <$PlayFontAwesomeIcon icon={faPauseCircle} onClick={() => togglePlaybackState(partyCode, dispatch)} />
-        )}
-        {isHost && <$SkipFontAwesomeIcon icon={faStepForward} onClick={() => skipSong(partyCode, connection)}></$SkipFontAwesomeIcon>}
-      </$SongManagement>
-      <div style={{ marginRight: "auto", flex: "1" }}></div>
-    </$NowPlaying>
+              {songFeelings && currentSong && (
+                <$ThumbsContainer>
+                  <ThumbsDown
+                    onDislike={() => userDislikesSong(partyCode, currentSong.uri, connection, dispatch)}
+                    feeling={songFeelings[currentSong?.uri]}
+                  />
+                  <ThumbsUp onLike={() => userLikesSong(partyCode, currentSong.uri, connection, dispatch)} feeling={songFeelings[currentSong?.uri]} />
+                </$ThumbsContainer>
+              )}
+            </React.Fragment>
+          )}
+          {!currentSong && <Loader width={50} height={50}></Loader>}
+        </$NowPlayingSong>
+        <$SongManagement>
+          {user?.details?.pausedMusic ? (
+            <$PlayFontAwesomeIcon icon={faPlayCircle} onClick={() => togglePlaybackState(partyCode, dispatch)} />
+          ) : (
+            <$PlayFontAwesomeIcon icon={faPauseCircle} onClick={() => togglePlaybackState(partyCode, dispatch)} />
+          )}
+          {isHost && <$SkipFontAwesomeIcon icon={faStepForward} onClick={() => skipSong(partyCode, connection)}></$SkipFontAwesomeIcon>}
+        </$SongManagement>
+        <div style={{ marginRight: "auto", flex: "1" }}></div>
+      </$NowPlaying>
+    </React.Fragment>
   );
 };
 

@@ -95,8 +95,9 @@ export default (state = initalState, action) => {
     }
 
     case TOGGLE_PLAYBACK: {
+      console.log("toggling playback!!!");
       return Object.assign({}, state, {
-        user: Object.assign({}, { details: Object.assign({}, state.user.details, { pausedMusic: !state.user.details.pausedMusic }) }, state.user),
+        user: Object.assign({}, state.user, { details: Object.assign({}, state.user.details, { pausedMusic: !state.user.details.pausedMusic }) }),
       });
     }
 

@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { addSongToQueue } from "../../../api/party";
+import notify from "../../../api/notify";
 
 const $Track = styled.div`
   background-color: #e0e0e0;
@@ -38,7 +39,13 @@ const Track = (props) => {
         <p className="title">{props.track.name}</p>
         <p className="artist">{props.track.artist}</p>
       </div>
-      <$StyledFontAwesomeIcon icon={faPlus} onClick={() => addSongToQueue(props.track, props.user.details.id, props.partyCode, props.connection)} />
+      <$StyledFontAwesomeIcon
+        icon={faPlus}
+        onClick={() => {
+          addSongToQueue(props.track, props.user.details.id, props.partyCode, props.connection);
+          notify(`We added ${props.track.name} to the queue`);
+        }}
+      />
     </$Track>
   );
 };
