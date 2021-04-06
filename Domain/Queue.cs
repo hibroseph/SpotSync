@@ -128,6 +128,10 @@ namespace SpotSync.Domain
             return _tracks.Any();
         }
 
+        public bool SongExistsInQueue(Track track)
+        {
+            return _tracks.Any(p => p.GetTrackWithoutFeelings().Uri.Equals(track.Uri, StringComparison.OrdinalIgnoreCase));
+        }
         public void QueueTrack(Track track)
         {
             _tracks.Add(new TrackWithFeelings(track));

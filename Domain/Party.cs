@@ -219,7 +219,7 @@ namespace SpotSync.Domain
 
         public async Task AddTrackToQueueAsync(AddSongToQueueRequest request)
         {
-            _queue.QueueTrack(new Track
+            Track track = new Track
             {
                 Artist = request.Artist,
                 AlbumImageUrl = request.AlbumImageUrl,
@@ -227,8 +227,12 @@ namespace SpotSync.Domain
                 Length = request.Length,
                 Name = request.Name,
                 Uri = request.TrackUri
-            });
+            };
 
+            if (!_queue.SongExistsInQueue(track))
+            {
+                _queue.QueueTrack(track);
+            }
 
             // check to see if music is playing, if not, lets start it
             if (_currentTrack == null)
