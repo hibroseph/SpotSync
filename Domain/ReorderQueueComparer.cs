@@ -20,13 +20,13 @@ namespace SpotSync.Domain
             }
 
             // Sort by time added
-            if (x.GetTimeAdded() > y.GetTimeAdded())
-            {
-                return -1;
-            }
-            else if (x.GetTimeAdded() < y.GetTimeAdded())
+            if (x.GetTimeLastUpvoted() > y.GetTimeLastUpvoted())
             {
                 return 1;
+            }
+            else if (x.GetTimeLastUpvoted() < y.GetTimeLastUpvoted())
+            {
+                return -1;
             }
 
             return 0;

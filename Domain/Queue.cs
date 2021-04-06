@@ -74,11 +74,15 @@ namespace SpotSync.Domain
             {
                 _usersLikesDislikes.UserLikesTrack(user, trackUri);
 
-                _tracks.Find(p => p.GetTrackWithoutFeelings().Uri.Equals(trackUri, StringComparison.OrdinalIgnoreCase)).UserLikesTrack();
+                TrackWithFeelings track = _tracks.Find(p => p.GetTrackWithoutFeelings().Uri.Equals(trackUri, StringComparison.OrdinalIgnoreCase));
 
-                _tracks.Sort(new ReorderQueueComparer());
+                if (track != null)
+                {
+                    track.UserLikesTrack();
+                    _tracks.Sort(new ReorderQueueComparer());
 
-                await DomainEvents.RaiseAsync(new UpdateQueue { Tracks = _tracks.Select(p => p.GetTrackWithoutFeelings()).ToList(), PartyCode = partyCode });
+                    await DomainEvents.RaiseAsync(new UpdateQueue { Tracks = _tracks.Select(p => p.GetTrackWithoutFeelings()).ToList(), PartyCode = partyCode });
+                }
             }
         }
 
@@ -88,7 +92,9 @@ namespace SpotSync.Domain
             {
                 _usersLikesDislikes.UserDislikesTrack(user, trackUri);
 
-                if (_tracks.Find(p => p.GetTrackWithoutFeelings().Uri.Equals(trackUri, StringComparison.OrdinalIgnoreCase)).DislikeCount() + 1 > listenerCount * 0.5)
+                TrackWithFeelings track = _tracks.Find(p => p.GetTrackWithoutFeelings().Uri.Equals(trackUri, StringComparison.OrdinalIgnoreCase));
+
+                if (track != null && track.DislikeCount() + 1 > listenerCount * 0.5)
                 {
                     _tracks.RemoveAll(p => p.GetTrackWithoutFeelings().Uri.Equals(trackUri, StringComparison.OrdinalIgnoreCase));
 

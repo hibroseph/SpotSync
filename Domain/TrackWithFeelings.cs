@@ -10,22 +10,23 @@ namespace SpotSync.Domain
         private Track _track;
         private int _likes;
         private int _dislikes;
-        private DateTime _timeAdded;
+        private DateTime _lastUpvoted;
 
         public TrackWithFeelings(Track track)
         {
-            _timeAdded = DateTime.Now;
+            _lastUpvoted = DateTime.Now;
             _track = track;
         }
 
-        public DateTime GetTimeAdded()
+        public DateTime GetTimeLastUpvoted()
         {
-            return _timeAdded;
+            return _lastUpvoted;
         }
 
         public void UserLikesTrack()
         {
             _likes++;
+            _lastUpvoted = DateTime.Now;
         }
 
         public void UserDislikesTrack()

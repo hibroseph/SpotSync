@@ -68,8 +68,6 @@ namespace SpotSync.Domain
 
         public async Task UserDislikesTrackAsync(PartyGoer partyGoer, string trackUri)
         {
-            await _queue.UserDislikesTrackAsync(partyGoer, trackUri, _listeners.Count(), _partyCode);
-
             if (IsNowPlayingTrack(trackUri))
             {
                 if (IsHost(partyGoer))
@@ -79,8 +77,11 @@ namespace SpotSync.Domain
                 }
 
                 await UserDislikesCurrentSongAsync(partyGoer);
-
+                return;
             }
+
+
+            await _queue.UserDislikesTrackAsync(partyGoer, trackUri, _listeners.Count(), _partyCode);
         }
 
         private async Task UserDislikesCurrentSongAsync(PartyGoer partyGoer)
