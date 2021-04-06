@@ -4,7 +4,7 @@ import Track from "./Track";
 import Loader from "../../shared/Loader";
 import CenteredHorizontally from "../../shared/CenteredHorizontally";
 import { connect } from "react-redux";
-import { getSpotifySearchResults, getUser, getPartyCode, getRealtimeConnection } from "../../../redux/reducers/reducers";
+import { getSpotifySearchResults, getUser, getPartyCode, getRealtimeConnection, getQueue } from "../../../redux/reducers/reducers";
 import SearchInput from "./SearchInput";
 import Subtitle from "../../shared/Subtitle";
 
@@ -13,12 +13,12 @@ const $SearchResults = styled.div`
   flex-wrap: wrap;
 `;
 
-const Search = (props) => {
+const Search = ({ search_results, user, partyCode, queue, connection }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setIsLoading(false);
-  }, props.search_results);
+  }, search_results);
 
   return (
     <React.Fragment>
@@ -28,12 +28,23 @@ const Search = (props) => {
           <Loader></Loader>
         </CenteredHorizontally>
       )}
-      {props?.search_results?.length > 0 && (
+      {search_results?.length > 0 && (
         <React.Fragment>
           <Subtitle>Search Results</Subtitle>
           <$SearchResults>
-            {props?.search_results?.map((track) => {
-              return <Track track={track} partyCode={props.partyCode} user={props.user} connection={props.connection}></Track>;
+            {search_results?.map((track) => {
+              return (
+                <Track
+                  isValidAddition={() => {
+                    console.log("checking to see if this is valid " + !queue?.some((song) => song.uri == track.uri));
+                    return !queue?.some((song) => song.uri == track.uri);
+                  }}
+                  track={track}
+                  partyCode={partyCode}
+                  user={user}
+                  connection={connection}
+                ></Track>
+              );
             })}
           </$SearchResults>
         </React.Fragment>
@@ -47,6 +58,7 @@ const mapStateToProps = (state) => {
     search_results: getSpotifySearchResults(state),
     user: getUser(state),
     partyCode: getPartyCode(state),
+    queue: getQueue(state),
     connection: getRealtimeConnection(state)?.connection,
   };
 };

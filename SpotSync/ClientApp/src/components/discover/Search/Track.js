@@ -42,8 +42,12 @@ const Track = (props) => {
       <$StyledFontAwesomeIcon
         icon={faPlus}
         onClick={() => {
-          addSongToQueue(props.track, props.user.details.id, props.partyCode, props.connection);
-          notify(`We added ${props.track.name} to the queue`);
+          if (props.isValidAddition()) {
+            addSongToQueue(props.track, props.user.details.id, props.partyCode, props.connection);
+            notify(`We added ${props.track.name} to the queue`);
+          } else {
+            notify(`${props.track.name} already exists in the queue. Go ahead and add it when it leaves the queue`);
+          }
         }}
       />
     </$Track>
