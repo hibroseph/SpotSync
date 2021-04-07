@@ -6838,9 +6838,6 @@ var initalState = {
 
     case PARTY_JOINED:
       {
-        console.log("PARTY JOINED");
-        console.log("listeners");
-        console.log(state.party.listeners);
         return Object.assign({}, state, {
           user: Object.assign({}, state.user, {
             details: Object.assign({}, state.user.details, {
@@ -6913,7 +6910,6 @@ var getQueue = function getQueue(state) {
 // CONCATENATED MODULE: ./ClientApp/src/api/partyHub.js
 
 var connectToParty = function connectToParty(partyCode, connection) {
-  console.log("Invoking connect to party");
   connection.invoke("ConnectToParty", partyCode);
 };
 var skipSong = function skipSong(partyCode, connection) {
@@ -22216,6 +22212,7 @@ var VERSION = "3.1.12";
 
 
 
+
 var startSignalRConnection = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator( /*#__PURE__*/regenerator_default().mark(function _callee(connection, dispatch) {
     return regenerator_default().wrap(function _callee$(_context) {
@@ -22288,21 +22285,19 @@ var setupSignalRConnection = function setupSignalRConnection(connectionHub) {
     startSignalRConnection(connection, dispatch);
     connection.on("UpdateParty", function (res) {});
     connection.on("NewListener", function (listener) {
-      console.log("A new listener joined the party " + listener);
+      notify("".concat(listener, " joined your party"));
       dispatch(listenerJoined(listener));
     });
     connection.on("UpdateQueue", function (queue) {
       dispatch(updateQueue(queue));
     });
     connection.on("InitialPartyLoad", function (res, history, queue, details) {
-      console.log("INITIAL PARTY LOAD");
       dispatch(updateQueue(queue));
       dispatch(updateHistory(history));
       dispatch(partyJoined(details.partyCode, details.listeners, details.host));
     });
     connection.on("ListenerLeft", function (name) {
-      console.log("SOMEONE DISCONNECTED");
-      console.log(name);
+      notify("".concat(name, " left your party"));
       dispatch(listenerLeft(name));
     });
     connection.on("UpdatePartyView", function (currentSong, history, queue) {

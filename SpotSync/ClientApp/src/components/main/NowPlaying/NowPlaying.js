@@ -10,7 +10,7 @@ import { userLikesSong, userDislikesSong } from "../../../api/partyHub";
 import ThumbsUp from "../../shared/ThumbsUp";
 import ThumbsDown from "../../shared/ThumbsDown";
 import Loader from "../../shared/Loader";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.min.css";
 
 const $NowPlaying = styled.div`

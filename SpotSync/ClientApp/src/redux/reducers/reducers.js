@@ -143,9 +143,6 @@ export default (state = initalState, action) => {
     }
 
     case PARTY_JOINED: {
-      console.log("PARTY JOINED");
-      console.log("listeners");
-      console.log(state.party.listeners);
       return Object.assign(
         {},
         state,
