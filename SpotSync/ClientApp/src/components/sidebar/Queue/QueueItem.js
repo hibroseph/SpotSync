@@ -4,14 +4,16 @@ import Voting from "./Voting";
 
 const $QueueItem = styled.div`
   width: 100%;
-  padding: 10px 8px;
+  padding: 15px 20px;
   margin: 5px 0px;
   border-radius: 10px;
-  background-color: #f4f4f4;
   display: flex;
   justify-content: space-between;
   box-sizing: border-box;
 
+  &:hover {
+    background-color: #e1f1ff;
+  }
   p {
     margin: 0px;
     font-size: 15px;
@@ -20,6 +22,11 @@ const $QueueItem = styled.div`
   .title {
     font-weight: bold;
     margin-bottom: 3px;
+  }
+
+  .artist {
+    font-size: 12px;
+    color: #8d8d8d;
   }
 `;
 
@@ -31,7 +38,7 @@ const QueueItem = (props) => {
     <$QueueItem>
       <div>
         <p className="title">{props.title}</p>
-        <p>{props.artist}</p>
+        <p className="artist">{props.artist}</p>
       </div>
       <Voting feeling={props.feeling} onDislike={props.onDislike} onLike={props.onLike} vote={props.vote}></Voting>
     </$QueueItem>

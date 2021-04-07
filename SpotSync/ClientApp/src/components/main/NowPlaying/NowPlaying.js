@@ -18,8 +18,7 @@ const $NowPlaying = styled.div`
   width: 100%;
   bottom: 0px;
   left: 0;
-  padding: 10px;
-  background-color: #e5e5e5;
+  padding: 15px;
   display: flex;
   justify-content: space-around;
 
@@ -62,11 +61,19 @@ const $NowPlayingSong = styled.div`
   }
   p {
     margin: 0px;
-    font-size: 10px;
   }
 
   img {
     width: 50px;
+  }
+
+  .title {
+    font-size: 15px;
+    font-weight: bold;
+  }
+
+  .artist {
+    font-size: 12px;
   }
 `;
 
@@ -97,8 +104,8 @@ const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFe
             <React.Fragment>
               <img src={currentSong?.albumImageUrl} />
               <div className="song-information">
-                <p>{currentSong?.name}</p>
-                <p>{currentSong?.artist}</p>
+                <p className={"title"}>{currentSong?.name}</p>
+                <p className={"artist"}>{currentSong?.artist}</p>
               </div>
 
               {songFeelings && currentSong && (

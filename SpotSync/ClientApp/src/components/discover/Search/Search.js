@@ -13,24 +13,25 @@ const $SearchResults = styled.div`
   flex-wrap: wrap;
 `;
 
-const Search = ({ search_results, user, partyCode, queue, connection }) => {
+const $SearchContainer = styled.div`
+  border: 3px solid #fafafa;
+  padding: 0 10px 10px;
+  border-radius: 10px;
+`;
+
+const Search = ({ user, partyCode, queue, connection }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const [searchResults, setSearchResults] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     setIsLoading(false);
   }, [searchResults]);
 
   return (
-    <React.Fragment>
-      <SearchInput
-        setSearchTerm={setSearchTerm}
-        setSearchResults={setSearchResults}
-        setIsLoading={setIsLoading}
-        placeholder="Search for Songs, Artists, and Albums"
-      />
+    <$SearchContainer>
+      <Subtitle>Search</Subtitle>
+      <SearchInput setSearchResults={setSearchResults} setIsLoading={setIsLoading} placeholder="Search for Songs, Artists, and Albums" />
       {isLoading && (
         <CenteredHorizontally>
           <Loader></Loader>
@@ -38,7 +39,6 @@ const Search = ({ search_results, user, partyCode, queue, connection }) => {
       )}
       {!isLoading && searchResults?.length > 0 && (
         <React.Fragment>
-          <Subtitle>Search Results for {searchTerm}</Subtitle>
           <$SearchResults>
             {searchResults.map((track) => {
               return (
@@ -56,7 +56,7 @@ const Search = ({ search_results, user, partyCode, queue, connection }) => {
           </$SearchResults>
         </React.Fragment>
       )}
-    </React.Fragment>
+    </$SearchContainer>
   );
 };
 

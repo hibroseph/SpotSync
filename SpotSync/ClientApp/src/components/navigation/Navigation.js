@@ -24,7 +24,6 @@ const $Navigation = styled.nav`
   padding: 10px 30px;
   box-sizing: border-box;
   width: 100%;
-  height: 50px;
   display: flex;
   justify-content: space-between;
   align-items: center;

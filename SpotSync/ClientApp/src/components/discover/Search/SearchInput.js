@@ -2,18 +2,10 @@ import React from "react";
 import styled from "styled-components";
 import { searchSpotify } from "../../../api/party";
 import { useEffect, useState } from "react";
+import Input from "../../shared/Input";
 
-export const $SearchInput = styled.input`
-  border: none;
-  text-decoration: none;
-  background-color: #e0e0e0;
-  color: black;
-  padding: 10px;
+export const $SearchInput = styled(Input)`
   width: 100%;
-  box-sizing: border-box;
-  border-radius: 10px;
-  font-size: 15px;
-}
 `;
 
 const onSearch = (searchValue, setSearchResults) => {
@@ -22,7 +14,7 @@ const onSearch = (searchValue, setSearchResults) => {
   });
 };
 
-const SearchInput = ({ setSearchTerm, setIsLoading, placeholder, setSearchResults }) => {
+const SearchInput = ({ setIsLoading, placeholder, setSearchResults }) => {
   const [searchValue, setSearchValue] = useState("");
 
   useEffect(() => {
@@ -30,7 +22,6 @@ const SearchInput = ({ setSearchTerm, setIsLoading, placeholder, setSearchResult
       setIsLoading(false);
       return;
     }
-    setSearchTerm(searchValue);
     setIsLoading(true);
     const timeoutId = setTimeout(() => onSearch(searchValue, setSearchResults), 1000);
     return () => clearTimeout(timeoutId);

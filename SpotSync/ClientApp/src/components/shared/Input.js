@@ -2,10 +2,10 @@ import React from "react";
 import styled from "styled-components";
 
 const $Input = styled.input`
-  border: none;
-  background-color: #e2e2e2;
-  padding: 10px;
-  border-radius: 5px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  box-sizing: border-box;
+  border: 3px solid #fafafa;
 `;
 
 const Input = (props) => {

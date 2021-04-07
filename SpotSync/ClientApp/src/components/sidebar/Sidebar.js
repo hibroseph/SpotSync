@@ -17,13 +17,13 @@ const $Sidebar = styled.div`
 `;
 
 const $SidebarContent = styled.div`
-  background-color: #e5e5e5;
   border-radius: 10px;
   padding: 5px;
   display: flex;
   flex-direction: column;
   align-items: center;
   overflow-y: auto;
+  border: 3px solid #fafafa;
 
   &::-webkit-scrollbar {
     background-color: #e5e5e5;

@@ -10,12 +10,15 @@ const $MainContent = styled.div`
   flex-direction: row;
   flex: 1 1 auto;
   overflow-y: auto;
+  padding: 10px 20px;
+  box-sizing: border-box;
 `;
 
 const $WideDiscoverFrame = styled(DiscoverFrame)`
   && {
     padding: 0 10px;
     width: 70%;
+    padding: 0 30px 20px 10px;
   }
 `;
 

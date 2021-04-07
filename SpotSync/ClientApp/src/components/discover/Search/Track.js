@@ -6,21 +6,28 @@ import { addSongToQueue } from "../../../api/party";
 import notify from "../../../api/notify";
 
 const $Track = styled.div`
-  background-color: #e0e0e0;
+  border: 3px solid #fafafa;
   border-radius: 10px;
-  margin: 5px;
-  padding: 5px;
-  width: 150px;
+  margin: 10px;
+  padding: 10px 20px;
+  width: 200px;
   font-size: 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 
+  &:hover {
+    background-color: #e1f1ff;
+  }
+
   .title {
     margin: 0px;
+    font-weight: bold;
+    font-size: 15px;
   }
 
   .artist {
+    font-size: 12px;
     color: grey;
     margin: 0px;
   }

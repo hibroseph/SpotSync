@@ -111,7 +111,7 @@ namespace SpotSync.Infrastructure
 
             List<Track> tracks = await ReadFullTrackJsonObjectFromResponseAsync(response);
 
-            return tracks.Select(p => new SpotifyTrackQueryResult { Uri = p.Uri, Artist = p.Artist, Length = p.Length, Name = p.Name, Explicit = p.Explicit });
+            return tracks.Select(p => new SpotifyTrackQueryResult { Uri = p.Uri.Replace("spotify:track:", ""), Artist = p.Artist, Length = p.Length, Name = p.Name, Explicit = p.Explicit });
         }
 
         private async Task<List<Track>> ReadFullTrackJsonObjectFromResponseAsync(HttpResponseMessage response)
@@ -297,6 +297,7 @@ namespace SpotSync.Infrastructure
         {
             return $"seed_tracks={ HttpUtility.UrlEncode(ConvertToCommaDelimitedString(getRecommendedSongs.SeedTrackUris))}{(!string.IsNullOrWhiteSpace(getRecommendedSongs.Market) ? $"&{getRecommendedSongs.Market}" : string.Empty)}";
         }
+
         private string ConvertToCommaDelimitedString(List<string> items)
         {
             return string.Join(",", items);
