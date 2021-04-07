@@ -9,7 +9,6 @@ import {
   LEFT_PARTY,
   UPDATE_HISTORY,
   UPDATE_QUEUE,
-  SEARCHED_SPOTIFY,
   TOGGLE_PLAYBACK,
   UPDATE_SONG,
   UPDATE_CURRENT_SONG,
@@ -104,10 +103,6 @@ export default (state = initalState, action) => {
       return Object.assign({}, state, { user: Object.assign({}, state.user, { accessToken: action.accessToken }) });
     }
 
-    case SEARCHED_SPOTIFY: {
-      return Object.assign({}, state, { search_results: action.results });
-    }
-
     case UPDATE_QUEUE: {
       return Object.assign({}, state, { party: Object.assign({}, state.party, { queue: action.queue }) });
     }
@@ -184,5 +179,4 @@ export const getHost = (state) => state?.party?.host;
 export const getListeners = (state) => state?.party?.listeners;
 export const getCurrentSong = (state) => state?.party?.nowPlaying;
 export const getParty = (state) => state.party;
-export const getSpotifySearchResults = (state) => state.search_results;
 export const getQueue = (state) => state?.party?.queue;

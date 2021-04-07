@@ -45,11 +45,11 @@ export const generateQueue = (partyCode) => {
     });
 };
 
-export const searchSpotify = (query, dispatch) => {
-  fetch(`/api/user/searchSpotify?query=${query}&queryType=0`)
+export const searchSpotify = (query) => {
+  return fetch(`/api/user/searchSpotify?query=${query}&queryType=0`)
     .then((response) => response.json())
-    .then((queryResults) => {
-      dispatch(saveSpotifySearchResults(queryResults));
+    .then((searchResults) => {
+      return searchResults;
     });
 };
 

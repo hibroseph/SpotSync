@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { searchSpotify } from "../../../api/party";
-import { connect } from "react-redux";
+import { useEffect, useState } from "react";
 
 export const $SearchInput = styled.input`
   border: none;
@@ -16,15 +16,27 @@ export const $SearchInput = styled.input`
 }
 `;
 
-const onSearch = (event, dispatch, setIsLoading) => {
-  if (event.target.value != "") {
+const onSearch = (searchValue, setSearchResults) => {
+  searchSpotify(searchValue).then((searchResults) => {
+    setSearchResults(searchResults);
+  });
+};
+
+const SearchInput = ({ setSearchTerm, setIsLoading, placeholder, setSearchResults }) => {
+  const [searchValue, setSearchValue] = useState("");
+
+  useEffect(() => {
+    if (searchValue == "") {
+      setIsLoading(false);
+      return;
+    }
+    setSearchTerm(searchValue);
     setIsLoading(true);
-    searchSpotify(event.target.value, dispatch);
-  }
+    const timeoutId = setTimeout(() => onSearch(searchValue, setSearchResults), 1000);
+    return () => clearTimeout(timeoutId);
+  }, [searchValue]);
+
+  return <$SearchInput placeholder={placeholder} onInput={(event) => setSearchValue(event.target.value)}></$SearchInput>;
 };
 
-const SearchInput = (props) => {
-  return <$SearchInput placeholder={props.placeholder} onInput={(event) => onSearch(event, props.dispatch, props.setIsLoading)}></$SearchInput>;
-};
-
-export default connect(null, null)(SearchInput);
+export default SearchInput;
