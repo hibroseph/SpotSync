@@ -183,7 +183,7 @@ namespace SpotSync.Controllers
             try
             {
                 party.JoinParty(user);
-
+                await party.SyncListenerWithSongAsync(user);
                 await _logService.LogUserActivityAsync(user.Id, $"Joined a party with code {partyCode}");
 
                 return new JsonResult(new Result<JoinedParty>(new JoinedParty { PartyCode = partyCode, SuccessfullyJoinedParty = true }));

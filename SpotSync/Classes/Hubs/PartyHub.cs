@@ -178,10 +178,5 @@ namespace SpotSync.Classes.Hubs
         {
             await Clients.Group(partyCode).SendAsync("UpdateSong", currentSong);
         }
-
-        public async Task UpdatePlaylistForParty(string partyCode, List<Track> playlist)
-        {
-            await Clients.Group(partyCode).SendAsync("UpdatePlaylist", playlist, playlist.First());
-        }
     }
 }

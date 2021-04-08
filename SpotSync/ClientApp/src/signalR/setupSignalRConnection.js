@@ -66,7 +66,9 @@ export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAc
     dispatch(updateQueue(queue));
   });
 
-  connection.on("InitialPartyLoad", (res, history, queue, details) => {
+  connection.on("InitialPartyLoad", (currentSong, history, queue, details) => {
+    console.log("INITAL PARTY LOAD");
+    dispatch(updateCurrentSong(currentSong.song));
     dispatch(updateQueue(queue));
     dispatch(updateHistory(history));
     dispatch(partyJoined(details.partyCode, details.listeners, details.host));
@@ -77,6 +79,7 @@ export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAc
     dispatch(listenerLeft(name));
   });
   connection.on("UpdatePartyView", (currentSong, history, queue) => {
+    console.log("UPDATEPARTYVIEW");
     dispatch(updateQueue(queue));
     dispatch(updateHistory(history));
     dispatch(updateCurrentSong(currentSong.song));
@@ -97,18 +100,8 @@ export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAc
     eventHandler && dispatch(eventHandler(res));
   });
 
-  connection.on("UserModifiedPlaylist", (res) => {
-    const eventHandler = actionEventMap[res.eventType];
-    eventHandler && dispatch(eventHandler(res));
-  });
-
   connection.on("UpdateSong", (updateSongObj) => {
     dispatch(updateSong(updateSongObj.song, updateSongObj.position));
-  });
-
-  connection.on("UpdatePlaylist", (res) => {
-    const eventHandler = actionEventMap[res.eventType];
-    eventHandler && dispatch(eventHandler(res));
   });
 
   return connection;

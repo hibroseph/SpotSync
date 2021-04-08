@@ -18,7 +18,7 @@ const $greyedOutBackground = styled.div`
   width: 100%;
   height: 100%;
   background-color: #000000;
-  opacity: 0.7;
+  filter: opacity(70%);
 `;
 
 const $popup = styled.div`

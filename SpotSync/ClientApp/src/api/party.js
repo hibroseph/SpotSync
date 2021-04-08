@@ -13,9 +13,11 @@ export const joinParty = (partyCode, connection) => {
     .then((res) => res.json())
     .then((json) => {
       if (json.succeeded == true) {
+        console.log("connecting to party");
         connectToParty(partyCode, connection);
         return { succeeded: true };
       } else {
+        console.log("failed to connect to party");
         if (json.message != undefined) {
           return { succeeded: false, message: json.message };
         }
