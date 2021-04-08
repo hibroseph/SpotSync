@@ -549,7 +549,7 @@ namespace SpotSync.Infrastructure
             }
         }
 
-        private async Task RefreshTokenForUserAsync(string partyGoerId)
+        public async Task RefreshTokenForUserAsync(string partyGoerId)
         {
             if (await _spotifyAuthentication.DoesAccessTokenNeedRefreshAsync(partyGoerId))
             {

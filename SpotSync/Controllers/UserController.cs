@@ -100,7 +100,7 @@ namespace SpotSync.Controllers
         [Authorize]
         public async Task<IActionResult> GetPartyGoerSpotifyAccessToken()
         {
-            return new JsonResult(new { AccessToken = await _spotifyAuthentication.GetAccessTokenAsync(await _partyGoerService.GetCurrentPartyGoerAsync()) });
+            return new JsonResult(new { AccessToken = await _partyGoerService.GetPartyGoerAccessTokenAsync(await _partyGoerService.GetCurrentPartyGoerAsync()) });
         }
 
         [HttpGet]

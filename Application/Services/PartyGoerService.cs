@@ -93,6 +93,11 @@ namespace SpotSync.Application.Services
 
         public async Task<string> GetPartyGoerAccessTokenAsync(PartyGoer partyGoer)
         {
+            if (await _spotifyAuthentication.DoesAccessTokenNeedRefreshAsync(partyGoer.Id))
+            {
+                await _spotifyHttpClient.RefreshTokenForUserAsync(partyGoer.Id);
+            }
+
             return await _spotifyAuthentication.GetAccessTokenAsync(partyGoer);
         }
 
