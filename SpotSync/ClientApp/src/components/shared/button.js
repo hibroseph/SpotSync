@@ -3,23 +3,16 @@ import styled from "styled-components";
 
 const $Button = styled.button`
   border-radius: 10px;
-  background-color: ${(props) => (props.selected ? "#e5e5e5" : props.white ? "white" : "#e9e9e9")};
+  background-color: #7d8aff;
   border: none;
   font-size: 18px;
   padding: 10px 25px;
-  font-weight: ${(props) => (props.selected ? "bold" : "normal")};
+  font-weight: bold;
+  color: white;
 
   &:hover {
-    background-color: #e0e0e0;
+    filter: opacity(50%);
   }
 `;
 
-const Button = (props) => {
-  return (
-    <$Button white={props.white} selected={props.selected} className={props.className} onClick={props.onClick}>
-      {props.children}
-    </$Button>
-  );
-};
-
-export default Button;
+export default $Button;

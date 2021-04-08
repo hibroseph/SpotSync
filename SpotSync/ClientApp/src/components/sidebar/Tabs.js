@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import Button from "../shared/Button";
+import TabButton from "../shared/TabButton";
 
 const $Tabs = styled.div`
   display: flex;
@@ -8,14 +8,14 @@ const $Tabs = styled.div`
   padding: 10px;
 `;
 
-const Tabs = (props) => {
+const Tabs = ({ tabs, selected, changeSelectedTab }) => {
   return (
     <$Tabs>
-      {props.tabs.map((tab) => {
+      {tabs.map((tab) => {
         return (
-          <Button white={true} selected={tab.title == props.selected} key={tab.title} onClick={() => props.onClick(tab.title)}>
+          <TabButton selected={tab.title == selected} key={tab.title} onClick={() => changeSelectedTab(tab.title)}>
             {tab.title}
-          </Button>
+          </TabButton>
         );
       })}
     </$Tabs>

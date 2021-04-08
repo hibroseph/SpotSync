@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Button from "../shared/Button";
 import Input from "../shared/Input";
@@ -52,11 +52,16 @@ const JoinParty = (partyCode, setLoading, connection) => {
   return joinParty(partyCode, connection);
 };
 
-const JoinOrCreateParty = ({ connection, dispatch }) => {
-  const [isLoading, setLoading] = useState(false);
+const JoinOrCreateParty = ({ connection }) => {
+  const [isLoading, setLoading] = useState(true);
   const [partyCode, setPartyCode] = useState(null);
   const [failureMessage, setFailureMessage] = useState(null);
 
+  useEffect(() => {
+    if (connection != undefined) {
+      setLoading(false);
+    }
+  }, [connection]);
   return (
     <$greyedOutBackground>
       <$popup>
@@ -65,7 +70,7 @@ const JoinOrCreateParty = ({ connection, dispatch }) => {
           {isLoading && <Loader isLoading={isLoading}></Loader>}
           {!isLoading && (
             <React.Fragment>
-              <$marginedButton onClick={() => createParty(connection)(dispatch)}>Create Party</$marginedButton>
+              <$marginedButton onClick={() => createParty(connection)}>Create Party</$marginedButton>
               <$verticalBar />
               <div>
                 <$styledInput onInput={(event) => setPartyCode(event.target.value)} placeholder="Party Code"></$styledInput>

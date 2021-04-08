@@ -23,17 +23,14 @@ export const joinParty = (partyCode, connection) => {
     });
 };
 
-export const createParty = (connection, user) => {
-  return (dispatch) => {
-    fetch("/party/StartParty", {
-      method: "POST",
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        connectToParty(json.partyCode, connection);
-        //dispatch(partyJoined(json.partyCode, [], user));
-      });
-  };
+export const createParty = (connection) => {
+  return fetch("/party/StartParty", {
+    method: "POST",
+  })
+    .then((res) => res.json())
+    .then((json) => {
+      return connectToParty(json.partyCode, connection);
+    });
 };
 
 export const generateQueue = (partyCode) => {

@@ -24,7 +24,10 @@ export const setUpSpotifyWebPlayback = (connection) => {
     });
 
     // Playback status updates
-    player.addListener("player_state_changed", (state) => {});
+    player.addListener("player_state_changed", (state) => {
+      console.log("player state changed");
+      console.log(state);
+    });
 
     // Ready
     player.addListener("ready", ({ device_id }) => {

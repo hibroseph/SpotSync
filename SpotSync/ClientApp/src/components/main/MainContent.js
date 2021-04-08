@@ -14,25 +14,17 @@ const $MainContent = styled.div`
   box-sizing: border-box;
 `;
 
-const $WideDiscoverFrame = styled(DiscoverFrame)`
-  && {
-    padding: 0 10px;
-    width: 70%;
-    padding: 0 30px 20px 10px;
-  }
-`;
-
 const $SidebarWithWidth = styled(Sidebar)`
   && {
-    width: 30%;
+    width: 25%;
   }
 `;
 
 const MainContent = (props) => {
   return (
     <$MainContent>
-      <$WideDiscoverFrame></$WideDiscoverFrame>
-      <$SidebarWithWidth></$SidebarWithWidth>
+      <DiscoverFrame />
+      <$SidebarWithWidth />
     </$MainContent>
   );
 };

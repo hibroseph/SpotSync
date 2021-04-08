@@ -14,24 +14,23 @@ const $Sidebar = styled.div`
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  border: 3px solid #e1e1e1;
+  border-radius: 10px;
 `;
 
 const $SidebarContent = styled.div`
-  border-radius: 10px;
   padding: 5px;
   display: flex;
   flex-direction: column;
   align-items: center;
   overflow-y: auto;
-  border: 3px solid #fafafa;
 
   &::-webkit-scrollbar {
-    background-color: #e5e5e5;
     width: 10px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: grey;
+    background-color: #e1e1e1;
     border-radius: 10px;
   }
 `;
@@ -67,10 +66,6 @@ const Sidebar = ({ partyCode, className, songFeelings, dispatch }) => {
     }
   }, [partyCode]);
 
-  const changeTabView = (tab) => {
-    setTabView(tab);
-  };
-
   const GetSideBarContent = () => {
     switch (currentTabView) {
       case "Queue":
@@ -84,7 +79,7 @@ const Sidebar = ({ partyCode, className, songFeelings, dispatch }) => {
 
   return (
     <$Sidebar className={className}>
-      <Tabs tabs={tabs} selected={currentTabView} onClick={(tab) => changeTabView(tab)}></Tabs>
+      <Tabs tabs={tabs} selected={currentTabView} changeSelectedTab={setTabView}></Tabs>
       <$SidebarContent>{GetSideBarContent()}</$SidebarContent>
     </$Sidebar>
   );

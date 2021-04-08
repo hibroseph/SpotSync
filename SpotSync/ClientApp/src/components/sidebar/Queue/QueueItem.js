@@ -12,7 +12,7 @@ const $QueueItem = styled.div`
   box-sizing: border-box;
 
   &:hover {
-    background-color: #e1f1ff;
+    background-color: #fdf8ed;
   }
   p {
     margin: 0px;

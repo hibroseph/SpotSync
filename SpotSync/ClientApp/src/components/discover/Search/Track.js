@@ -6,7 +6,7 @@ import { addSongToQueue } from "../../../api/party";
 import notify from "../../../api/notify";
 
 const $Track = styled.div`
-  border: 3px solid #fafafa;
+  border: 3px solid #e1e1e1;
   border-radius: 10px;
   margin: 10px;
   padding: 10px 20px;
@@ -17,7 +17,8 @@ const $Track = styled.div`
   justify-content: space-between;
 
   &:hover {
-    background-color: #e1f1ff;
+    background-color: #fdf8ed;
+    border-color: #fdf8ed;
   }
 
   .title {
@@ -39,24 +40,14 @@ const $StyledFontAwesomeIcon = styled(FontAwesomeIcon)`
   }
 `;
 
-const Track = (props) => {
+const Track = ({ addSongToQueue, track }) => {
   return (
     <$Track>
       <div className="song-information">
-        <p className="title">{props.track.name}</p>
-        <p className="artist">{props.track.artist}</p>
+        <p className="title">{track.name}</p>
+        <p className="artist">{track.artist}</p>
       </div>
-      <$StyledFontAwesomeIcon
-        icon={faPlus}
-        onClick={() => {
-          if (props.isValidAddition()) {
-            addSongToQueue(props.track, props.user.details.id, props.partyCode, props.connection);
-            notify(`We added ${props.track.name} to the queue`);
-          } else {
-            notify(`${props.track.name} already exists in the queue. Go ahead and add it when it leaves the queue`);
-          }
-        }}
-      />
+      <$StyledFontAwesomeIcon icon={faPlus} onClick={addSongToQueue} />
     </$Track>
   );
 };

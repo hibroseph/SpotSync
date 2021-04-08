@@ -26,20 +26,23 @@ const addSpotifyPlaybackScriptToDom = () => {
   document.body.appendChild(script);
 };
 
-const checkToSeeIfUserIsInParty = (props) => {
-  if (props.realTimeConnection?.connection) {
+const configureSpotifySdk = (props, spotifySdkAdded, setSpotifySdkAdded) => {
+  if (props.realTimeConnection?.connection && !spotifySdkAdded) {
     setUpSpotifyWebPlayback(props.realTimeConnection.connection);
     addSpotifyPlaybackScriptToDom();
+    setSpotifySdkAdded(true);
   }
 };
 
 function App(props) {
+  const [spotifySdkAdded, setSpotifySdkAdded] = useState(false);
+
   useEffect(() => {
     setUpProcess(props.dispatch);
   }, []);
 
   useEffect(() => {
-    checkToSeeIfUserIsInParty(props);
+    configureSpotifySdk(props, spotifySdkAdded, setSpotifySdkAdded);
   }, [props?.isUserInParty, props?.realTimeConnection?.connection]);
 
   return (
