@@ -1,10 +1,11 @@
-export const setUpSpotifyWebPlayback = (accessToken, connection) => {
+export const setUpSpotifyWebPlayback = (connection) => {
   window.onSpotifyWebPlaybackSDKReady = () => {
-    const token = accessToken;
     const player = new Spotify.Player({
       name: "Spotibro",
       getOAuthToken: (cb) => {
-        cb(token);
+        fetch("/api/user/GetPartyGoerSpotifyAccessToken")
+          .then((json) => json.json())
+          .then((res) => cb(res.accessToken));
       },
     });
 

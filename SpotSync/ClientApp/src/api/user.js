@@ -1,5 +1,4 @@
 import { updateUserDetails } from "../redux/actions/user";
-import { connectToParty } from "./partyHub";
 import { setUserAccessToken } from "../redux/actions/user";
 export const fetchUserDetails = () => {
   return (dispatch) => {

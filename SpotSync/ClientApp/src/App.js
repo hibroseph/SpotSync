@@ -27,8 +27,8 @@ const addSpotifyPlaybackScriptToDom = () => {
 };
 
 const checkToSeeIfUserIsInParty = (props) => {
-  if (props?.isUserInParty && props.realTimeConnection?.connection && props?.accessToken) {
-    setUpSpotifyWebPlayback(props.accessToken, props.realTimeConnection.connection);
+  if (props.realTimeConnection?.connection) {
+    setUpSpotifyWebPlayback(props.realTimeConnection.connection);
     addSpotifyPlaybackScriptToDom();
   }
 };
