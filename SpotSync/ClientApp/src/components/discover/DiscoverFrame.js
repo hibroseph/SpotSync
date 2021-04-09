@@ -3,10 +3,13 @@ import styled from "styled-components";
 import Search from "../discover/Search/Search";
 import Tabs from "../sidebar/Tabs";
 import { addSongToQueue } from "../../api/party";
-import { getTopSongs } from "../../api/user";
+import { addSomeTracksToQueue as addSomeTracksFromPlaylistToQueue } from "../../api/partyHub";
+import { getPlaylists, getTopSongs } from "../../api/user";
 import SearchResults from "./Search/SearchResults";
 import { getUser, getPartyCode, getRealtimeConnection, getQueue } from "../../redux/reducers/reducers";
 import { connect } from "react-redux";
+import PlaylistView from "./Playlists/PlaylistView";
+import notify from "../../api/notify";
 
 const $DiscoverFrame = styled.div`
   padding: 0 10px;
@@ -25,12 +28,22 @@ const tabs = [
     title: "Your Top Songs",
   },
   {
-    title: "Playlist",
+    title: "Playlists",
   },
 ];
 
 const addTrackToQueue = (track, user, partyCode, connection) => {
   addSongToQueue(track, user.details.id, partyCode, connection);
+};
+
+const viewPlaylist = (id) => {
+  console.log(`Viewing playlist ${id}`);
+};
+
+const addSomeTracksToQueue = (id, amount, connection) => {
+  console.log(`Adding ${amount} songs from playlist ${id}`);
+  addSomeTracksFromPlaylistToQueue(id, amount, connection);
+  notify("Added some tracks from your playlist to the queue");
 };
 
 const DiscoverFrame = ({ queue, user, partyCode, connection }) => {
@@ -39,8 +52,12 @@ const DiscoverFrame = ({ queue, user, partyCode, connection }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const [searchResults, setSearchResults] = useState([]);
+
   const [haveTopSongs, setHaveTopSongs] = useState(false);
   const [topSongs, setTopSongs] = useState({});
+
+  const [playlists, setPlaylists] = useState([]);
+  const [playlistsLoading, setPlaylistsLoading] = useState(false);
 
   useEffect(() => {
     setIsLoading(false);
@@ -52,6 +69,17 @@ const DiscoverFrame = ({ queue, user, partyCode, connection }) => {
         setTopSongs(songs);
         setHaveTopSongs(true);
       });
+    }
+
+    if (currentTabView == "Playlists") {
+      setPlaylistsLoading(true);
+      getPlaylists(10, 0)
+        .then((playlists) => {
+          setPlaylists(playlists);
+        })
+        .finally(() => {
+          setPlaylistsLoading(false);
+        });
     }
   }, [currentTabView, user]);
 
@@ -74,6 +102,14 @@ const DiscoverFrame = ({ queue, user, partyCode, connection }) => {
           addSongToQueue={(track) => addTrackToQueue(track, user, partyCode, connection)}
           isLoading={!haveTopSongs}
         ></SearchResults>
+      )}
+      {currentTabView == "Playlists" && (
+        <PlaylistView
+          playlists={playlists}
+          addSomeTracksToQueue={(id, amount) => addSomeTracksToQueue(id, amount, connection)}
+          viewPlaylist={(id) => viewPlaylist(id)}
+          isLoading={playlistsLoading}
+        ></PlaylistView>
       )}
     </$DiscoverFrame>
   );

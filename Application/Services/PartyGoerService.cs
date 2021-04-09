@@ -21,16 +21,18 @@ namespace SpotSync.Application.Services
         private ISpotifyHttpClient _spotifyHttpClient;
         private IHttpContextAccessor _httpContextAccessor;
         private ISpotifyAuthentication _spotifyAuthentication;
+        private IPartyGoerDetailsService _partyGoerDetailsService;
         private Dictionary<string, PartyGoer> _partyGoerCache;
         private ILogService _logService;
 
         public PartyGoerService(ISpotifyHttpClient spotifyHttpClient, IHttpContextAccessor httpContextAccessor,
-        ISpotifyAuthentication spotifyAuthentication, ILogService logService)
+        ISpotifyAuthentication spotifyAuthentication, IPartyGoerDetailsService partyGoerDetailsService, ILogService logService)
         {
             _spotifyHttpClient = spotifyHttpClient;
             _httpContextAccessor = httpContextAccessor;
             _spotifyAuthentication = spotifyAuthentication;
             _partyGoerCache = new Dictionary<string, PartyGoer>();
+            _partyGoerDetailsService = partyGoerDetailsService;
             _logService = logService;
         }
 
@@ -115,6 +117,16 @@ namespace SpotSync.Application.Services
 
                 return new Domain.ServiceResult<List<Device>> { Error = ErrorType.SpotifyApiFailed };
             }
+        }
+
+        public async Task<List<Playlist>> GetUsersPlaylistsAsync(PartyGoer user, int limit = 10, int offset = 0)
+        {
+            return await _spotifyHttpClient.GetUsersPlaylistsAsync(user, limit, offset);
+        }
+
+        public async Task<List<Track>> GetPlaylistItemsAsync(PartyGoer user, string playlistId)
+        {
+            return await _spotifyHttpClient.GetPlaylistItemsAsync(user, playlistId, _partyGoerDetailsService.GetMarket(user));
         }
     }
 }

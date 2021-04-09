@@ -24,10 +24,7 @@ export const setUpSpotifyWebPlayback = (connection) => {
     });
 
     // Playback status updates
-    player.addListener("player_state_changed", (state) => {
-      console.log("player state changed");
-      console.log(state);
-    });
+    player.addListener("player_state_changed", (state) => {});
 
     // Ready
     player.addListener("ready", ({ device_id }) => {
@@ -37,6 +34,19 @@ export const setUpSpotifyWebPlayback = (connection) => {
     // Not Ready
     player.addListener("not_ready", ({ device_id }) => {});
 
+    var slider;
+
+    let timeoutId = setInterval(() => {
+      if (document.getElementById("spotify-volume-slider") != undefined) {
+        slider = document.getElementById("spotify-volume-slider");
+        slider.oninput = (value) => {
+          const volume = parseFloat(value.target.value);
+          player.setVolume(volume == 0 ? 0.0001 : volume * 0.1).catch((err) => console.error(err));
+        };
+
+        clearInterval(timeoutId);
+      }
+    }, 2000);
     // Connect to the player!
     player.connect();
   };

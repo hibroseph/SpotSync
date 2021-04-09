@@ -24,5 +24,7 @@ namespace SpotSync.Domain.Contracts
         Task TogglePlaybackAsync(PartyGoer partyGoer, PlaybackState state);
         Task<List<Device>> GetUserDevicesAsync(PartyGoer partyGoer);
         Task RefreshTokenForUserAsync(string partyGoerId);
+        Task<List<Playlist>> GetUsersPlaylistsAsync(PartyGoer user, int limit = 10, int offset = 0);
+        Task<List<Track>> GetPlaylistItemsAsync(PartyGoer user, string playlistId, string market);
     }
 }

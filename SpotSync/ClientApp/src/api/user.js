@@ -21,3 +21,9 @@ export const getTopSongs = (amount) => {
     .then((res) => res.json())
     .then((json) => json);
 };
+
+export const getPlaylists = (limit, offset) => {
+  return fetch(`/api/user/usersplaylists?limit=${limit}&offset=${offset}`)
+    .then((response) => response.json())
+    .then((json) => json);
+};

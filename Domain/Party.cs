@@ -241,6 +241,16 @@ namespace SpotSync.Domain
             }
         }
 
+        public async Task AddTracksRandomlyToQueueAsync(List<Track> tracks)
+        {
+            await _queue.AddTracksRandomlyToQueueAsync(tracks);
+
+            if (_currentTrack == null && _queue.SongsExistInQueue())
+            {
+                await StartQueueAsync();
+            }
+        }
+
         public bool IsPartyPlayingMusic()
         {
             return _currentTrack != null;

@@ -49,7 +49,10 @@ namespace SpotSync.Infrastructure
                 { ApiEndpointType.GetRecommendedTracks, new SpotifyEndpoint { EndpointUrl = "https://api.spotify.com/v1/recommendations", HttpMethod = HttpMethod.Get } },
                 { ApiEndpointType.GetUserDevices, new SpotifyEndpoint { EndpointUrl = "https://api.spotify.com/v1/me/player/devices", HttpMethod = HttpMethod.Get } },
                 { ApiEndpointType.SearchSpotify, new SpotifyEndpoint{ EndpointUrl = "https://api.spotify.com/v1/search", HttpMethod = HttpMethod.Get } },
-                { ApiEndpointType.PausePlayback, new SpotifyEndpoint {EndpointUrl = "https://api.spotify.com/v1/me/player/pause", HttpMethod = HttpMethod.Put } }
+                { ApiEndpointType.PausePlayback, new SpotifyEndpoint {EndpointUrl = "https://api.spotify.com/v1/me/player/pause", HttpMethod = HttpMethod.Put } },
+                { ApiEndpointType.GetUserPlaylists, new SpotifyEndpoint { EndpointUrl = "https://api.spotify.com/v1/me/playlists", HttpMethod = HttpMethod.Get } },
+                { ApiEndpointType.GetPlaylistItems, new SpotifyEndpoint { EndpointUrl = "https://api.spotify.com/v1/playlists/{playlist_id}/tracks", HttpMethod = HttpMethod.Get,
+                Keys = new List<string> {"{playlist_id}"} } }
             };
         }
 
@@ -58,6 +61,92 @@ namespace SpotSync.Infrastructure
             var response = await SendHttpRequestAsync(partyGoer, _apiEndpoints[ApiEndpointType.PausePlayback]);
 
             EnsureSuccessfulResponse(response);
+        }
+
+        public async Task<List<Track>> GetPlaylistItemsAsync(PartyGoer user, string playlistId, string market)
+        {
+            var parameters = new ApiParameters
+            {
+                Parameters = new Dictionary<string, string>
+                {
+                    {"fields", "items(track(id,name,album(images(url)),artists(name),explicit(),duration_ms()))" },
+                    {"market",  market}
+                },
+                Keys = new Dictionary<string, string>{
+                    {"{playlist_id}", playlistId },
+                }
+            };
+
+            var response = await SendHttpRequestAsync(user, _apiEndpoints[ApiEndpointType.GetPlaylistItems], parameters);
+
+            EnsureSuccessfulResponse(response);
+
+            List<Track> playlistTracks = new List<Track>();
+
+            JObject jsonPlaylistContent = await GetJObjectContentFromResponseAsync(response);
+
+            foreach (var item in jsonPlaylistContent["items"])
+            {
+                if (item["track"].HasValues)
+                {
+                    playlistTracks.Add(new Track
+                    {
+                        AlbumImageUrl = item["track"]["album"]["images"].First["url"].ToString(),
+                        Artist = item["track"]["artists"].First["name"].ToString(),
+                        Uri = item["track"]["id"].ToString(),
+                        Name = item["track"]["name"].ToString(),
+                        Explicit = item["track"]["explicit"].Value<bool>(),
+                        Length = item["track"]["duration_ms"].Value<int>()
+                    });
+                }
+            }
+
+            return playlistTracks;
+        }
+
+        public async Task<List<Playlist>> GetUsersPlaylistsAsync(PartyGoer user, int limit = 10, int offset = 0)
+        {
+            try
+            {
+                var parameters = new ApiParameters
+                {
+                    Parameters = new Dictionary<string, string>
+                {
+                    {"limit", limit.ToString() },
+                    {"offset", offset.ToString() }
+                }
+                };
+
+                var response = await SendHttpRequestAsync(user, _apiEndpoints[ApiEndpointType.GetUserPlaylists], parameters, null);
+
+                EnsureSuccessfulResponse(response);
+
+                var playlists = new List<Playlist>();
+
+                JObject jsonPlaylists = await GetJObjectContentFromResponseAsync(response);
+
+                foreach (var item in jsonPlaylists["items"])
+                {
+                    playlists.Add(new Playlist
+                    {
+                        Id = item["id"].ToString(),
+                        PlaylistImageUrl = GetPlaylistImageUrl(item["images"]),
+                        Name = item["name"].ToString()
+                    });
+                }
+
+                return playlists;
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, "Error occurred in GetUsersPlaylistsAsync");
+                return null;
+            }
+        }
+
+        private string GetPlaylistImageUrl(JToken jsonImages)
+        {
+            return jsonImages.First?["url"].ToString();
         }
 
         public async Task<PartyGoerDetails> GetUserDetailsAsync(string spotifyId)
@@ -459,7 +548,7 @@ namespace SpotSync.Infrastructure
             {
                 parameters = new ApiParameters
                 {
-                    Parameters = new Dictionary<string, object>
+                    Parameters = new Dictionary<string, string>
                 {
                     {"device_id", perferredDeviceId }
 
@@ -595,6 +684,10 @@ namespace SpotSync.Infrastructure
 
         }
 
+        private async Task<HttpResponseMessage> SendHttpRequestAsync(PartyGoer user, SpotifyEndpoint endpoint, ApiParameters parameters)
+        {
+            return await SendHttpRequestAsync(user, endpoint, parameters, null);
+        }
         private async Task<HttpResponseMessage> SendHttpRequestAsync(PartyGoer user, SpotifyEndpoint spotifyEndpoint, object content = null, bool useQueryString = false)
         {
             return await SendHttpRequestAsync(user.Id, spotifyEndpoint, content, useQueryString);
@@ -604,7 +697,24 @@ namespace SpotSync.Infrastructure
         {
             await RefreshTokenForUserAsync(user.Id);
 
-            using (var requestMessage = new HttpRequestMessage(spotifyEndpoint.HttpMethod, spotifyEndpoint.EndpointUrl + AddQueryStrings(queryStringParameters)))
+            string spotifyEndpointUrl = spotifyEndpoint.EndpointUrl;
+
+            // look to see if spotifyendpoint has keys
+            if (spotifyEndpoint?.Keys != null)
+            {
+                // we need to verify these keys exist in api parameters
+                foreach (string key in spotifyEndpoint.Keys)
+                {
+                    if (!queryStringParameters.Keys.ContainsKey(key))
+                    {
+                        throw new Exception($"Endpoint: {spotifyEndpoint} says it contains a key: {key} but it is not found in parameters");
+                    }
+
+                    spotifyEndpointUrl = spotifyEndpointUrl.Replace(key, queryStringParameters.Keys[key]);
+                }
+            }
+
+            using (var requestMessage = new HttpRequestMessage(spotifyEndpoint.HttpMethod, spotifyEndpointUrl + AddQueryStrings(queryStringParameters)))
             {
                 requestMessage.Headers.Authorization = await _spotifyAuthentication.GetAuthenticationHeaderForPartyGoerAsync(user.Id);
 
@@ -648,9 +758,9 @@ namespace SpotSync.Infrastructure
 
                 builder.Append("?");
                 int i = 0;
-                foreach (KeyValuePair<string, object> parameter in queryStringParameters.Parameters)
+                foreach (KeyValuePair<string, string> parameter in queryStringParameters.Parameters)
                 {
-                    builder.Append($"{parameter.Key}={parameter.Value}");
+                    builder.Append($"{parameter.Key}={HttpUtility.UrlEncode(parameter.Value)}");
                     AppendAmpersandConditonallyBetweenParameters(builder, i, count);
                     i++;
                 }
@@ -702,11 +812,10 @@ namespace SpotSync.Infrastructure
         }
     }
 
-
-
     public class ApiParameters
     {
-        public Dictionary<string, object> Parameters { get; set; }
+        public Dictionary<string, string> Parameters { get; set; }
+        public Dictionary<string, string> Keys { get; set; }
     }
 
 }

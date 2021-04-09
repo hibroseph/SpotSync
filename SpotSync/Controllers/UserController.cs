@@ -37,6 +37,25 @@ namespace SpotSync.Controllers
 
         [HttpGet]
         [Authorize]
+        public async Task<IActionResult> UsersPlaylists(int limit = 10, int offset = 0)
+        {
+            return new JsonResult(await _partyGoerService.GetUsersPlaylistsAsync(await _partyGoerService.GetCurrentPartyGoerAsync(), limit, offset));
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> UsersPlaylistItems(string playlistId)
+        {
+            if (string.IsNullOrWhiteSpace(playlistId))
+            {
+                return new NotFoundResult();
+            }
+
+            return new JsonResult(await _partyGoerService.GetPlaylistItemsAsync(await _partyGoerService.GetCurrentPartyGoerAsync(), playlistId));
+        }
+
+        [HttpGet]
+        [Authorize]
         public async Task<IActionResult> SuggestedSongs(int limit = 5)
         {
             List<Track> recommendedSongs = await _partyGoerService.GetRecommendedSongsAsync((await _partyGoerService.GetCurrentPartyGoerAsync()).Id, limit);

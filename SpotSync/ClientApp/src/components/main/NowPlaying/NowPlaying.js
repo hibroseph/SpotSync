@@ -32,6 +32,16 @@ const $SongManagement = styled.div`
   justify-content: center;
 `;
 
+const $VolumeManagement = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  marginright: auto;
+  flex: 1;
+`;
+
+const $Volume = styled.input``;
+
 const $PlayFontAwesomeIcon = styled(FontAwesomeIcon)`
   font-size: 30px;
 
@@ -84,8 +94,6 @@ const $ThumbsContainer = styled.div`
   align-items: center;
 `;
 const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFeelings, isHost }) => {
-  console.log("NOWPLAYING");
-  console.log(currentSong);
   return (
     <React.Fragment>
       <ToastContainer
@@ -100,46 +108,38 @@ const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFe
         draggable
         pauseOnHover
       ></ToastContainer>
-      {partyCode && (
+      {partyCode && currentSong && (
         <$NowPlaying>
           <$NowPlayingSong>
-            {currentSong && (
-              <React.Fragment>
-                <img src={currentSong?.albumImageUrl} />
-                <div className="song-information">
-                  <p className={"title"}>{currentSong?.name}</p>
-                  <p className={"artist"}>{currentSong?.artist}</p>
-                </div>
+            <React.Fragment>
+              <img src={currentSong?.albumImageUrl} />
+              <div className="song-information">
+                <p className={"title"}>{currentSong?.name}</p>
+                <p className={"artist"}>{currentSong?.artist}</p>
+              </div>
 
-                {songFeelings && currentSong && (
-                  <$ThumbsContainer>
-                    <ThumbsDown
-                      onDislike={() => userDislikesSong(partyCode, currentSong.uri, connection, dispatch)}
-                      feeling={songFeelings[currentSong?.uri]}
-                    />
-                    <ThumbsUp
-                      onLike={() => userLikesSong(partyCode, currentSong.uri, connection, dispatch)}
-                      feeling={songFeelings[currentSong?.uri]}
-                    />
-                  </$ThumbsContainer>
-                )}
-              </React.Fragment>
-            )}
+              {songFeelings && currentSong && (
+                <$ThumbsContainer>
+                  <ThumbsDown
+                    onDislike={() => userDislikesSong(partyCode, currentSong.uri, connection, dispatch)}
+                    feeling={songFeelings[currentSong?.uri]}
+                  />
+                  <ThumbsUp onLike={() => userLikesSong(partyCode, currentSong.uri, connection, dispatch)} feeling={songFeelings[currentSong?.uri]} />
+                </$ThumbsContainer>
+              )}
+            </React.Fragment>
           </$NowPlayingSong>
           <$SongManagement>
-            {currentSong &&
-              (user?.details?.pausedMusic ? (
-                <$PlayFontAwesomeIcon icon={faPlayCircle} onClick={() => togglePlaybackState(partyCode, dispatch)} />
-              ) : (
-                <$PlayFontAwesomeIcon icon={faPauseCircle} onClick={() => togglePlaybackState(partyCode, dispatch)} />
-              ))}
-            {isHost && currentSong && (
-              <$SkipFontAwesomeIcon icon={faStepForward} onClick={() => skipSong(partyCode, connection)}></$SkipFontAwesomeIcon>
+            {user?.details?.pausedMusic ? (
+              <$PlayFontAwesomeIcon icon={faPlayCircle} onClick={() => togglePlaybackState(partyCode, dispatch)} />
+            ) : (
+              <$PlayFontAwesomeIcon icon={faPauseCircle} onClick={() => togglePlaybackState(partyCode, dispatch)} />
             )}
-
-            {!currentSong && <Loader width={50} height={50}></Loader>}
+            {isHost && <$SkipFontAwesomeIcon icon={faStepForward} onClick={() => skipSong(partyCode, connection)}></$SkipFontAwesomeIcon>}
           </$SongManagement>
-          <div style={{ marginRight: "auto", flex: "1" }}></div>
+          <$VolumeManagement>
+            <$Volume type="range" min="0" max="10" id="spotify-volume-slider" />
+          </$VolumeManagement>
         </$NowPlaying>
       )}
     </React.Fragment>

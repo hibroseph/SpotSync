@@ -13,11 +13,9 @@ export const joinParty = (partyCode, connection) => {
     .then((res) => res.json())
     .then((json) => {
       if (json.succeeded == true) {
-        console.log("connecting to party");
         connectToParty(partyCode, connection);
         return { succeeded: true };
       } else {
-        console.log("failed to connect to party");
         if (json.message != undefined) {
           return { succeeded: false, message: json.message };
         }
@@ -68,10 +66,4 @@ export const getUserLikesDislikes = (partyCode) => {
         return json.content;
       }
     });
-};
-
-export const getTopSongs = (amount) => {
-  return fetch(`/api/party/SuggestedSongs?limit=${amount}`)
-    .then((res) => res.json())
-    .then((json) => json);
 };

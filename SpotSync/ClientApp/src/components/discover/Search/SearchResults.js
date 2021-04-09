@@ -2,7 +2,6 @@ import React from "react";
 import Track from "./Track";
 import Loader from "../../shared/Loader";
 import CenteredHorizontally from "../../shared/CenteredHorizontally";
-import Subtitle from "../../shared/Subtitle";
 import styled from "styled-components";
 
 const $SearchResults = styled.div`

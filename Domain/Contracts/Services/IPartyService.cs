@@ -29,5 +29,6 @@ namespace SpotSync.Domain.Contracts
         Task TogglePlaybackStateAsync(string partyCode, PartyGoer listener);
         Task<List<Party>> GetAllPartiesAsync();
         Task<List<Track>> GenerateNewPlaylist(Party party, List<string> recommendedTrackUris);
+        Task AddSomeTracksFromPlaylistToQueueAsync(PartyGoer partyGoer, string playlistId, int amount);
     }
 }

@@ -12,20 +12,26 @@ namespace SpotSync.Domain
     {
         private List<TrackWithFeelings> _tracks;
         private UsersLikesDislikes _usersLikesDislikes;
-
+        private Random _random;
         public Queue(List<Track> tracks)
         {
             _tracks = tracks.Select(p => new TrackWithFeelings(p)).ToList();
             _tracks.Sort(new ReorderQueueComparer());
             _usersLikesDislikes = new UsersLikesDislikes();
+            _random = new Random();
         }
 
         public Queue()
         {
             _tracks = new List<TrackWithFeelings>();
             _usersLikesDislikes = new UsersLikesDislikes();
+            _random = new Random();
         }
 
+        public bool SongsExistInQueue()
+        {
+            return _tracks.Count > 0;
+        }
         public List<Track> GetAllTracks()
         {
             return _tracks.Select(p => p.GetTrackWithoutFeelings()).ToList();
@@ -135,6 +141,21 @@ namespace SpotSync.Domain
         public void QueueTrack(Track track)
         {
             _tracks.Add(new TrackWithFeelings(track));
+        }
+
+        public Task AddTracksRandomlyToQueueAsync(List<Track> tracks)
+        {
+            foreach (Track track in tracks)
+            {
+                _tracks.Insert(GetRandomQueueIndex(), new TrackWithFeelings(track));
+            }
+
+            return Task.CompletedTask;
+        }
+
+        private int GetRandomQueueIndex()
+        {
+            return _random.Next(0, (_tracks.Count > 0 ? _tracks.Count - 1 : 0));
         }
     }
 }

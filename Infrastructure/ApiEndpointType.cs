@@ -14,6 +14,8 @@ namespace SpotSync.Infrastructure
         GetRecommendedTracks = 6,
         GetUserDevices = 7,
         SearchSpotify = 8,
-        PausePlayback = 9
+        PausePlayback = 9,
+        GetUserPlaylists = 10,
+        GetPlaylistItems = 11
     }
 }

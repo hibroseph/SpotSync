@@ -174,6 +174,26 @@ namespace SpotSync.Classes.Hubs
             }
         }
 
+        public async Task AddSomeTracksFromPlaylistToQueue(string partyCode, string playlistId, int amount)
+        {
+            PartyGoer partier = new PartyGoer(Context.UserIdentifier);
+
+            await _partyService.AddSomeTracksFromPlaylistToQueueAsync(partier, playlistId, amount);
+
+            Party party = await _partyService.GetPartyWithAttendeeAsync(partier);
+
+            // Update the view of the partier to the current playlist
+            await Clients.Group(party.GetPartyCode()).SendAsync("UpdatePartyView",
+            new
+            {
+                Song = party.GetCurrentSong(),
+                Position = party.GetCurrentPositionInSong()
+            },
+            party.GetHistory(),
+            party.GetQueue()
+            );
+        }
+
         public async Task UpdateSongForParty(string partyCode, Track currentSong, int currentProgressInMs)
         {
             await Clients.Group(partyCode).SendAsync("UpdateSong", currentSong);

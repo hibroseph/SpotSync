@@ -9,5 +9,6 @@ namespace SpotSync.Infrastructure
     {
         public string EndpointUrl { get; set; }
         public HttpMethod HttpMethod { get; set; }
+        public List<string> Keys { get; set; }
     }
 }

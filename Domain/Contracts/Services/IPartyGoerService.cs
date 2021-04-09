@@ -17,5 +17,7 @@ namespace SpotSync.Domain.Contracts.Services
         Task<string> GetPartyGoerAccessTokenAsync(PartyGoer partyGoer);
         void SavePartyGoer(PartyGoerDetails partyGoerDetails);
         Task<ServiceResult<List<Device>>> GetUserDevicesAsync(PartyGoer partyGoer);
+        Task<List<Playlist>> GetUsersPlaylistsAsync(PartyGoer partyGoer, int limit = 10, int offset = 0);
+        Task<List<Track>> GetPlaylistItemsAsync(PartyGoer user, string playlistId);
     }
 }

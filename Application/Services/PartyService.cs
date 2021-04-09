@@ -28,6 +28,15 @@ namespace SpotSync.Application.Services
             _partyGoerDetailsService = partyGoerDetailsService;
         }
 
+        public async Task AddSomeTracksFromPlaylistToQueueAsync(PartyGoer partyGoer, string playlistId, int amount)
+        {
+            List<Track> playlistTracks = await _partyGoerService.GetPlaylistItemsAsync(partyGoer, playlistId);
+
+            Party party = await _partyRepository.GetPartyWithAttendeeAsync(partyGoer);
+
+            await party.AddTracksRandomlyToQueueAsync(playlistTracks.GetRandomNItems(amount));
+        }
+
         public async Task<List<Party>> GetAllPartiesAsync()
         {
             return await _partyRepository.GetAllPartiesAsync();
