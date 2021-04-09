@@ -4,9 +4,9 @@ import Search from "../discover/Search/Search";
 import Tabs from "../sidebar/Tabs";
 import { addSongToQueue } from "../../api/party";
 import { addSomeTracksToQueue as addSomeTracksFromPlaylistToQueue } from "../../api/partyHub";
-import { getPlaylists, getTopSongs } from "../../api/user";
+import { getPlaylists, getTopSongs, getPlaylistItems } from "../../api/user";
 import SearchResults from "./Search/SearchResults";
-import { getUser, getPartyCode, getRealtimeConnection, getQueue } from "../../redux/reducers/reducers";
+import { getUser, getPartyCode, getRealtimeConnection } from "../../redux/reducers/reducers";
 import { connect } from "react-redux";
 import PlaylistView from "./Playlists/PlaylistView";
 import notify from "../../api/notify";
@@ -34,11 +34,16 @@ const tabs = [
 ];
 
 const addTrackToQueue = (track, user, partyCode, connection) => {
+  console.log("ADDING TRACK TO QUEUE");
   addSongToQueue(track, user.details.id, partyCode, connection);
 };
 
-const viewPlaylist = (id) => {
-  console.log(`Viewing playlist ${id}`);
+const viewPlaylist = (id, setPlaylistTracks, setPlaylistLoading) => {
+  setPlaylistLoading(true);
+  getPlaylistItems(id).then((playlistTracks) => {
+    setPlaylistTracks(playlistTracks);
+    setPlaylistLoading(false);
+  });
 };
 
 const addSomeTracksToQueue = (id, amount, connection) => {
@@ -47,7 +52,7 @@ const addSomeTracksToQueue = (id, amount, connection) => {
   notify("Added some tracks from your playlist to the queue");
 };
 
-const DiscoverFrame = ({ queue, user, partyCode, connection }) => {
+const DiscoverFrame = ({ user, partyCode, connection }) => {
   const [currentTabView, setTabView] = useState("Your Top Songs");
 
   const [isLoading, setIsLoading] = useState(false);
@@ -59,6 +64,8 @@ const DiscoverFrame = ({ queue, user, partyCode, connection }) => {
 
   const [playlists, setPlaylists] = useState([]);
   const [playlistsLoading, setPlaylistsLoading] = useState(false);
+
+  const [playlistTracks, setPlaylistTracks] = useState([]);
 
   useEffect(() => {
     setIsLoading(false);
@@ -74,7 +81,7 @@ const DiscoverFrame = ({ queue, user, partyCode, connection }) => {
 
     if (currentTabView == "Playlists") {
       setPlaylistsLoading(true);
-      getPlaylists(20, 0)
+      getPlaylists(30, 0)
         .then((playlists) => {
           setPlaylists(playlists);
         })
@@ -109,7 +116,9 @@ const DiscoverFrame = ({ queue, user, partyCode, connection }) => {
           <PlaylistView
             playlists={playlists}
             addSomeTracksToQueue={(id, amount) => addSomeTracksToQueue(id, amount, connection)}
-            viewPlaylist={(id) => viewPlaylist(id)}
+            addToQueue={(track) => addTrackToQueue(track, user, partyCode, connection)}
+            viewPlaylist={(id) => viewPlaylist(id, setPlaylistTracks, setPlaylistsLoading)}
+            playlistTracks={playlistTracks}
             isLoading={playlistsLoading}
           ></PlaylistView>
         )}
@@ -119,6 +128,6 @@ const DiscoverFrame = ({ queue, user, partyCode, connection }) => {
 };
 
 const mapStateToProps = (state) => {
-  return { user: getUser(state), partyCode: getPartyCode(state), connection: getRealtimeConnection(state).connection, queue: getQueue(state) };
+  return { user: getUser(state), partyCode: getPartyCode(state), connection: getRealtimeConnection(state).connection };
 };
 export default connect(mapStateToProps, null)(DiscoverFrame);

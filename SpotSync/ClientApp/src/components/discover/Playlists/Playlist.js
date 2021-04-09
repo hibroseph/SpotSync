@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import Text from "../../Shared/Text";
+import Text from "../../shared/Text";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRandom, faListUl } from "@fortawesome/free-solid-svg-icons";
 

@@ -27,3 +27,9 @@ export const getPlaylists = (limit, offset) => {
     .then((response) => response.json())
     .then((json) => json);
 };
+
+export const getPlaylistItems = (playlistId) => {
+  return fetch(`/api/user/usersplaylistitems?playlistId=${playlistId}`)
+    .then((res) => res.json())
+    .then((json) => json);
+};

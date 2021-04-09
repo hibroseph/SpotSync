@@ -8,7 +8,7 @@ import { userLikesSong, userDislikesSong } from "../../../api/partyHub";
 const History = ({ songFeelings, party, connection, dispatch }) => {
   return party?.history?.length > 0 ? (
     <React.Fragment>
-      {party?.history.map((song) => {
+      {party?.history.map((song, index) => {
         return (
           <QueueItem
             onLike={() => {
@@ -17,7 +17,7 @@ const History = ({ songFeelings, party, connection, dispatch }) => {
             onDislike={() => {
               userDislikesSong(party.code, song.uri, connection, dispatch);
             }}
-            key={song.uri}
+            key={`${song.uri}_${index}`}
             title={song.name}
             artist={song.artist}
             feeling={songFeelings[song.uri]}

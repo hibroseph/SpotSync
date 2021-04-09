@@ -19,8 +19,8 @@ const SearchResults = ({ searchResults, isLoading, addSongToQueue }) => {
       {!isLoading && searchResults?.length > 0 && (
         <React.Fragment>
           <$SearchResults>
-            {searchResults.map((track) => {
-              return <Track track={track} addSongToQueue={() => addSongToQueue(track)}></Track>;
+            {searchResults.map((track, index) => {
+              return <Track key={`${track.uri}_${index}`} track={track} addSongToQueue={() => addSongToQueue(track)}></Track>;
             })}
           </$SearchResults>
         </React.Fragment>

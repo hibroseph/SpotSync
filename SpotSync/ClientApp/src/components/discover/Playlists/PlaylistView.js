@@ -1,15 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import Playlist from "./Playlist";
 import Loader from "../../shared/Loader";
 import CenteredHorizontally from "../../shared/CenteredHorizontally";
+import TrackList from "./TrackList";
 
 const $PlaylistContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
 `;
 
-export default ({ playlists, addSomeTracksToQueue, viewPlaylist, isLoading }) => {
+export default ({ playlists, playlistTracks, addSomeTracksToQueue, viewPlaylist, isLoading, addToQueue }) => {
+  const [playlistView, setPlaylistView] = useState("Playlists");
   return (
     <React.Fragment>
       {isLoading && (
@@ -17,11 +19,25 @@ export default ({ playlists, addSomeTracksToQueue, viewPlaylist, isLoading }) =>
           <Loader></Loader>
         </CenteredHorizontally>
       )}
-      <$PlaylistContainer>
-        {playlists.map((playlist) => {
-          return <Playlist key={playlist.id} playlist={playlist} addSomeTracksToQueue={addSomeTracksToQueue} viewPlaylist={viewPlaylist}></Playlist>;
-        })}
-      </$PlaylistContainer>
+      {!isLoading && playlistView == "Playlists" && (
+        <$PlaylistContainer>
+          {playlists.map((playlist) => {
+            return (
+              <Playlist
+                key={playlist.id}
+                playlist={playlist}
+                addSomeTracksToQueue={addSomeTracksToQueue}
+                viewPlaylist={(id) => {
+                  setPlaylistView("PlaylistTracks");
+                  viewPlaylist(id);
+                }}
+              ></Playlist>
+            );
+          })}
+        </$PlaylistContainer>
+      )}
+
+      {!isLoading && playlistView == "PlaylistTracks" && <TrackList tracks={playlistTracks} addToQueue={addToQueue}></TrackList>}
     </React.Fragment>
   );
 };

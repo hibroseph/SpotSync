@@ -12,7 +12,7 @@ import toast from "../../../api/notify";
 const Queue = ({ party, connection, songFeelings = {}, dispatch }) => {
   return party?.queue?.length > 0 ? (
     <React.Fragment>
-      {party.queue.map((song) => {
+      {party.queue.map((song, index) => {
         return (
           <QueueItem
             onLike={() => {
@@ -23,7 +23,7 @@ const Queue = ({ party, connection, songFeelings = {}, dispatch }) => {
               userDislikesSong(party.code, song.uri, connection, dispatch);
               toast(`We will play less songs like ${song.name}`);
             }}
-            key={song.uri}
+            key={`${song.uri}_${index}`}
             title={song.name}
             artist={song.artist}
             feeling={songFeelings[song.uri]}
