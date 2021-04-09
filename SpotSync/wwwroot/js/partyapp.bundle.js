@@ -18919,7 +18919,7 @@ var QueueItem = function QueueItem(props) {
 
 
 var Queue = function Queue(_ref) {
-  var _party$queue, _party$history;
+  var _party$queue;
 
   var party = _ref.party,
       connection = _ref.connection,
@@ -18941,7 +18941,7 @@ var Queue = function Queue(_ref) {
       artist: song.artist,
       feeling: songFeelings[song.uri]
     });
-  })) : (party === null || party === void 0 ? void 0 : (_party$history = party.history) === null || _party$history === void 0 ? void 0 : _party$history.length) > 0 ? /*#__PURE__*/react.createElement(CenteredHorizontally, null, /*#__PURE__*/react.createElement(Subtitle, null, "A new queue will be generated from your liked songs next song.")) : /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement(Button, {
+  })) : (party === null || party === void 0 ? void 0 : party.nowPlaying) != undefined ? /*#__PURE__*/react.createElement(CenteredHorizontally, null, /*#__PURE__*/react.createElement(Subtitle, null, "A new queue will be generated from your liked songs next song.")) : /*#__PURE__*/react.createElement(react.Fragment, null, /*#__PURE__*/react.createElement(Button, {
     onClick: function onClick() {
       return generateQueue(party.code);
     }

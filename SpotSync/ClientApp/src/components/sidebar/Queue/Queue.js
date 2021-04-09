@@ -31,7 +31,7 @@ const Queue = ({ party, connection, songFeelings = {}, dispatch }) => {
         );
       })}
     </React.Fragment>
-  ) : party?.history?.length > 0 ? (
+  ) : party?.nowPlaying != undefined ? (
     <CenteredHorizontally>
       <Subtitle>A new queue will be generated from your liked songs next song.</Subtitle>
     </CenteredHorizontally>
