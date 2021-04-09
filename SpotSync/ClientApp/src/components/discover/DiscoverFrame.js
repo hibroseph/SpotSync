@@ -10,6 +10,7 @@ import { getUser, getPartyCode, getRealtimeConnection, getQueue } from "../../re
 import { connect } from "react-redux";
 import PlaylistView from "./Playlists/PlaylistView";
 import notify from "../../api/notify";
+import ScrollContainer from "../shared/ScrollContainer";
 
 const $DiscoverFrame = styled.div`
   padding: 0 10px;
@@ -73,7 +74,7 @@ const DiscoverFrame = ({ queue, user, partyCode, connection }) => {
 
     if (currentTabView == "Playlists") {
       setPlaylistsLoading(true);
-      getPlaylists(10, 0)
+      getPlaylists(20, 0)
         .then((playlists) => {
           setPlaylists(playlists);
         })
@@ -85,32 +86,34 @@ const DiscoverFrame = ({ queue, user, partyCode, connection }) => {
 
   return (
     <$DiscoverFrame>
-      <$Bar>
-        <Search inputSelected={() => setTabView("Search Results")} setIsLoading={setIsLoading} setSearchResults={setSearchResults} />
-        <Tabs selected={currentTabView} changeSelectedTab={setTabView} tabs={tabs} />
-      </$Bar>
-      {currentTabView == "Search Results" && (
-        <SearchResults
-          searchResults={searchResults}
-          addSongToQueue={(track) => addTrackToQueue(track, user, partyCode, connection)}
-          isLoading={isLoading}
-        ></SearchResults>
-      )}
-      {currentTabView == "Your Top Songs" && (
-        <SearchResults
-          searchResults={topSongs}
-          addSongToQueue={(track) => addTrackToQueue(track, user, partyCode, connection)}
-          isLoading={!haveTopSongs}
-        ></SearchResults>
-      )}
-      {currentTabView == "Playlists" && (
-        <PlaylistView
-          playlists={playlists}
-          addSomeTracksToQueue={(id, amount) => addSomeTracksToQueue(id, amount, connection)}
-          viewPlaylist={(id) => viewPlaylist(id)}
-          isLoading={playlistsLoading}
-        ></PlaylistView>
-      )}
+      <ScrollContainer>
+        <$Bar>
+          <Search inputSelected={() => setTabView("Search Results")} setIsLoading={setIsLoading} setSearchResults={setSearchResults} />
+          <Tabs selected={currentTabView} changeSelectedTab={setTabView} tabs={tabs} />
+        </$Bar>
+        {currentTabView == "Search Results" && (
+          <SearchResults
+            searchResults={searchResults}
+            addSongToQueue={(track) => addTrackToQueue(track, user, partyCode, connection)}
+            isLoading={isLoading}
+          ></SearchResults>
+        )}
+        {currentTabView == "Your Top Songs" && (
+          <SearchResults
+            searchResults={topSongs}
+            addSongToQueue={(track) => addTrackToQueue(track, user, partyCode, connection)}
+            isLoading={!haveTopSongs}
+          ></SearchResults>
+        )}
+        {currentTabView == "Playlists" && (
+          <PlaylistView
+            playlists={playlists}
+            addSomeTracksToQueue={(id, amount) => addSomeTracksToQueue(id, amount, connection)}
+            viewPlaylist={(id) => viewPlaylist(id)}
+            isLoading={playlistsLoading}
+          ></PlaylistView>
+        )}
+      </ScrollContainer>
     </$DiscoverFrame>
   );
 };

@@ -12,6 +12,7 @@ const $Image = styled.img`
 `;
 
 const $PlaylistContainer = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
   padding: 20px;

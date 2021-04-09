@@ -19,7 +19,7 @@ export default ({ playlists, addSomeTracksToQueue, viewPlaylist, isLoading }) =>
       )}
       <$PlaylistContainer>
         {playlists.map((playlist) => {
-          return <Playlist id={playlist.id} playlist={playlist} addSomeTracksToQueue={addSomeTracksToQueue} viewPlaylist={viewPlaylist}></Playlist>;
+          return <Playlist key={playlist.id} playlist={playlist} addSomeTracksToQueue={addSomeTracksToQueue} viewPlaylist={viewPlaylist}></Playlist>;
         })}
       </$PlaylistContainer>
     </React.Fragment>
