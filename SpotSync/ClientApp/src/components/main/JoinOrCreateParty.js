@@ -25,6 +25,7 @@ const $popup = styled.div`
   background-color: #ffffff;
   border-radius: 10px;
   padding: 20px;
+  width: 600px;
 `;
 
 const $flexContainer = styled.div`

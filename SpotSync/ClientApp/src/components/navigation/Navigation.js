@@ -11,7 +11,6 @@ import Button from "../shared/Button";
 
 const $ButtonGroup = styled.div`
   display: flex;
-  width: 275px;
   justify-content: space-between;
 `;
 
@@ -41,6 +40,10 @@ const $Navigation = styled.nav`
   }
 `;
 
+const $MarginLeftButton = styled(LinkButton)`
+  margin-left: 25px;
+`;
+
 const Navigation = ({ partyCode, user, dispatch }) => {
   return (
     <$Navigation>
@@ -57,8 +60,8 @@ const Navigation = ({ partyCode, user, dispatch }) => {
             </Button>
           </React.Fragment>
         )}
-        {user.authentication == AUTHENTICATED && <LinkButton title="Logout" link="/account/logout"></LinkButton>}
-        {user.authentication == UNAUTHENTICATED && <LinkButton title="Login" link="/account/login"></LinkButton>}
+        {user.authentication == AUTHENTICATED && <$MarginLeftButton href="/account/logout">Logout</$MarginLeftButton>}
+        {user.authentication == UNAUTHENTICATED && <$MarginLeftButton href="/account/login">Login</$MarginLeftButton>}
       </$ButtonGroup>
     </$Navigation>
   );

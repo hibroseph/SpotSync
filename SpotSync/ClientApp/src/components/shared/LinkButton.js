@@ -20,4 +20,4 @@ const LinkButton = (props) => {
   return <$LinkButton href={props.link}>{props.title}</$LinkButton>;
 };
 
-export default LinkButton;
+export default $LinkButton;

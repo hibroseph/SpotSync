@@ -84,6 +84,8 @@ const $ThumbsContainer = styled.div`
   align-items: center;
 `;
 const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFeelings, isHost }) => {
+  console.log("NOWPLAYING");
+  console.log(currentSong);
   return (
     <React.Fragment>
       <ToastContainer
@@ -98,39 +100,48 @@ const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFe
         draggable
         pauseOnHover
       ></ToastContainer>
-      <$NowPlaying>
-        <$NowPlayingSong>
-          {currentSong && (
-            <React.Fragment>
-              <img src={currentSong?.albumImageUrl} />
-              <div className="song-information">
-                <p className={"title"}>{currentSong?.name}</p>
-                <p className={"artist"}>{currentSong?.artist}</p>
-              </div>
+      {partyCode && (
+        <$NowPlaying>
+          <$NowPlayingSong>
+            {currentSong && (
+              <React.Fragment>
+                <img src={currentSong?.albumImageUrl} />
+                <div className="song-information">
+                  <p className={"title"}>{currentSong?.name}</p>
+                  <p className={"artist"}>{currentSong?.artist}</p>
+                </div>
 
-              {songFeelings && currentSong && (
-                <$ThumbsContainer>
-                  <ThumbsDown
-                    onDislike={() => userDislikesSong(partyCode, currentSong.uri, connection, dispatch)}
-                    feeling={songFeelings[currentSong?.uri]}
-                  />
-                  <ThumbsUp onLike={() => userLikesSong(partyCode, currentSong.uri, connection, dispatch)} feeling={songFeelings[currentSong?.uri]} />
-                </$ThumbsContainer>
-              )}
-            </React.Fragment>
-          )}
-          {!currentSong && <Loader width={50} height={50}></Loader>}
-        </$NowPlayingSong>
-        <$SongManagement>
-          {user?.details?.pausedMusic ? (
-            <$PlayFontAwesomeIcon icon={faPlayCircle} onClick={() => togglePlaybackState(partyCode, dispatch)} />
-          ) : (
-            <$PlayFontAwesomeIcon icon={faPauseCircle} onClick={() => togglePlaybackState(partyCode, dispatch)} />
-          )}
-          {isHost && <$SkipFontAwesomeIcon icon={faStepForward} onClick={() => skipSong(partyCode, connection)}></$SkipFontAwesomeIcon>}
-        </$SongManagement>
-        <div style={{ marginRight: "auto", flex: "1" }}></div>
-      </$NowPlaying>
+                {songFeelings && currentSong && (
+                  <$ThumbsContainer>
+                    <ThumbsDown
+                      onDislike={() => userDislikesSong(partyCode, currentSong.uri, connection, dispatch)}
+                      feeling={songFeelings[currentSong?.uri]}
+                    />
+                    <ThumbsUp
+                      onLike={() => userLikesSong(partyCode, currentSong.uri, connection, dispatch)}
+                      feeling={songFeelings[currentSong?.uri]}
+                    />
+                  </$ThumbsContainer>
+                )}
+              </React.Fragment>
+            )}
+          </$NowPlayingSong>
+          <$SongManagement>
+            {currentSong &&
+              (user?.details?.pausedMusic ? (
+                <$PlayFontAwesomeIcon icon={faPlayCircle} onClick={() => togglePlaybackState(partyCode, dispatch)} />
+              ) : (
+                <$PlayFontAwesomeIcon icon={faPauseCircle} onClick={() => togglePlaybackState(partyCode, dispatch)} />
+              ))}
+            {isHost && currentSong && (
+              <$SkipFontAwesomeIcon icon={faStepForward} onClick={() => skipSong(partyCode, connection)}></$SkipFontAwesomeIcon>
+            )}
+
+            {!currentSong && <Loader width={50} height={50}></Loader>}
+          </$SongManagement>
+          <div style={{ marginRight: "auto", flex: "1" }}></div>
+        </$NowPlaying>
+      )}
     </React.Fragment>
   );
 };

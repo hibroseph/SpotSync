@@ -58,7 +58,7 @@ export default (state = initalState, action) => {
     }
 
     case UPDATE_CURRENT_SONG: {
-      return Object.assign({}, state, { nowPlaying: action.track });
+      return Object.assign({}, state, { party: Object.assign({}, state.party, { nowPlaying: action.track }) });
     }
 
     case LEFT_PARTY: {
