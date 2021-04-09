@@ -15,3 +15,9 @@ export const getUserAccessToken = (dispatch) => {
     .then((json) => json.json())
     .then((res) => dispatch(setUserAccessToken(res.accessToken)));
 };
+
+export const getTopSongs = (amount) => {
+  return fetch(`/api/user/SuggestedSongs?limit=${amount}`)
+    .then((res) => res.json())
+    .then((json) => json);
+};

@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Search from "../discover/Search/Search";
 import Tabs from "../sidebar/Tabs";
 import { addSongToQueue } from "../../api/party";
+import { getTopSongs } from "../../api/user";
 import SearchResults from "./Search/SearchResults";
 import { getUser, getPartyCode, getRealtimeConnection, getQueue } from "../../redux/reducers/reducers";
 import { connect } from "react-redux";
@@ -38,10 +39,21 @@ const DiscoverFrame = ({ queue, user, partyCode, connection }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const [searchResults, setSearchResults] = useState([]);
+  const [haveTopSongs, setHaveTopSongs] = useState(false);
+  const [topSongs, setTopSongs] = useState({});
 
   useEffect(() => {
     setIsLoading(false);
   }, [searchResults]);
+
+  useEffect(() => {
+    if (currentTabView == "Your Top Songs" && !haveTopSongs && user) {
+      getTopSongs(20).then((songs) => {
+        setTopSongs(songs);
+        setHaveTopSongs(true);
+      });
+    }
+  }, [currentTabView, user]);
 
   return (
     <$DiscoverFrame>
@@ -54,6 +66,13 @@ const DiscoverFrame = ({ queue, user, partyCode, connection }) => {
           searchResults={searchResults}
           addSongToQueue={(track) => addTrackToQueue(track, user, partyCode, connection)}
           isLoading={isLoading}
+        ></SearchResults>
+      )}
+      {currentTabView == "Your Top Songs" && (
+        <SearchResults
+          searchResults={topSongs}
+          addSongToQueue={(track) => addTrackToQueue(track, user, partyCode, connection)}
+          isLoading={!haveTopSongs}
         ></SearchResults>
       )}
     </$DiscoverFrame>

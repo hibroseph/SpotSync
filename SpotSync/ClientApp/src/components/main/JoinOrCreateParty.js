@@ -18,7 +18,8 @@ const $greyedOutBackground = styled.div`
   width: 100%;
   height: 100%;
   background-color: #000000;
-  filter: opacity(70%);
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
 `;
 
 const $popup = styled.div`

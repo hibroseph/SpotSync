@@ -69,3 +69,9 @@ export const getUserLikesDislikes = (partyCode) => {
       }
     });
 };
+
+export const getTopSongs = (amount) => {
+  return fetch(`/api/party/SuggestedSongs?limit=${amount}`)
+    .then((res) => res.json())
+    .then((json) => json);
+};
