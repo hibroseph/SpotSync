@@ -4,95 +4,25 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SpotSync</title>
-    <link rel="stylesheet" href="~/lib/bulma/css/bulma.min.css" />
-    <link rel="icon" href="~/favicon.ico" type="image/ico" />
-    <link rel="shortcut icon" href="~/favicon.ico" type="image/ico" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <title>Spotibro</title>
     <link rel="stylesheet" href="~/css/style.css" />
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
-        <nav class="navbar has-background-white-ter">
-            <div class="navbar-brand">
-                <div class="navbar-item">
-                    <a href="/"> <img class="mt-2" style="width: 150px" src="~/assets/logo.svg" /></a>
-                </div>
-                <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample" onclick="toggleMenu()">
-                    <span aria-hidden="true"></span>
-                    <span aria-hidden="true"></span>
-                    <span aria-hidden="true"></span>
-                </a>
-            </div>
-
-            <div id="navbarBasicExample" class="navbar-menu">
-                <div class="navbar-start">
-                    @if (User.Identity.IsAuthenticated)
-                    {
-                        <a class="navbar-item" href="@Url.Action("Index", "Dashboard")">
-                            Dashboard
-                        </a>
-                        @if (Model != null && Model.IsUserInParty && !string.IsNullOrWhiteSpace(Model?.PartyUrl))
-                        {
-                            <a class="navbar-item" href="@Model.PartyUrl">Current Party</a>
-                        }
-                    }
-                </div>
-
-                <div class="navbar-end">
-                    <div class="navbar-item">
-                        <div class="buttons">
-                            @if (User.Identity.IsAuthenticated)
-                            {
-                                <a class="button is-primary" href="@Url.Action("Logout","Account")">
-                                    Log Out
-                                </a>
-                            }
-                            else
-                            {
-                                <a class="button is-primary" href="@Url.Action("Login","Account")">
-                                    Log In
-                                </a>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <nav class="nav">
+            <img class="logo" src="~/assets/logo.svg" />
+            @if (User.Identity.IsAuthenticated)
+            {
+                <a class="button" href="/account/logout">Logout</a>
+            }
+            else
+            {
+                <a class="button" href="/account/login">Login</a>
+            }
         </nav>
     </header>
-    <div class="container">
-        <main role="main">
-            @RenderBody()
-        </main>
-    </div>
-
-    <div style="position: fixed; display: flex; flex-direction: row; justify-content: center; bottom: 100px; width: 100%; pointer-events: none;">
-        <div id="user-notifications" style="display: flex; flex-direction: column"></div>
-    </div>
-
-    @RenderSection("StatusBar", required: false)
-
-    <div id="notifications" style="position: fixed; bottom: 0; right: 0; margin: 10px;">
-        @if (!string.IsNullOrWhiteSpace(Model?.ErrorMessage))
-        {
-            <div class="notification is-danger is-light">
-                <button onclick="DeleteNotification()" class="delete"></button>
-                @Model.ErrorMessage
-            </div>
-        }
-    </div>
-
-    @RenderSection("Scripts", required: false)
-
-    <script src="~/lib/umbrellajs/umbrella.min.js"></script>
-    <script>
-        function DeleteNotification() {
-            u("#notifications").children().first().remove();
-        }
-
-        function toggleMenu() {
-            u("#navbarBasicExample").toggleClass("is-active")
-        }
-    </script>
+    @RenderBody()
 </body>
 </html>

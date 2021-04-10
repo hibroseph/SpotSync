@@ -9,7 +9,7 @@
 		<LangVersion>latest</LangVersion>
 		<DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
 	</PropertyGroup>
-
+	<!--
 	<ItemGroup>
 	  <Compile Remove="Views\Party\NewFolder\**" />
 	  <Content Remove="Views\Party\NewFolder\**" />
@@ -18,17 +18,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Remove="TypeScript\ListenerManager.ts" />
-	  <None Remove="TypeScript\ModalManager.ts" />
-	  <None Remove="TypeScript\NotificationManager.ts" />
-	  <None Remove="TypeScript\PlaylistManager.ts" />
-	  <None Remove="TypeScript\SearchCache.ts" />
-	  <None Remove="TypeScript\SearchContainerManager.ts" />
-	  <None Remove="TypeScript\Types.ts" />
-	  <None Remove="Views\Party\index.ts" />
 	  <None Remove="Views\Party\NowPlayingManager.ts" />
 	</ItemGroup>
-
+-->
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.3" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="3.1.8" />
@@ -45,20 +37,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <TypeScriptCompile Include="TypeScript\ListenerManager.ts" />
-	  <TypeScriptCompile Include="TypeScript\ModalManager.ts" />
-	  <TypeScriptCompile Include="TypeScript\NotificationManager.ts" />
-	  <TypeScriptCompile Include="TypeScript\PlaylistManager.ts" />
-	  <TypeScriptCompile Include="TypeScript\SearchCache.ts" />
-	  <TypeScriptCompile Include="TypeScript\SearchContainerManager.ts" />
-	  <TypeScriptCompile Include="TypeScript\Types.ts" />
-	  <TypeScriptCompile Include="Views\Party\index.ts" />
-	  <TypeScriptCompile Include="TypeScript\NowPlayingManager.ts" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="ClientApp\src\components\nav\" />
-	  <Folder Include="ClientApp\src\components\shared\" />
+		<Folder Include="ClientApp\src\components\nav\" />
+		<Folder Include="ClientApp\src\components\shared\" />
 	</ItemGroup>
 
 

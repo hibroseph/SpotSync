@@ -3,10 +3,9 @@ import styled from "styled-components";
 import Text from "../../shared/Text";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRandom, faListUl } from "@fortawesome/free-solid-svg-icons";
+import Image from "../../shared/Image";
 
-const $Image = styled.img`
-  width: 150px;
-  height: 150px;
+const $Image = styled(Image)`
   border-radius: 10px;
   margin-bottom: 10px;
 `;
@@ -44,6 +43,7 @@ const $StyledIcon = styled(FontAwesomeIcon)`
   color: white;
   font-size: 30px;
   padding: 10px;
+  margin: 4px;
 
   &:hover {
     background-color: rgba(0, 0, 0, 0.5);
@@ -60,7 +60,7 @@ export default ({ playlist, addSomeTracksToQueue, viewPlaylist }) => {
         <$PlaylistOptionsContainer onMouseLeave={() => setIsHovering(false)}>
           <$PlaylistOptions>
             <$StyledIcon onClick={() => addSomeTracksToQueue(playlist.id, 5)} icon={faRandom}></$StyledIcon>
-            <$StyledIcon onClick={() => viewPlaylist(playlist.id)} icon={faListUl}></$StyledIcon>
+            <$StyledIcon onClick={viewPlaylist} icon={faListUl}></$StyledIcon>
           </$PlaylistOptions>
         </$PlaylistOptionsContainer>
       )}

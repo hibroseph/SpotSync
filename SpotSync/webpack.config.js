@@ -32,7 +32,7 @@ module.exports = {
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
     }, optimization: {
-        minimize: false
+        minimize: true
     },
     output: {
         filename: '[name].bundle.js',
@@ -41,5 +41,6 @@ module.exports = {
     watchOptions: {
         poll: true,
         ignored: /node_modules/
-    }
+    },
+    devtool: 'source-map'
 };

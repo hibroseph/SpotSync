@@ -3,7 +3,7 @@ import styled from "styled-components";
 import Playlist from "./Playlist";
 import Loader from "../../shared/Loader";
 import CenteredHorizontally from "../../shared/CenteredHorizontally";
-import TrackList from "./TrackList";
+import PlaylistTrackView from "./PlaylistTrackView";
 
 const $PlaylistContainer = styled.div`
   display: flex;
@@ -27,9 +27,9 @@ export default ({ playlists, playlistTracks, addSomeTracksToQueue, viewPlaylist,
                 key={playlist.id}
                 playlist={playlist}
                 addSomeTracksToQueue={addSomeTracksToQueue}
-                viewPlaylist={(id) => {
+                viewPlaylist={() => {
                   setPlaylistView("PlaylistTracks");
-                  viewPlaylist(id);
+                  viewPlaylist(playlist);
                 }}
               ></Playlist>
             );
@@ -37,7 +37,9 @@ export default ({ playlists, playlistTracks, addSomeTracksToQueue, viewPlaylist,
         </$PlaylistContainer>
       )}
 
-      {!isLoading && playlistView == "PlaylistTracks" && <TrackList tracks={playlistTracks} addToQueue={addToQueue}></TrackList>}
+      {!isLoading && playlistView == "PlaylistTracks" && (
+        <PlaylistTrackView playlistTracks={playlistTracks} addToQueue={addToQueue}></PlaylistTrackView>
+      )}
     </React.Fragment>
   );
 };

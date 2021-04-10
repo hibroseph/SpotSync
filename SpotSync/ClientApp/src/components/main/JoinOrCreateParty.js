@@ -17,7 +17,6 @@ const $greyedOutBackground = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: #000000;
   background-color: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(10px);
 `;
@@ -26,7 +25,7 @@ const $popup = styled.div`
   background-color: #ffffff;
   border-radius: 10px;
   padding: 20px;
-  width: 600px;
+  width: 700px;
 `;
 
 const $flexContainer = styled.div`

@@ -9,7 +9,7 @@ import SearchResults from "./Search/SearchResults";
 import { getUser, getPartyCode, getRealtimeConnection } from "../../redux/reducers/reducers";
 import { connect } from "react-redux";
 import PlaylistView from "./Playlists/PlaylistView";
-import notify from "../../api/notify";
+import notify, { error } from "../../api/notify";
 import ScrollContainer from "../shared/ScrollContainer";
 
 const $DiscoverFrame = styled.div`
@@ -34,20 +34,20 @@ const tabs = [
 ];
 
 const addTrackToQueue = (track, user, partyCode, connection) => {
-  console.log("ADDING TRACK TO QUEUE");
   addSongToQueue(track, user.details.id, partyCode, connection);
 };
 
-const viewPlaylist = (id, setPlaylistTracks, setPlaylistLoading) => {
+const viewPlaylist = (playlist, setPlaylistTracks, setPlaylistLoading) => {
   setPlaylistLoading(true);
-  getPlaylistItems(id).then((playlistTracks) => {
-    setPlaylistTracks(playlistTracks);
-    setPlaylistLoading(false);
-  });
+  getPlaylistItems(playlist.id)
+    .then((playlistTracks) => {
+      setPlaylistTracks({ tracks: playlistTracks, playlist });
+    })
+    .catch((err) => error("Unable to load tracks for your playlist. Try again."))
+    .finally(() => setPlaylistLoading(false));
 };
 
 const addSomeTracksToQueue = (id, amount, connection) => {
-  console.log(`Adding ${amount} songs from playlist ${id}`);
   addSomeTracksFromPlaylistToQueue(id, amount, connection);
   notify("Added some tracks from your playlist to the queue");
 };
@@ -64,6 +64,7 @@ const DiscoverFrame = ({ user, partyCode, connection }) => {
 
   const [playlists, setPlaylists] = useState([]);
   const [playlistsLoading, setPlaylistsLoading] = useState(false);
+  const [havePlaylists, setHavePlaylists] = useState(false);
 
   const [playlistTracks, setPlaylistTracks] = useState([]);
 
@@ -73,31 +74,41 @@ const DiscoverFrame = ({ user, partyCode, connection }) => {
 
   useEffect(() => {
     if (currentTabView == "Your Top Songs" && !haveTopSongs && user) {
-      getTopSongs(20).then((songs) => {
-        setTopSongs(songs);
-        setHaveTopSongs(true);
-      });
+      getTopSongs(20)
+        .then((songs) => {
+          setTopSongs(songs);
+        })
+        .catch((err) => {
+          error("There was an error getting your top songs. Try again.");
+        })
+        .finally(() => {
+          setHaveTopSongs(true);
+        });
     }
 
-    if (currentTabView == "Playlists") {
+    if (currentTabView == "Playlists" && !havePlaylists) {
       setPlaylistsLoading(true);
       getPlaylists(30, 0)
         .then((playlists) => {
           setPlaylists(playlists);
         })
+        .catch((err) => {
+          error("There was an error getting your playlists. Try again.");
+        })
         .finally(() => {
           setPlaylistsLoading(false);
+          setHavePlaylists(true);
         });
     }
   }, [currentTabView, user]);
 
   return (
     <$DiscoverFrame>
+      <$Bar>
+        <Search inputSelected={() => setTabView("Search Results")} setIsLoading={setIsLoading} setSearchResults={setSearchResults} />
+        <Tabs selected={currentTabView} changeSelectedTab={setTabView} tabs={tabs} />
+      </$Bar>
       <ScrollContainer>
-        <$Bar>
-          <Search inputSelected={() => setTabView("Search Results")} setIsLoading={setIsLoading} setSearchResults={setSearchResults} />
-          <Tabs selected={currentTabView} changeSelectedTab={setTabView} tabs={tabs} />
-        </$Bar>
         {currentTabView == "Search Results" && (
           <SearchResults
             searchResults={searchResults}
@@ -117,7 +128,7 @@ const DiscoverFrame = ({ user, partyCode, connection }) => {
             playlists={playlists}
             addSomeTracksToQueue={(id, amount) => addSomeTracksToQueue(id, amount, connection)}
             addToQueue={(track) => addTrackToQueue(track, user, partyCode, connection)}
-            viewPlaylist={(id) => viewPlaylist(id, setPlaylistTracks, setPlaylistsLoading)}
+            viewPlaylist={(playlist) => viewPlaylist(playlist, setPlaylistTracks, setPlaylistsLoading)}
             playlistTracks={playlistTracks}
             isLoading={playlistsLoading}
           ></PlaylistView>

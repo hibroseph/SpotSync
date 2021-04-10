@@ -1,7 +1,78 @@
-table.nolines td {
-    border: none !important;
+* {
+    font-family: 'Roboto', sans-serif;
 }
 
-table.interactive tr:hover {
-    background-color: hsl(0, 0%, 96%);
+html, body {
+    margin: 0;
+    height: 100%;
+}
+
+.button {
+    border-radius: 10px;
+    background-color: rgb(125, 138, 255);
+    border: none;
+    font-size: 18px;
+    padding: 10px 25px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+}
+
+.button:hover {
+    filter: opacity(50%);
+}
+
+.logo {
+    height: 50px;
+}
+
+.nav {
+    display: flex;
+    justify-content: space-between;
+    align-items:center;
+    padding: 10px;
+}
+
+.homepage-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.main-promo-title {
+    font-size: 64px;
+    font-weight: bold;
+    background-color: #FBD277;
+    border-radius: 100px;
+    padding: 30px 50px;
+    color: white;
+    width: 700px;
+    margin:50px 0;
+}
+
+.step-container {
+    display: flex;
+    width: 700px;
+    margin: 50px
+}
+
+.step-counter {
+    color: white;
+    font-size: 64px;
+    background-color: #7D8AFF;
+    border-radius: 100px;
+    font-weight: bold;
+    padding: 10px 30px;
+    height: 75px;
+}
+
+.step-text {
+    font-size: 64px;
+    color: black;
+    font-weight: bold;
+    padding: 0 50px;
+}
+
+.profit {
+    color: #53E761;
 }
