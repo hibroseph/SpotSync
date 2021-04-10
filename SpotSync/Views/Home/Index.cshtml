@@ -3,6 +3,9 @@
 }
 
     <section class="homepage-body">
+        @if (User.Identity.IsAuthenticated)  {
+         <a href="/party/app" class="go-to-app">Go to Spotibro</a>
+        }
         <div class="main-promo-title">Listen and Share Music in Realtime in Spotify</div>
         <div class="step-container">
             <div class="step-counter">1</div>

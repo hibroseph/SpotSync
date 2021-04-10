@@ -48,6 +48,24 @@ html, body {
     color: white;
     width: 700px;
     margin:50px 0;
+    text-align: center;
+}
+
+.go-to-app {
+    font-size: 64px;
+    font-weight: bold;
+    background-color: #7D8AFF;
+    border-radius: 100px;
+    padding: 30px 50px;
+    color: white;
+    width: 700px;
+    margin: 50px 0;
+    text-align: center;
+    text-decoration: none;
+}
+
+.go-to-app:hover {
+   filter: opacity(50%);
 }
 
 .step-container {

@@ -15,7 +15,10 @@
             <img class="logo" src="~/assets/logo.svg" />
             @if (User.Identity.IsAuthenticated)
             {
-                <a class="button" href="/account/logout">Logout</a>
+        <div>
+            <a class="button" href="/party/app">Dashboard</a>
+            <a class="button" href="/account/logout">Logout</a>
+        </div>
             }
             else
             {
