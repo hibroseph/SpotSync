@@ -9,6 +9,10 @@
 		<LangVersion>latest</LangVersion>
 		<DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <Content Include="ClientApp\src\assets\unknown-album-art.png" />
+	</ItemGroup>
 	<!--
 	<ItemGroup>
 	  <Compile Remove="Views\Party\NewFolder\**" />

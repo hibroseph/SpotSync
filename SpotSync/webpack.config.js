@@ -1,6 +1,7 @@
 ﻿const path = require('path');
 
-module.exports = {
+module.exports = (env, argv) => {
+    return {
     entry: {
         partyapp: './ClientApp/src/index.js'
     },
@@ -31,16 +32,17 @@ module.exports = {
     },
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
-    }, optimization: {
-        minimize: true
+        }, optimization: {
+        minimize: argv.mode == 'production' ? true : false
     },
     output: {
         filename: '[name].bundle.js',
-        path: path.resolve(__dirname, 'wwwroot/buildoutput/')
+            path: path.resolve(__dirname, 'wwwroot/buildoutput/')
     },
     watchOptions: {
         poll: true,
-        ignored: /node_modules/
+            ignored: /node_modules/
     },
     devtool: 'source-map'
+}  
 };

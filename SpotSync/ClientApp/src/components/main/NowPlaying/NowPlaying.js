@@ -9,10 +9,10 @@ import { skipSong } from "../../../api/partyHub";
 import { userLikesSong, userDislikesSong } from "../../../api/partyHub";
 import ThumbsUp from "../../shared/ThumbsUp";
 import ThumbsDown from "../../shared/ThumbsDown";
-import Loader from "../../shared/Loader";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.min.css";
-
+import NoAlbumArt from "../../../assets/unknown-album-art.png";
+import Image from "../../shared/Image";
 const $NowPlaying = styled.div`
   box-sizing: border-box;
   width: 100%;
@@ -75,6 +75,7 @@ const $NowPlayingSong = styled.div`
 
   img {
     width: 50px;
+    height: 50px;
   }
 
   .title {
@@ -112,7 +113,7 @@ const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFe
         <$NowPlaying>
           <$NowPlayingSong>
             <React.Fragment>
-              <img src={currentSong?.albumImageUrl} />
+              <Image src={currentSong?.albumImageUrl != undefined ? currentSong.albumImageUrl : NoAlbumArt} />
               <div className="song-information">
                 <p className={"title"}>{currentSong?.name}</p>
                 <p className={"artist"}>{currentSong?.artist}</p>
