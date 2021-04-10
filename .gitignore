@@ -5,8 +5,7 @@
 
 # SpotSync Specific
 
-# build outputs
-*.bundle.js
+buildoutput/
 
 # User-specific files
 *.rsuser

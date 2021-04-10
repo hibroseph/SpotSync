@@ -39,6 +39,8 @@
 	<ItemGroup>
 		<Folder Include="ClientApp\src\components\nav\" />
 		<Folder Include="ClientApp\src\components\shared\" />
+		<Folder Include="wwwroot\buildoutput\" />
+		<Folder Include="wwwroot\js\" />
 	</ItemGroup>
 
 
