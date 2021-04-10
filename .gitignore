@@ -5,6 +5,9 @@
 
 # SpotSync Specific
 
+# build outputs
+*.bundle.js
+
 # User-specific files
 *.rsuser
 *.suo
