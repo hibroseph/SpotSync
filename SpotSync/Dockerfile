@@ -5,6 +5,7 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 
+WORKDIR "/src"
 COPY . .
 
 ## install node
@@ -13,6 +14,8 @@ RUN apt-get install curl \
     && apt-get install nodejs 
 
 WORKDIR "/src/SpotSync"
+RUN ls
+run pwd
 RUN npm install 
 RUN npm run build
 
