@@ -5,19 +5,12 @@ WORKDIR /app
 ENV ASPNETCORE_URLS http://*:443
 EXPOSE 443
 
-
+#FROM node
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
-COPY ["SpotSync/SpotSync.csproj", "SpotSync/"]
-COPY ["Domain/Domain.csproj", "Domain/"]
-COPY ["Application/Application.csproj", "Application/"]
-COPY ["Persistence/Persistence.csproj", "Persistence/"]
-COPY ["Infrastructure/Infrastructure.csproj", "Infrastructure/"]
-COPY ["Database/Database.csproj", "Database/"]
-RUN dotnet restore "SpotSync/SpotSync.csproj"
+
 COPY . .
 WORKDIR "/src/SpotSync"
-RUN dotnet build "SpotSync.csproj" -c Release -o /app/build
 
 FROM build AS publish
 RUN dotnet publish "SpotSync.csproj" -c Release -o /app/publish
