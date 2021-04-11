@@ -15,7 +15,9 @@ import ScrollContainer from "../shared/ScrollContainer";
 const $DiscoverFrame = styled.div`
   padding: 0 10px;
   width: 75%;
-  padding: 0 30px 20px 10px;
+  padding: 0 0 20px 10px;
+  display: flex;
+  flex-direction: column;
 `;
 
 const $Bar = styled.div`
