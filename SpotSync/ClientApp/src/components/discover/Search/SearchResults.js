@@ -8,7 +8,7 @@ const $SearchResults = styled.div`
   display: flex;
   flex-wrap: wrap;
 `;
-const SearchResults = ({ searchResults, isLoading, addSongToQueue }) => {
+const SearchResults = ({ searchTerm, searchResults, isLoading, addSongToQueue }) => {
   return (
     <React.Fragment>
       {isLoading && (
@@ -18,6 +18,7 @@ const SearchResults = ({ searchResults, isLoading, addSongToQueue }) => {
       )}
       {!isLoading && searchResults?.length > 0 && (
         <React.Fragment>
+          <p>Search Results for {searchTerm}</p>
           <$SearchResults>
             {searchResults.map((track, index) => {
               return <Track key={`${track.uri}_${index}`} track={track} addSongToQueue={() => addSongToQueue(track)}></Track>;

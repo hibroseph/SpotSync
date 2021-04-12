@@ -2,3 +2,5 @@ This is used to keep track of what is currently an issue and what I am working o
 
 Issue: Inconsistent loading of elements on page
 Issue: Joining existing party sometimes does not play music
+Issue: JS build size after transpilation
+

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 
-namespace SpotSync.Infrastructure
+namespace SpotSync.Domain.Contracts
 {
-    class SpotifyEndpoint
+    public class SpotifyEndpoint
     {
         public string EndpointUrl { get; set; }
         public HttpMethod HttpMethod { get; set; }

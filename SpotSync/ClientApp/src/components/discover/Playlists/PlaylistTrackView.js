@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import TrackList from "./TrackList";
+import TrackList from "../TrackList";
 import Image from "../../shared/Image";
 import Text from "../../shared/Text";
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SpotSync.Infrastructure
+namespace SpotSync.Infrastructure.SpotifyApi
 {
     class StartUserPlaybackSong
     {

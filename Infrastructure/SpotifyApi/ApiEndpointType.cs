@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SpotSync.Infrastructure
+namespace SpotSync.Infrastructure.SpotifyApi
 {
     public enum ApiEndpointType
     {
@@ -16,6 +16,8 @@ namespace SpotSync.Infrastructure
         SearchSpotify = 8,
         PausePlayback = 9,
         GetUserPlaylists = 10,
-        GetPlaylistItems = 11
+        GetPlaylistItems = 11,
+        ArtistInformation = 12,
+        ArtistTopTracks = 13
     }
 }

@@ -1,0 +1,18 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Text.Json.Serialization;
+
+namespace SpotSync.Domain.Contracts.SpotifyApiModels
+{
+    public class Track
+    {
+        public string Id { get; set; }
+        public List<Artist> Artists { get; set; }
+
+        [JsonPropertyName("duration_ms")]
+        public int Duration { get; set; }
+        public bool Explicit { get; set; }
+        public string Name { get; set; }
+    }
+}

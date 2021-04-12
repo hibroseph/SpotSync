@@ -13,6 +13,7 @@ using SpotSync.Domain.Contracts.Repositories;
 using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.Contracts.Services.PartyGoerSetting;
 using SpotSync.Domain.Events;
+using SpotSync.Infrastructure.SpotifyApi;
 using SpotSync.Infrastructure;
 using System;
 
@@ -33,6 +34,7 @@ namespace SpotSync
 
             serviceCollection.AddSingleton<IPartyRepository, PartyRepository>();
             serviceCollection.AddSingleton<IPartyGoerService, PartyGoerService>();
+            serviceCollection.AddSingleton<IBrowseSpotifyService, BrowseSpotifyService>();
             serviceCollection.AddSingleton<ILogService, LogService>();
             serviceCollection.AddSingleton<IPartyService, PartyService>();
             serviceCollection.AddSingleton<IAuthenticationService, AuthenticationService>();

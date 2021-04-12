@@ -25,16 +25,6 @@ const $Bar = styled.div`
   align-items: center;
 `;
 
-const tabs = [
-  { title: "Search Results" },
-  {
-    title: "Your Top Songs",
-  },
-  {
-    title: "Playlists",
-  },
-];
-
 const addTrackToQueue = (track, user, partyCode, connection) => {
   addSongToQueue(track, user.details.id, partyCode, connection);
 };
@@ -54,13 +44,26 @@ const addSomeTracksToQueue = (id, amount, connection) => {
   notify("Added some tracks from your playlist to the queue");
 };
 
+const addSearchResultsToTabs = (tabs, setTabs) => {
+  setTabs([...tabs, { title: "Search Results" }]);
+};
+
 const DiscoverFrame = ({ user, partyCode, connection }) => {
+  const [tabs, setTabs] = useState([
+    {
+      title: "Your Top Songs",
+    },
+    {
+      title: "Playlists",
+    },
+  ]);
+
   const [currentTabView, setTabView] = useState("Your Top Songs");
 
   const [isLoading, setIsLoading] = useState(false);
 
   const [searchResults, setSearchResults] = useState([]);
-
+  const [searchTerm, setSearchTerm] = useState(null);
   const [haveTopSongs, setHaveTopSongs] = useState(false);
   const [topSongs, setTopSongs] = useState({});
 
@@ -107,7 +110,12 @@ const DiscoverFrame = ({ user, partyCode, connection }) => {
   return (
     <$DiscoverFrame>
       <$Bar>
-        <Search inputSelected={() => setTabView("Search Results")} setIsLoading={setIsLoading} setSearchResults={setSearchResults} />
+        <Search
+          addSearchResultsToTabs={() => addSearchResultsToTabs(tabs, setTabs)}
+          inputSelected={() => setTabView("Search Results")}
+          setIsLoading={setIsLoading}
+          setSearchResults={setSearchResults}
+        />
         <Tabs selected={currentTabView} changeSelectedTab={setTabView} tabs={tabs} />
       </$Bar>
       <ScrollContainer>

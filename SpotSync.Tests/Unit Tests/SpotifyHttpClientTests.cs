@@ -5,7 +5,7 @@ using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.Contracts.Services.PartyGoerSetting;
 using SpotSync.Domain.DTO;
-using SpotSync.Infrastructure;
+using SpotSync.Infrastructure.SpotifyApi;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
