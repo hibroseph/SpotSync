@@ -88,7 +88,7 @@ namespace SpotSync.Application.Authentication
 
         public Task<string> GetAccessTokenAsync(PartyGoer partyGoer)
         {
-            return Task.FromResult(AuthenticationTokens[partyGoer.Id].AccessToken);
+            return Task.FromResult(AuthenticationTokens[partyGoer.GetId()].AccessToken);
         }
     }
 }

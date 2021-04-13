@@ -63,7 +63,7 @@ namespace SpotSync.Controllers
 
                 DashboardModel model = new DashboardModel
                 {
-                    Name = user.Id,
+                    Name = user.GetUsername(),
                     AvailableParties = topParties.Select(p => new PreviewPartyModel
                     {
                         AlbumArtUrl = p.GetCurrentSong()?.AlbumImageUrl ?? "./assets/unknown-album-art.png",

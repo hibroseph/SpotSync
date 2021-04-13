@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
+using SpotSync.Domain.Contracts.Services;
 using SpotSync.Models;
 using SpotSync.Models.Shared;
 
@@ -18,10 +19,13 @@ namespace SpotSync.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IPartyService _partyService;
-        public HomeController(ILogger<HomeController> logger, IPartyService partyService)
+        private readonly IPartyGoerService _partyGoerService;
+
+        public HomeController(ILogger<HomeController> logger, IPartyService partyService, IPartyGoerService partyGoerService)
         {
             _logger = logger;
             _partyService = partyService;
+            _partyGoerService = partyGoerService;
         }
 
         public async Task<IActionResult> Index()
@@ -29,7 +33,7 @@ namespace SpotSync.Controllers
             if (User.Identity.IsAuthenticated)
             {
                 //return RedirectToAction("Index", "Dashboard");
-                PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                PartyGoer user = await _partyGoerService.GetCurrentPartyGoerAsync();
 
                 Party party = await _partyService.GetPartyWithAttendeeAsync(user);
 

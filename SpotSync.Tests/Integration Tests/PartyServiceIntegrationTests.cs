@@ -5,7 +5,6 @@ using SpotSync.Application.Services;
 using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
-using SpotSync.Domain.Contracts.Services.PartyGoerSetting;
 using SpotSync.Domain.DTO;
 using System;
 using System.Collections.Generic;
@@ -21,14 +20,13 @@ namespace SpotSync.Tests
         Mock<ISpotifyHttpClient> _spotifyHttpClient;
         Mock<ILogService> _logService;
         Mock<IPartyGoerService> _partyGoerService;
-        Mock<IPartyGoerDetailsService> _partyDetailsService;
 
-        PartyGoer PartyHost1 = new PartyGoer("Joe");
-        PartyGoer PartyHost2 = new PartyGoer("Kip");
-        PartyGoer PartyHost3 = new PartyGoer("Kipseph");
-        PartyGoer PartyAttendee1 = new PartyGoer("John");
-        PartyGoer PartyAttendee2 = new PartyGoer("Matt");
-        PartyGoer PartyAttendee3 = new PartyGoer("Joseph");
+        PartyGoer PartyHost1 = new PartyGoer("Joe", false, "US", "premium");
+        PartyGoer PartyHost2 = new PartyGoer("Kip", false, "US", "premium");
+        PartyGoer PartyHost3 = new PartyGoer("Kipseph", false, "US", "premium");
+        PartyGoer PartyAttendee1 = new PartyGoer("John", false, "US", "premium");
+        PartyGoer PartyAttendee2 = new PartyGoer("Matt", false, "US", "premium");
+        PartyGoer PartyAttendee3 = new PartyGoer("Joseph", false, "US", "premium");
 
         [SetUp]
         public void SetUpPartyService()
@@ -38,9 +36,9 @@ namespace SpotSync.Tests
             _logService = new Mock<ILogService>();
             _partyGoerService = new Mock<IPartyGoerService>();
 
-            _spotifyHttpClient.Setup(p => p.RequestAccessAndRefreshTokenFromSpotifyAsync(It.IsAny<string>())).Returns(Task.FromResult(new PartyGoerDetails { Id = It.IsAny<string>(), ShouldFilterExplicitSongs = It.IsAny<bool>() }));
+            _spotifyHttpClient.Setup(p => p.RequestAccessAndRefreshTokenFromSpotifyAsync(It.IsAny<string>())).Returns(Task.FromResult(new SpotifyUser { SpotifyId = It.IsAny<string>() }));
 
-            _partyService = new PartyService(_partyRepository, _spotifyHttpClient.Object, _logService.Object, _partyGoerService.Object, _partyDetailsService.Object);
+            _partyService = new PartyService(_partyRepository, _spotifyHttpClient.Object, _logService.Object, _partyGoerService.Object);
         }
 
         [Test]

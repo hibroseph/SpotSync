@@ -100,12 +100,12 @@ namespace Persistence
 
             if (partyKeys.Count > 1)
             {
-                throw new Exception($"Host: {host?.Id} is hosting {partyKeys.Count} parties. A host should only host 1 party at a time.");
+                throw new Exception($"Host: {host?.GetId()} is hosting {partyKeys.Count} parties. A host should only host 1 party at a time.");
             }
 
             if (partyKeys == null)
             {
-                throw new Exception($"Host: {host?.Id} is not hosting a party");
+                throw new Exception($"Host: {host?.GetId()} is not hosting a party");
             }
 
             _parties.Remove(partyKeys.First());
@@ -171,7 +171,7 @@ namespace Persistence
 
             if (partyKeys == null || partyKeys.Count == 0)
             {
-                throw new Exception($"The attendee: {attendee.Id} is not currently in a party");
+                throw new Exception($"The attendee: {attendee.GetId()} is not currently in a party");
             }
 
             _parties[partyKeys.First()].LeaveParty(attendee);

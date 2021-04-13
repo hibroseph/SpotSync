@@ -8,7 +8,6 @@ namespace SpotSync.Domain.Contracts.Services
     public interface ILogService
     {
         Task<string> LogExceptionAsync(Exception exception, string customMessage);
-        Task LogUserActivityAsync(string username, string action);
         Task LogUserActivityAsync(PartyGoer user, string action);
         Task LogAppActivityAsync(string activity);
     }

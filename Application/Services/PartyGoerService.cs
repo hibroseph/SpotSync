@@ -2,7 +2,6 @@
 using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
-using SpotSync.Domain.Contracts.Services.PartyGoerSetting;
 using SpotSync.Domain.DTO;
 using SpotSync.Domain.Types;
 using System;
@@ -13,6 +12,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using SpotSync.Domain.Errors;
+using System.Collections.Concurrent;
 
 namespace SpotSync.Application.Services
 {
@@ -21,18 +21,16 @@ namespace SpotSync.Application.Services
         private ISpotifyHttpClient _spotifyHttpClient;
         private IHttpContextAccessor _httpContextAccessor;
         private ISpotifyAuthentication _spotifyAuthentication;
-        private IPartyGoerDetailsService _partyGoerDetailsService;
-        private Dictionary<string, PartyGoer> _partyGoerCache;
+        private IDictionary<string, PartyGoer> _partyGoerCache;
         private ILogService _logService;
 
         public PartyGoerService(ISpotifyHttpClient spotifyHttpClient, IHttpContextAccessor httpContextAccessor,
-        ISpotifyAuthentication spotifyAuthentication, IPartyGoerDetailsService partyGoerDetailsService, ILogService logService)
+        ISpotifyAuthentication spotifyAuthentication, ILogService logService)
         {
             _spotifyHttpClient = spotifyHttpClient;
             _httpContextAccessor = httpContextAccessor;
             _spotifyAuthentication = spotifyAuthentication;
-            _partyGoerCache = new Dictionary<string, PartyGoer>();
-            _partyGoerDetailsService = partyGoerDetailsService;
+            _partyGoerCache = new ConcurrentDictionary<string, PartyGoer>();
             _logService = logService;
         }
 
@@ -56,18 +54,6 @@ namespace SpotSync.Application.Services
             return await _spotifyHttpClient.QuerySpotifyAsync(await GetCurrentPartyGoerAsync(), query, queryType, limit);
         }
 
-        public void SavePartyGoer(PartyGoerDetails partyGoerDetails)
-        {
-            if (_partyGoerCache.ContainsKey(partyGoerDetails.Id))
-            {
-                _partyGoerCache[partyGoerDetails.Id] = new PartyGoer(partyGoerDetails);
-            }
-            else
-            {
-                _partyGoerCache.Add(partyGoerDetails.Id, new PartyGoer(partyGoerDetails));
-            }
-        }
-
         /// <summary>
         /// Accesses the current party goer. If no party goer is associated with the current session, null is returned
         /// </summary>
@@ -84,20 +70,21 @@ namespace SpotSync.Application.Services
             }
             else
             {
-                PartyGoerDetails partyGoerDetails = await _spotifyHttpClient.GetUserDetailsAsync(partyGoerId);
+                SpotifyUser user = await _spotifyHttpClient.GetUserDetailsAsync(partyGoerId);
 
-                PartyGoer newPartyGoer = new PartyGoer(partyGoerDetails);
-                _partyGoerCache.Add(partyGoerId, newPartyGoer);
+                PartyGoer newPartyGoer = new PartyGoer(user.SpotifyId, user.ExplicitSettings.Filter, user.Market, user.Product);
+                _partyGoerCache.TryAdd(partyGoerId, newPartyGoer);
 
                 return newPartyGoer;
             }
         }
 
+
         public async Task<string> GetPartyGoerAccessTokenAsync(PartyGoer partyGoer)
         {
-            if (await _spotifyAuthentication.DoesAccessTokenNeedRefreshAsync(partyGoer.Id))
+            if (await _spotifyAuthentication.DoesAccessTokenNeedRefreshAsync(partyGoer.GetId()))
             {
-                await _spotifyHttpClient.RefreshTokenForUserAsync(partyGoer.Id);
+                await _spotifyHttpClient.RefreshTokenForUserAsync(partyGoer.GetId());
             }
 
             return await _spotifyAuthentication.GetAccessTokenAsync(partyGoer);
@@ -126,7 +113,7 @@ namespace SpotSync.Application.Services
 
         public async Task<List<Track>> GetPlaylistItemsAsync(PartyGoer user, string playlistId)
         {
-            return await _spotifyHttpClient.GetPlaylistItemsAsync(user, playlistId, _partyGoerDetailsService.GetMarket(user));
+            return await _spotifyHttpClient.GetPlaylistItemsAsync(user, playlistId);
         }
     }
 }

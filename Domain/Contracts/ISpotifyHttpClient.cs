@@ -11,18 +11,18 @@ namespace SpotSync.Domain.Contracts
     public interface ISpotifyHttpClient
     {
         Task<CurrentSongDTO> GetCurrentSongAsync(string partyGoerId);
-        Task<PartyGoerDetails> RequestAccessAndRefreshTokenFromSpotifyAsync(string code);
+        Task<SpotifyUser> RequestAccessAndRefreshTokenFromSpotifyAsync(string code);
         Task<Errors.ServiceResult<UpdateSongError>> UpdateSongForPartyGoerAsync(PartyGoer user, List<string> songUris, int currentSongProgressInMs);
         Task<List<Track>> GetRecommendedSongsAsync(string spotifyId, GetRecommendedSongs recommendedSongs);
         Task<List<Track>> GetUserTopTracksAsync(string spotifyId, int limit = 10);
         Task<string> GetUsersActiveDeviceAsync(string spotifyId);
         Task<IEnumerable<ISpotifyQueryResult>> QuerySpotifyAsync(PartyGoer user, string searchQuery, SpotifyQueryType queryType, int limit);
-        Task<PartyGoerDetails> GetUserDetailsAsync(string spotifyId);
+        Task<SpotifyUser> GetUserDetailsAsync(string spotifyId);
         Task TogglePlaybackAsync(PartyGoer partyGoer, PlaybackState state);
         Task<List<Device>> GetUserDevicesAsync(PartyGoer partyGoer);
         Task RefreshTokenForUserAsync(string partyGoerId);
         Task<List<Playlist>> GetUsersPlaylistsAsync(PartyGoer user, int limit = 10, int offset = 0);
-        Task<List<Track>> GetPlaylistItemsAsync(PartyGoer user, string playlistId, string market);
+        Task<List<Track>> GetPlaylistItemsAsync(PartyGoer user, string playlistId);
         Task<ArtistInformation> GetArtistInformationAsync(PartyGoer partyGoer, string artistId);
     }
 }

@@ -35,7 +35,7 @@ namespace SpotSync.Domain
 
             if (HasUserDislikedTracksBefore(user))
             {
-                dislikedTracks = _usersDislikedTracks[user.Id];
+                dislikedTracks = _usersDislikedTracks[user.GetId()];
             }
             else
             {
@@ -44,7 +44,7 @@ namespace SpotSync.Domain
 
             if (HasUserLikedTracksBefore(user))
             {
-                likedTracks = _usersLikedTracks[user.Id];
+                likedTracks = _usersLikedTracks[user.GetId()];
 
             }
             else
@@ -67,14 +67,14 @@ namespace SpotSync.Domain
         {
             if (HasUserDislikedTracksBefore(user))
             {
-                if (!_usersDislikedTracks[user.Id].Contains(trackUri))
+                if (!_usersDislikedTracks[user.GetId()].Contains(trackUri))
                 {
-                    _usersDislikedTracks[user.Id].Add(trackUri);
+                    _usersDislikedTracks[user.GetId()].Add(trackUri);
                 }
             }
             else
             {
-                _usersDislikedTracks[user.Id] = new List<string> { trackUri };
+                _usersDislikedTracks[user.GetId()] = new List<string> { trackUri };
             }
 
             // If the user used to dislike this song, remove it from that list
@@ -94,14 +94,14 @@ namespace SpotSync.Domain
         {
             if (HasUserLikedTracksBefore(user))
             {
-                if (!_usersLikedTracks[user.Id].Contains(trackUri))
+                if (!_usersLikedTracks[user.GetId()].Contains(trackUri))
                 {
-                    _usersLikedTracks[user.Id].Add(trackUri);
+                    _usersLikedTracks[user.GetId()].Add(trackUri);
                 }
             }
             else
             {
-                _usersLikedTracks[user.Id] = new List<string> { trackUri };
+                _usersLikedTracks[user.GetId()] = new List<string> { trackUri };
             }
 
             // If the user used to dislike this song, remove it from that list
@@ -113,26 +113,26 @@ namespace SpotSync.Domain
 
         private bool HasUserDislikedTracksBefore(PartyGoer user)
         {
-            return _usersDislikedTracks.ContainsKey(user.Id);
+            return _usersDislikedTracks.ContainsKey(user.GetId());
         }
         private bool HasUserLikedTracksBefore(PartyGoer user)
         {
-            return _usersLikedTracks.ContainsKey(user.Id);
+            return _usersLikedTracks.ContainsKey(user.GetId());
         }
 
         private void UserDoesntDislikeTrackAnymore(PartyGoer user, string trackUri)
         {
-            if (_usersDislikedTracks.ContainsKey(user.Id))
+            if (_usersDislikedTracks.ContainsKey(user.GetId()))
             {
-                _usersDislikedTracks[user.Id].Remove(trackUri);
+                _usersDislikedTracks[user.GetId()].Remove(trackUri);
             }
         }
 
         public bool DoesUserDislikeTrack(PartyGoer partyGoer, string trackUri)
         {
-            if (_usersDislikedTracks.ContainsKey(partyGoer.Id))
+            if (_usersDislikedTracks.ContainsKey(partyGoer.GetId()))
             {
-                return _usersDislikedTracks[partyGoer.Id].Contains(trackUri);
+                return _usersDislikedTracks[partyGoer.GetId()].Contains(trackUri);
             }
 
             return false;
@@ -140,17 +140,17 @@ namespace SpotSync.Domain
 
         private void UserDoesntLikeTrackAnymore(PartyGoer user, string trackUri)
         {
-            if (_usersLikedTracks.ContainsKey(user.Id))
+            if (_usersLikedTracks.ContainsKey(user.GetId()))
             {
-                _usersLikedTracks[user.Id].Remove(trackUri);
+                _usersLikedTracks[user.GetId()].Remove(trackUri);
             }
         }
 
         public bool DoesUserLikeTrack(PartyGoer partyGoer, string trackUri)
         {
-            if (_usersLikedTracks.ContainsKey(partyGoer.Id))
+            if (_usersLikedTracks.ContainsKey(partyGoer.GetId()))
             {
-                return _usersLikedTracks[partyGoer.Id].Contains(trackUri);
+                return _usersLikedTracks[partyGoer.GetId()].Contains(trackUri);
             }
 
             return false;

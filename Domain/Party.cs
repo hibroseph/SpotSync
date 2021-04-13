@@ -28,7 +28,7 @@ namespace SpotSync.Domain
         public Party(PartyGoer host)
         {
             _host = host;
-            _listeners = new Dictionary<string, PartyGoer> { { host.Id, host } };
+            _listeners = new Dictionary<string, PartyGoer> { { host.GetId(), host } };
             _partyCode = GeneratePartyCode();
             _trackPositionTime = new Stopwatch();
             _queue = new Queue();
@@ -204,11 +204,11 @@ namespace SpotSync.Domain
         public async Task TogglePlaybackAsync(PartyGoer partyGoer)
         {
             // Grabbing partier by reference, so any change I make to it will change it in the list
-            if (_listeners.TryGetValue(partyGoer.Id, out PartyGoer partier))
+            if (_listeners.TryGetValue(partyGoer.GetId(), out PartyGoer partier))
             {
-                partier.PausedMusic = !partier.PausedMusic;
+                partier.ToggleMusicPlaybackState();
 
-                await DomainEvents.RaiseAsync(new ToggleMusicState { Listener = partier, State = DeterminePlaybackState(partier.PausedMusic) });
+                await DomainEvents.RaiseAsync(new ToggleMusicState { Listener = partier, State = DeterminePlaybackState(partier.IsMusicPaused()) });
             }
         }
 
@@ -258,7 +258,7 @@ namespace SpotSync.Domain
 
         public void JoinParty(PartyGoer partyGoer)
         {
-            _listeners.TryAdd(partyGoer.Id, partyGoer);
+            _listeners.TryAdd(partyGoer.GetId(), partyGoer);
 
             if (_listeners.Count == 1)
             {
@@ -268,7 +268,7 @@ namespace SpotSync.Domain
 
         public void LeaveParty(PartyGoer partyGoer)
         {
-            _listeners.Remove(partyGoer.Id);
+            _listeners.Remove(partyGoer.GetId());
 
             if (IsHost(partyGoer))
             {
@@ -308,7 +308,7 @@ namespace SpotSync.Domain
 
         public bool IsListener(PartyGoer listenerInQuestion)
         {
-            return _listeners.ContainsKey(listenerInQuestion.Id);
+            return _listeners.ContainsKey(listenerInQuestion.GetId());
         }
         public bool Equals([AllowNull] Party other)
         {

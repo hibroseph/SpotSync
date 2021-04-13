@@ -1,6 +1,5 @@
-import { partyJoined, partyLeft, togglePlayback } from "../redux/actions/party";
+import { partyLeft, togglePlayback } from "../redux/actions/party";
 import { connectToParty, userAddSongToQueue } from "./partyHub";
-import { saveSpotifySearchResults } from "../redux/actions/party";
 
 export const leaveParty = (partyCode) => {
   return (dispatch) => {

@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using SpotSync.Classes.Hubs;
@@ -16,9 +13,7 @@ using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.DTO;
-using SpotSync.Domain.Errors;
 using SpotSync.Domain.Events;
-using SpotSync.Models.Dashboard;
 using SpotSync.Models.Party;
 using SpotSync.Models.Shared;
 using Track = SpotSync.Domain.Track;
@@ -29,14 +24,12 @@ namespace SpotSync.Controllers
     {
         private readonly IPartyService _partyService;
         private readonly IPartyGoerService _partyGoerService;
-        private readonly IHubContext<PartyHub> _partyHubContext;
         private readonly ILogService _logService;
 
-        public PartyController(IPartyService partyService, IHubContext<PartyHub> hubContext, ILogService logService, IPartyGoerService partyGoerService)
+        public PartyController(IPartyService partyService, ILogService logService, IPartyGoerService partyGoerService)
         {
             _partyService = partyService;
             _partyGoerService = partyGoerService;
-            _partyHubContext = hubContext;
             _logService = logService;
         }
 
@@ -101,7 +94,8 @@ namespace SpotSync.Controllers
         [Authorize]
         public async Task<IActionResult> Index(string partyCode)
         {
-            PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            PartyGoer user = await _partyGoerService.GetCurrentPartyGoerAsync();
+
             Party party;
 
             if (string.IsNullOrWhiteSpace(partyCode))
@@ -124,7 +118,7 @@ namespace SpotSync.Controllers
 
             if (isUserListening)
             {
-                usersSuggestedSongs = await _partyGoerService.GetRecommendedSongsAsync(user.Id);
+                usersSuggestedSongs = await _partyGoerService.GetRecommendedSongsAsync(user.GetId());
             }
 
             PartyModel model = new PartyModel
@@ -169,7 +163,7 @@ namespace SpotSync.Controllers
 
             if (party == null)
             {
-                await _logService.LogUserActivityAsync(user.Id, $"Failed to join party, party code did was not a valid party: {partyCode}");
+                await _logService.LogUserActivityAsync(user, $"Failed to join party, party code did was not a valid party: {partyCode}");
 
                 return new JsonResult(new Result(false, "Party code was not valid"));
             }
@@ -184,14 +178,14 @@ namespace SpotSync.Controllers
             {
                 party.JoinParty(user);
                 await party.SyncListenerWithSongAsync(user);
-                await _logService.LogUserActivityAsync(user.Id, $"Joined a party with code {partyCode}");
+                await _logService.LogUserActivityAsync(user, $"Joined a party with code {partyCode}");
 
                 return new JsonResult(new Result<JoinedParty>(new JoinedParty { PartyCode = partyCode, SuccessfullyJoinedParty = true }));
 
             }
             catch (Exception ex)
             {
-                await _logService.LogExceptionAsync(ex, $"{user.Id} failed to join party {partyCode}");
+                await _logService.LogExceptionAsync(ex, $"{user} failed to join party {partyCode}");
             }
 
             return new JsonResult(new Result(false, "An error occurred while trying to join party"));
@@ -205,15 +199,15 @@ namespace SpotSync.Controllers
                 RedirectToAction("Index", "Dashboard");
             }
 
-            PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            PartyGoer user = await _partyGoerService.GetCurrentPartyGoerAsync();
 
             if (!await _partyService.LeavePartyAsync(user))
             {
-                await _logService.LogUserActivityAsync(user.Id, $"User failed to leave party {partyCode}");
+                await _logService.LogUserActivityAsync(user, $"User failed to leave party {partyCode}");
                 return RedirectToAction("Index", "Dashboard");
             }
 
-            await _logService.LogUserActivityAsync(user.Id, $"User successfully left party {partyCode}");
+            await _logService.LogUserActivityAsync(user, $"User successfully left party {partyCode}");
 
             return RedirectToAction("Index", "Dashboard"); ;
         }
@@ -222,24 +216,24 @@ namespace SpotSync.Controllers
         [HttpDelete]
         public async Task<IActionResult> EndParty()
         {
-            PartyGoer host = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            PartyGoer host = await _partyGoerService.GetCurrentPartyGoerAsync();
 
             if (await _partyService.IsUserHostingAPartyAsync(host))
             {
                 if (await _partyService.EndPartyAsync(host))
                 {
-                    await _logService.LogUserActivityAsync(host.Id, $"User successfully ended party");
+                    await _logService.LogUserActivityAsync(host, $"User successfully ended party");
                     return Ok();
                 }
                 else
                 {
-                    await _logService.LogUserActivityAsync(host.Id, $"User failed to end party");
+                    await _logService.LogUserActivityAsync(host, $"User failed to end party");
                     return BadRequest("There was an issue with deleting your party");
                 }
             }
             else
             {
-                await _logService.LogUserActivityAsync(host.Id, $"User failed to end party because they weren't the host");
+                await _logService.LogUserActivityAsync(host, $"User failed to end party because they weren't the host");
                 return BadRequest("Unable to delete party. You are not hosting any parties");
             }
         }
@@ -248,19 +242,19 @@ namespace SpotSync.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateSongForParty([FromBody]PartyCodeDTO partyCode)
         {
-            PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            PartyGoer user = await _partyGoerService.GetCurrentPartyGoerAsync();
 
             if (await _partyService.IsUserPartyingAsync(user))
             {
                 Party party = await _partyService.GetPartyWithAttendeeAsync(user);
 
-                await _logService.LogUserActivityAsync(user.Id, $"User updated song for party with code {partyCode.PartyCode}");
+                await _logService.LogUserActivityAsync(user, $"User updated song for party with code {partyCode.PartyCode}");
 
                 return await UpdateCurrentSongForEveryoneInPartyAsync(party, user);
             }
             else
             {
-                await _logService.LogUserActivityAsync(user.Id, $"User failed tp update song for party with code {partyCode.PartyCode}");
+                await _logService.LogUserActivityAsync(user, $"User failed tp update song for party with code {partyCode.PartyCode}");
                 return BadRequest($"You are currently not hosting a party or attending a party: {partyCode.PartyCode}");
             }
         }
@@ -270,7 +264,7 @@ namespace SpotSync.Controllers
         {
             try
             {
-                PartyGoer listener = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                PartyGoer listener = await _partyGoerService.GetCurrentPartyGoerAsync();
 
                 await _partyService.SyncListenerWithSongAsync(listener);
 
@@ -287,7 +281,7 @@ namespace SpotSync.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateQueueForParty(string partyCode)
         {
-            PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            PartyGoer user = await _partyGoerService.GetCurrentPartyGoerAsync();
 
             Party party = await _partyService.GetPartyWithCodeAsync(partyCode);
 

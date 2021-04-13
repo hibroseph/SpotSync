@@ -24,14 +24,12 @@ namespace SpotSync.Controllers
     {
         private IPartyGoerService _partyGoerService;
         private ILogService _logService;
-        private ISpotifyAuthentication _spotifyAuthentication;
         private IPartyService _partyService;
 
-        public UserController(IPartyGoerService partyGoerService, ILogService logService, ISpotifyAuthentication spotifyAuthentication, IPartyService partyService)
+        public UserController(IPartyGoerService partyGoerService, ILogService logService, IPartyService partyService)
         {
             _partyGoerService = partyGoerService;
             _logService = logService;
-            _spotifyAuthentication = spotifyAuthentication;
             _partyService = partyService;
         }
 
@@ -58,7 +56,7 @@ namespace SpotSync.Controllers
         [Authorize]
         public async Task<IActionResult> SuggestedSongs(int limit = 5)
         {
-            List<Track> recommendedSongs = await _partyGoerService.GetRecommendedSongsAsync((await _partyGoerService.GetCurrentPartyGoerAsync()).Id, limit);
+            List<Track> recommendedSongs = await _partyGoerService.GetRecommendedSongsAsync((await _partyGoerService.GetCurrentPartyGoerAsync()).GetId(), limit);
 
             return new JsonResult(recommendedSongs);
         }
@@ -73,11 +71,11 @@ namespace SpotSync.Controllers
 
             if (party != null)
             {
-                return Ok(new { IsInParty = true, Party = new { PartyCode = party.GetPartyCode() }, UserDetails = currentUser });
+                return Ok(new { IsInParty = true, Party = new { PartyCode = party.GetPartyCode() }, Details = new { Id = currentUser.GetId() } });
             }
             else
             {
-                return Ok(new { IsInParty = false, UserDetails = currentUser });
+                return Ok(new { IsInParty = false, UserDetails = new { Id = currentUser.GetId() } });
             }
         }
 
@@ -85,7 +83,7 @@ namespace SpotSync.Controllers
         [Authorize]
         public async Task<IActionResult> CheckSpotifyForConnection()
         {
-            string deviceName = await _partyGoerService.GetUsersActiveDeviceAsync((await _partyGoerService.GetCurrentPartyGoerAsync()).Id);
+            string deviceName = await _partyGoerService.GetUsersActiveDeviceAsync((await _partyGoerService.GetCurrentPartyGoerAsync()).GetId());
 
             return new JsonResult(new { DeviceName = deviceName });
         }
@@ -94,7 +92,7 @@ namespace SpotSync.Controllers
         [Authorize]
         public async Task<IActionResult> GetActiveDevice()
         {
-            string deviceName = await _partyGoerService.GetUsersActiveDeviceAsync((await _partyGoerService.GetCurrentPartyGoerAsync()).Id);
+            string deviceName = await _partyGoerService.GetUsersActiveDeviceAsync((await _partyGoerService.GetCurrentPartyGoerAsync()).GetId());
 
             return new JsonResult(new { DeviceName = deviceName });
         }

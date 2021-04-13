@@ -20,14 +20,9 @@ namespace SpotSync.Application.Services
             return await _repository.LogExceptionAsync(exception, customMsg);
         }
 
-        public async Task LogUserActivityAsync(string username, string activity)
-        {
-            await _repository.LogUserActivityAsync(username, activity);
-        }
-
         public async Task LogUserActivityAsync(PartyGoer user, string activity)
         {
-            await _repository.LogUserActivityAsync(user.Id, activity);
+            await _repository.LogUserActivityAsync(user.GetId(), activity);
         }
 
         public async Task LogAppActivityAsync(string activity)

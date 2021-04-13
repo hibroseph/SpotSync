@@ -13,7 +13,6 @@ using Microsoft.Extensions.Configuration;
 using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
-using SpotSync.Domain.Contracts.Services.PartyGoerSetting;
 using SpotSync.Models.Account;
 
 namespace SpotSync.Controllers
@@ -25,17 +24,15 @@ namespace SpotSync.Controllers
         private readonly IPartyService _partyService;
         private readonly ILogService _logService;
         private readonly IPartyGoerService _partyGoerService;
-        private readonly IPartyGoerDetailsService _partyGoerSettingsService;
 
         public AccountController(Domain.Contracts.IAuthenticationService authenticationService, IConfiguration configuration, IPartyService partyService,
-        ILogService logService, IPartyGoerService partyGoerService, IPartyGoerDetailsService partyGoerSettingsService)
+        ILogService logService, IPartyGoerService partyGoerService)
         {
             _authenticationService = authenticationService;
             _configuration = configuration;
             _partyService = partyService;
             _logService = logService;
             _partyGoerService = partyGoerService;
-            _partyGoerSettingsService = partyGoerSettingsService;
         }
 
         [HttpGet]
@@ -55,28 +52,30 @@ namespace SpotSync.Controllers
         [Authorize]
         public async Task<IActionResult> IsAuthenticated()
         {
-            return Ok(new { userName = (await _partyGoerService.GetCurrentPartyGoerAsync()).Id });
+            return Ok(new { userName = (await _partyGoerService.GetCurrentPartyGoerAsync()).GetId() });
         }
 
         public async Task<IActionResult> Authorized(string code)
         {
             try
             {
-                PartyGoerDetails partyGoerDetails = await _authenticationService.AuthenticateUserWithAccessCodeAsync(code);
-                PartyGoer partyGoer = new PartyGoer(partyGoerDetails.Id);
+                PartyGoer newUser = await _authenticationService.AuthenticateUserWithAccessCodeAsync(code);
 
-                _partyGoerSettingsService.SetMarket(partyGoer, partyGoerDetails.Market);
-                _partyGoerService.SavePartyGoer(partyGoerDetails);
+                if (!newUser.HasPremium())
+                {
+                    // TODO: create this
+                    RedirectToAction("NoPremium", "Error");
+                }
 
                 // Get details from spotify of user 
                 var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
-                identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, partyGoerDetails.Id));
+                identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, newUser.GetId()));
 
                 var principal = new ClaimsPrincipal(identity);
 
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-                await _logService.LogUserActivityAsync(partyGoer, "Successfully authenticated through Spotify");
+                await _logService.LogUserActivityAsync(newUser, "Successfully authenticated through Spotify");
 
                 return RedirectToAction("App", "Party");
             }
@@ -91,7 +90,7 @@ namespace SpotSync.Controllers
         {
             try
             {
-                PartyGoer user = new PartyGoer(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                PartyGoer user = await _partyGoerService.GetCurrentPartyGoerAsync();
 
                 // If the user is joined in a party, REMOVE HIM
                 if (await _partyService.IsUserPartyingAsync(user))
