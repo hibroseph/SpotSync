@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace SpotSync.Domain.DTO
 {
-    public class SpotifyUser
+    public class User
     {
         [JsonPropertyName("id")]
         public string SpotifyId { get; set; }

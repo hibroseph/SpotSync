@@ -22,7 +22,7 @@ namespace SpotSync.Application.Services
 
         public async Task<PartyGoer> AuthenticateUserWithAccessCodeAsync(string code)
         {
-            SpotifyUser user = await _spotifyHttpClient.RequestAccessAndRefreshTokenFromSpotifyAsync(code);
+            User user = await _spotifyHttpClient.RequestAccessAndRefreshTokenFromSpotifyAsync(code);
 
             return new PartyGoer(user.SpotifyId, user.ExplicitSettings.Filter, user.Market, user.Product);
         }

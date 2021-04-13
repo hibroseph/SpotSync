@@ -14,5 +14,7 @@ namespace SpotSync.Domain.Contracts.SpotifyApiModels
         public int Duration { get; set; }
         public bool Explicit { get; set; }
         public string Name { get; set; }
+        [JsonPropertyName("available_markets")]
+        public List<string> Markets { get; set; }
     }
 }

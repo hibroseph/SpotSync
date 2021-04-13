@@ -94,3 +94,8 @@ html, body {
 .profit {
     color: #53E761;
 }
+
+.text-body {
+    font-weight: bold;
+    font-size: 20px;
+}

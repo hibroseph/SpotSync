@@ -11,13 +11,13 @@ namespace SpotSync.Domain.Contracts
     public interface ISpotifyHttpClient
     {
         Task<CurrentSongDTO> GetCurrentSongAsync(string partyGoerId);
-        Task<SpotifyUser> RequestAccessAndRefreshTokenFromSpotifyAsync(string code);
+        Task<User> RequestAccessAndRefreshTokenFromSpotifyAsync(string code);
         Task<Errors.ServiceResult<UpdateSongError>> UpdateSongForPartyGoerAsync(PartyGoer user, List<string> songUris, int currentSongProgressInMs);
-        Task<List<Track>> GetRecommendedSongsAsync(string spotifyId, GetRecommendedSongs recommendedSongs);
+        Task<List<Track>> GetRecommendedSongsAsync(PartyGoer partyGoer, GetRecommendedSongs recommendedSongs);
         Task<List<Track>> GetUserTopTracksAsync(string spotifyId, int limit = 10);
         Task<string> GetUsersActiveDeviceAsync(string spotifyId);
         Task<IEnumerable<ISpotifyQueryResult>> QuerySpotifyAsync(PartyGoer user, string searchQuery, SpotifyQueryType queryType, int limit);
-        Task<SpotifyUser> GetUserDetailsAsync(string spotifyId);
+        Task<User> GetUserDetailsAsync(string spotifyId);
         Task TogglePlaybackAsync(PartyGoer partyGoer, PlaybackState state);
         Task<List<Device>> GetUserDevicesAsync(PartyGoer partyGoer);
         Task RefreshTokenForUserAsync(string partyGoerId);

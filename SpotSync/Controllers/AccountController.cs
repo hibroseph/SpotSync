@@ -64,7 +64,7 @@ namespace SpotSync.Controllers
                 if (!newUser.HasPremium())
                 {
                     // TODO: create this
-                    RedirectToAction("NoPremium", "Error");
+                    return RedirectToAction("NoPremium", "Error");
                 }
 
                 // Get details from spotify of user 

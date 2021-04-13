@@ -70,7 +70,7 @@ namespace SpotSync.Application.Services
             }
             else
             {
-                SpotifyUser user = await _spotifyHttpClient.GetUserDetailsAsync(partyGoerId);
+                User user = await _spotifyHttpClient.GetUserDetailsAsync(partyGoerId);
 
                 PartyGoer newPartyGoer = new PartyGoer(user.SpotifyId, user.ExplicitSettings.Filter, user.Market, user.Product);
                 _partyGoerCache.TryAdd(partyGoerId, newPartyGoer);

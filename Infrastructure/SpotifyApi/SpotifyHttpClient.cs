@@ -18,6 +18,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Net.Http.Json;
+using SpotSync.Domain.Contracts.SpotifyApiModels;
+using System.Collections;
 
 namespace SpotSync.Infrastructure.SpotifyApi
 {
@@ -172,13 +174,13 @@ namespace SpotSync.Infrastructure.SpotifyApi
             return jsonImages.First?["url"].ToString();
         }
 
-        public async Task<SpotifyUser> GetUserDetailsAsync(string spotifyId)
+        public async Task<User> GetUserDetailsAsync(string spotifyId)
         {
             var response = await SendHttpRequestAsync(spotifyId, _apiEndpoints[ApiEndpointType.UserInformation]);
 
             EnsureSuccessfulResponse(response);
 
-            return await response.Content.ReadFromJsonAsync<SpotifyUser>();
+            return await response.Content.ReadFromJsonAsync<User>();
 
         }
 
@@ -336,7 +338,7 @@ namespace SpotSync.Infrastructure.SpotifyApi
             return recommendedTrackUris;
         }
 
-        public async Task<List<Domain.Track>> GetRecommendedSongsAsync(string spotifyId, GetRecommendedSongs getRecommendedSongs)
+        public async Task<List<Domain.Track>> GetRecommendedSongsAsync(PartyGoer partyGoer, GetRecommendedSongs getRecommendedSongs)
         {
             List<string> seedTrackUris = getRecommendedSongs.SeedTrackUris;
 
@@ -347,21 +349,26 @@ namespace SpotSync.Infrastructure.SpotifyApi
 
             seedTrackUris = seedTrackUris.Select(p => p.Replace("spotify:track:", "")).ToList();
 
-            var response = await SendHttpRequestAsync(spotifyId, _apiEndpoints[ApiEndpointType.GetRecommendedTracks], AddRecommendedSongsApiParmeters(getRecommendedSongs), true);
+            var response = await SendHttpRequestAsync(partyGoer.GetSpotifyId(), _apiEndpoints[ApiEndpointType.GetRecommendedTracks], AddRecommendedSongsApiParmeters(getRecommendedSongs), true);
 
-            JObject json = JObject.Parse(await response.Content.ReadAsStringAsync());
+            RecommendedTracks tracks = await response.Content.ReadFromJsonAsync<RecommendedTracks>();
 
             List<Domain.Track> recommendedSongs = new List<Domain.Track>();
-            foreach (var item in json["tracks"])
+
+            foreach (Domain.Contracts.SpotifyApiModels.Track track in tracks.Tracks)
             {
-                recommendedSongs.Add(new Domain.Track
+                if (track.Markets.Contains(partyGoer.GetMarket()))
                 {
-                    Uri = item["id"].ToString(),
-                    Name = item["name"].ToString(),
-                    Artist = item["artists"].First["name"].ToString(),
-                    Length = item["duration_ms"].Value<int>(),
-                    AlbumImageUrl = item["album"]["images"].First["url"].ToString()
-                });
+                    recommendedSongs.Add(new Domain.Track
+                    {
+                        AlbumImageUrl = null,
+                        Artist = track.Artists.First().Name,
+                        Explicit = track.Explicit,
+                        Length = track.Duration,
+                        Name = track.Name,
+                        Uri = track.Id
+                    });
+                }
             }
 
             return recommendedSongs.ToList();
@@ -377,7 +384,7 @@ namespace SpotSync.Infrastructure.SpotifyApi
             return string.Join(",", items);
         }
 
-        public async Task<SpotifyUser> RequestAccessAndRefreshTokenFromSpotifyAsync(string code)
+        public async Task<User> RequestAccessAndRefreshTokenFromSpotifyAsync(string code)
         {
             List<KeyValuePair<string, string>> properties = new List<KeyValuePair<string, string>> {
                 new KeyValuePair<string, string>("grant_type", "authorization_code"),
@@ -407,7 +414,7 @@ namespace SpotSync.Infrastructure.SpotifyApi
 
                 string accessToken = accessTokenBody["access_token"].ToString();
 
-                SpotifyUser user = await GetSpotifyUserWithAccessToken(accessToken);
+                User user = await GetSpotifyUserWithAccessToken(accessToken);
 
                 await _spotifyAuthentication.AddAuthenticatedPartyGoerAsync(user.SpotifyId, accessToken,
                 accessTokenBody["refresh_token"].ToString(),
@@ -420,7 +427,7 @@ namespace SpotSync.Infrastructure.SpotifyApi
             return null;
         }
 
-        private async Task<SpotifyUser> GetSpotifyUserWithAccessToken(string accessToken)
+        private async Task<User> GetSpotifyUserWithAccessToken(string accessToken)
         {
 
             HttpResponseMessage response = null;
@@ -437,7 +444,7 @@ namespace SpotSync.Infrastructure.SpotifyApi
                 throw new Exception("Could not get user details while logging a user in.");
             }
 
-            return await response.Content.ReadFromJsonAsync<SpotifyUser>();
+            return await response.Content.ReadFromJsonAsync<User>();
         }
 
         private bool ConvertToHasPremiumSpotify(string spotifyProduct)
@@ -611,7 +618,7 @@ namespace SpotSync.Infrastructure.SpotifyApi
 
                 string accessToken = accessTokenBody["access_token"].ToString();
 
-                SpotifyUser user = await GetSpotifyUserWithAccessToken(accessToken);
+                User user = await GetSpotifyUserWithAccessToken(accessToken);
 
                 await _spotifyAuthentication.RefreshAccessTokenForPartyGoerAsync(user.SpotifyId, accessToken,
                 Convert.ToInt32(accessTokenBody["expires_in"])

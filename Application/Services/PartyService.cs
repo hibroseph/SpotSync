@@ -172,7 +172,7 @@ namespace SpotSync.Application.Services
         {
             if (recommendedTrackUris.Count > 0)
             {
-                return await _spotifyHttpClient.GetRecommendedSongsAsync(party.GetHost().GetId(), new GetRecommendedSongs
+                return await _spotifyHttpClient.GetRecommendedSongsAsync(party.GetHost(), new GetRecommendedSongs
                 {
                     SeedTrackUris = recommendedTrackUris,
                     Market = party.GetHost().GetMarket()
@@ -180,7 +180,7 @@ namespace SpotSync.Application.Services
             }
             else
             {
-                return await _spotifyHttpClient.GetRecommendedSongsAsync(party.GetHost().GetId(), new GetRecommendedSongs
+                return await _spotifyHttpClient.GetRecommendedSongsAsync(party.GetHost(), new GetRecommendedSongs
                 {
                     SeedTrackUris = (await _partyGoerService.GetRecommendedSongsAsync(party.GetHost().GetId(), 5)).Select(track => track.Uri).ToList(),
                     Market = party.GetHost().GetMarket()
