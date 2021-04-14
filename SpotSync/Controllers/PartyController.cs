@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using SpotSync.Classes.Hubs;
 using SpotSync.Classes.Responses.Common;
 using SpotSync.Classes.Responses.Party;
 using SpotSync.Domain;
@@ -15,8 +10,6 @@ using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.DTO;
 using SpotSync.Domain.Events;
 using SpotSync.Models.Party;
-using SpotSync.Models.Shared;
-using Track = SpotSync.Domain.Track;
 
 namespace SpotSync.Controllers
 {
@@ -89,61 +82,6 @@ namespace SpotSync.Controllers
 
             return new StatusCodeResult(200);
         }
-
-        /*
-        [Authorize]
-        public async Task<IActionResult> Index(string partyCode)
-        {
-            PartyGoer user = await _partyGoerService.GetCurrentPartyGoerAsync();
-
-            Party party;
-
-            if (string.IsNullOrWhiteSpace(partyCode))
-            {
-                party = await _partyService.GetPartyWithAttendeeAsync(user);
-            }
-            else
-            {
-                party = await _partyService.GetPartyWithCodeAsync(partyCode);
-            }
-
-            if (party == null)
-            {
-                return RedirectToAction("Index", "Dashboard");
-            }
-
-            List<Track> usersSuggestedSongs = null;
-
-            bool isUserListening = party.IsListener(user);
-
-            if (isUserListening)
-            {
-                usersSuggestedSongs = await _partyGoerService.GetRecommendedSongsAsync(user.GetId());
-            }
-
-            PartyModel model = new PartyModel
-            {
-                PartyCode = party.GetPartyCode(),
-                SuggestedSongs = usersSuggestedSongs?.Select(song => ConvertDomainSongToModelSong(song)).ToList(),
-                IsUserListening = isUserListening
-            };
-
-            BaseModel baseModel = new BaseModel(true, model.PartyCode);
-            return View(new BaseModel<PartyModel>(model, baseModel));
-        }*/
-
-        /*
-        private SongModel ConvertDomainSongToModelSong(Track song)
-        {
-            return new SongModel
-            {
-                Title = song.Name,
-                Artist = song.Artist,
-                AlbumImageUrl = song.AlbumImageUrl,
-                Length = song.Length,
-                TrackUri = song.Id
-            };
-        }*/
 
         /// <summary>
         /// This endpoint is allowed to be accessed if you are not authenticated. If you are not authenticated, then you will be redirected to login
