@@ -26,7 +26,7 @@ export default (state = initalState, action) => {
       let indexOfListenerToRemove = state.party.listeners.findIndex((name) => name == action.name);
       return Object.assign({}, state, {
         party: Object.assign({}, state.party, {
-          listeners: [...state.party.listeners.slice(0, indexOfListenerToRemove), ...state.party.queue.slice(indexOfListenerToRemove + 1)],
+          listeners: [...state.party.listeners.slice(0, indexOfListenerToRemove), ...state.party.listeners.slice(indexOfListenerToRemove + 1)],
         }),
       });
     }
