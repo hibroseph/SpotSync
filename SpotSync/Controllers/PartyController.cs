@@ -90,7 +90,7 @@ namespace SpotSync.Controllers
             return new StatusCodeResult(200);
         }
 
-
+        /*
         [Authorize]
         public async Task<IActionResult> Index(string partyCode)
         {
@@ -130,8 +130,9 @@ namespace SpotSync.Controllers
 
             BaseModel baseModel = new BaseModel(true, model.PartyCode);
             return View(new BaseModel<PartyModel>(model, baseModel));
-        }
+        }*/
 
+        /*
         private SongModel ConvertDomainSongToModelSong(Track song)
         {
             return new SongModel
@@ -140,9 +141,9 @@ namespace SpotSync.Controllers
                 Artist = song.Artist,
                 AlbumImageUrl = song.AlbumImageUrl,
                 Length = song.Length,
-                TrackUri = song.Uri
+                TrackUri = song.Id
             };
-        }
+        }*/
 
         /// <summary>
         /// This endpoint is allowed to be accessed if you are not authenticated. If you are not authenticated, then you will be redirected to login
@@ -322,40 +323,6 @@ namespace SpotSync.Controllers
             {
                 return base.StatusCode(500);
             }
-        }
-
-        [Authorize]
-        public async Task<IActionResult> GetActiveParties()
-        {
-            List<TopPartyModel> topParties = ConvertToTopPartyModels(await _partyService.GetTopPartiesAsync(5));
-
-            return Ok(topParties);
-        }
-
-        private List<TopPartyModel> ConvertToTopPartyModels(List<Party> parties)
-        {
-            List<TopPartyModel> topParties = new List<TopPartyModel>();
-
-            foreach (Party party in parties)
-            {
-                topParties.Add(new TopPartyModel
-                {
-                    PartyCode = party.GetPartyCode(),
-                    ListenerCount = party.GetListenerCount(),
-                    CurrentSong = ConvertToSimpleTrackModel(party.GetCurrentSong())
-                });
-            }
-
-            return topParties;
-        }
-
-        private SimpleTrackModel ConvertToSimpleTrackModel(Track track)
-        {
-            return new SimpleTrackModel
-            {
-                Title = track.Name,
-                Artist = track.Artist
-            };
         }
     }
 }

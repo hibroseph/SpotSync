@@ -66,7 +66,7 @@ namespace SpotSync.Domain
 
         public List<string> GetRandomLikedTrackUris(int amount)
         {
-            return _tracks.GetRandomNItems(5).Select(track => track.GetTrackWithoutFeelings().Uri).ToList();
+            return _tracks.GetRandomNItems(5).Select(track => track.GetTrackWithoutFeelings().Id).ToList();
         }
 
         public LikesDislikes GetUsersTrackFeelings(PartyGoer user)
@@ -80,7 +80,7 @@ namespace SpotSync.Domain
             {
                 _usersLikesDislikes.UserLikesTrack(user, trackUri);
 
-                TrackWithFeelings track = _tracks.Find(p => p.GetTrackWithoutFeelings().Uri.Equals(trackUri, StringComparison.OrdinalIgnoreCase));
+                TrackWithFeelings track = _tracks.Find(p => p.GetTrackWithoutFeelings().Id.Equals(trackUri, StringComparison.OrdinalIgnoreCase));
 
                 if (track != null)
                 {
@@ -98,11 +98,11 @@ namespace SpotSync.Domain
             {
                 _usersLikesDislikes.UserDislikesTrack(user, trackUri);
 
-                TrackWithFeelings track = _tracks.Find(p => p.GetTrackWithoutFeelings().Uri.Equals(trackUri, StringComparison.OrdinalIgnoreCase));
+                TrackWithFeelings track = _tracks.Find(p => p.GetTrackWithoutFeelings().Id.Equals(trackUri, StringComparison.OrdinalIgnoreCase));
 
                 if (track != null && track.DislikeCount() + 1 > listenerCount * 0.5)
                 {
-                    _tracks.RemoveAll(p => p.GetTrackWithoutFeelings().Uri.Equals(trackUri, StringComparison.OrdinalIgnoreCase));
+                    _tracks.RemoveAll(p => p.GetTrackWithoutFeelings().Id.Equals(trackUri, StringComparison.OrdinalIgnoreCase));
 
                     await DomainEvents.RaiseAsync(new UpdateQueue { Tracks = _tracks.Select(p => p.GetTrackWithoutFeelings()).ToList(), PartyCode = partyCode });
                 }
@@ -117,7 +117,7 @@ namespace SpotSync.Domain
             {
                 if (track.DoUsersLikeSong())
                 {
-                    likedTrackUris.Add(track.GetTrackWithoutFeelings().Uri);
+                    likedTrackUris.Add(track.GetTrackWithoutFeelings().Id);
                 }
             }
 
@@ -136,7 +136,7 @@ namespace SpotSync.Domain
 
         public bool SongExistsInQueue(Track track)
         {
-            return _tracks.Any(p => p.GetTrackWithoutFeelings().Uri.Equals(track.Uri, StringComparison.OrdinalIgnoreCase));
+            return _tracks.Any(p => p.GetTrackWithoutFeelings().Id.Equals(track.Id, StringComparison.OrdinalIgnoreCase));
         }
         public void QueueTrack(Track track)
         {

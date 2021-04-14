@@ -12,11 +12,15 @@ namespace SpotSync.Tests.Unit_Tests
     [TestFixture]
     public class PartyTests
     {
+        private const bool EXPLICIT = false;
+        private const string MARKET = "US";
+        private const string PRODUCT = "Premium";
+
         [Test]
         public void NoHost_NewPartyGoer_IsNewHost()
         {
-            PartyGoer partyGoer = new PartyGoer("hello");
-            PartyGoer partyGoer1 = new PartyGoer("hello2");
+            PartyGoer partyGoer = new PartyGoer("hello", EXPLICIT, MARKET, PRODUCT);
+            PartyGoer partyGoer1 = new PartyGoer("hello2", EXPLICIT, MARKET, PRODUCT);
 
             Party party = new Party(partyGoer);
 
@@ -32,7 +36,7 @@ namespace SpotSync.Tests.Unit_Tests
         [Test]
         public async Task SkipSong_HostSkipsSong_SongIsSkipped()
         {
-            PartyGoer host = new PartyGoer("Kip");
+            PartyGoer host = new PartyGoer("Kip", EXPLICIT, MARKET, PRODUCT);
 
             Party party = new Party(host);
 
@@ -40,18 +44,18 @@ namespace SpotSync.Tests.Unit_Tests
 
             await party.AddNewQueueAsync(tracks);
 
-            Assert.AreEqual(party.GetCurrentSong().Uri, tracks.ElementAt(0).Uri);
+            Assert.AreEqual(party.GetCurrentSong().Id, tracks.ElementAt(0).Id);
 
             await party.RequestSkipAsync(host);
 
-            Assert.AreEqual(party.GetCurrentSong().Uri, tracks.ElementAt(1).Uri);
+            Assert.AreEqual(party.GetCurrentSong().Id, tracks.ElementAt(1).Id);
         }
 
         [Test]
         public async Task SkipSong_ListenerSkipsSong_SongIsNotSkipped()
         {
-            PartyGoer host = new PartyGoer("Kip");
-            PartyGoer listener = new PartyGoer("Matt");
+            PartyGoer host = new PartyGoer("Kip", EXPLICIT, MARKET, PRODUCT);
+            PartyGoer listener = new PartyGoer("Matt", EXPLICIT, MARKET, PRODUCT);
 
             Party party = new Party(host);
 
@@ -61,11 +65,11 @@ namespace SpotSync.Tests.Unit_Tests
 
             await party.AddNewQueueAsync(tracks);
 
-            Assert.AreEqual(party.GetCurrentSong().Uri, tracks.ElementAt(0).Uri);
+            Assert.AreEqual(party.GetCurrentSong().Id, tracks.ElementAt(0).Id);
 
             await party.RequestSkipAsync(listener);
 
-            Assert.AreEqual(party.GetCurrentSong().Uri, tracks.ElementAt(0).Uri);
+            Assert.AreEqual(party.GetCurrentSong().Id, tracks.ElementAt(0).Id);
         }
 
         [Test]
@@ -76,7 +80,7 @@ namespace SpotSync.Tests.Unit_Tests
                 Assert.Pass();
             });
 
-            PartyGoer host = new PartyGoer("Kip");
+            PartyGoer host = new PartyGoer("Kip", EXPLICIT, MARKET, PRODUCT);
 
             Party party = new Party(host);
 
@@ -84,7 +88,7 @@ namespace SpotSync.Tests.Unit_Tests
 
             await party.AddNewQueueAsync(tracks);
 
-            Assert.AreEqual(party.GetCurrentSong().Uri, tracks.ElementAt(0).Uri);
+            Assert.AreEqual(party.GetCurrentSong().Id, tracks.ElementAt(0).Id);
 
             await party.RequestSkipAsync(host);
             await party.RequestSkipAsync(host);
@@ -95,7 +99,7 @@ namespace SpotSync.Tests.Unit_Tests
         [Test]
         public async Task DownVote_HostDownVotesSong_SongSkips()
         {
-            PartyGoer host = new PartyGoer("Kip");
+            PartyGoer host = new PartyGoer("Kip", EXPLICIT, MARKET, PRODUCT);
 
             Party party = new Party(host);
 
@@ -103,19 +107,19 @@ namespace SpotSync.Tests.Unit_Tests
 
             await party.AddNewQueueAsync(tracks);
 
-            Assert.AreEqual(party.GetCurrentSong().Uri, tracks.ElementAt(0).Uri);
+            Assert.AreEqual(party.GetCurrentSong().Id, tracks.ElementAt(0).Id);
 
-            await party.UserDislikesTrackAsync(host, tracks.ElementAt(0).Uri);
+            await party.UserDislikesTrackAsync(host, tracks.ElementAt(0).Id);
 
-            Assert.AreEqual(party.GetCurrentSong().Uri, tracks.ElementAt(1).Uri);
+            Assert.AreEqual(party.GetCurrentSong().Id, tracks.ElementAt(1).Id);
 
         }
 
         [Test]
         public async Task DownVote_ListenerDownVotesSong_SongSkips()
         {
-            PartyGoer host = new PartyGoer("Kip");
-            PartyGoer listener = new PartyGoer("Matt");
+            PartyGoer host = new PartyGoer("Kip", EXPLICIT, MARKET, PRODUCT);
+            PartyGoer listener = new PartyGoer("Matt", EXPLICIT, MARKET, PRODUCT);
 
             Party party = new Party(host);
 
@@ -125,11 +129,11 @@ namespace SpotSync.Tests.Unit_Tests
 
             await party.AddNewQueueAsync(tracks);
 
-            Assert.AreEqual(party.GetCurrentSong().Uri, tracks.ElementAt(0).Uri);
+            Assert.AreEqual(party.GetCurrentSong().Id, tracks.ElementAt(0).Id);
 
-            await party.UserDislikesTrackAsync(listener, tracks.ElementAt(0).Uri);
+            await party.UserDislikesTrackAsync(listener, tracks.ElementAt(0).Id);
 
-            Assert.AreEqual(party.GetCurrentSong().Uri, tracks.ElementAt(1).Uri);
+            Assert.AreEqual(party.GetCurrentSong().Id, tracks.ElementAt(1).Id);
         }
 
 
@@ -138,19 +142,19 @@ namespace SpotSync.Tests.Unit_Tests
             return new List<Track>() {
                 new Track {
                     AlbumImageUrl = "hello.com",
-                    Artist = "Kipelicious",
+                    Artists = new List<Artist>{ new Artist{ Name = "Kipelicious", Id = "123" } },
                     Explicit = true,
                     Length = 500000,
                     Name = "I Love Kip",
-                    Uri = "xyz123"
+                    Id = "xyz123"
             },
                 new Track {
                     AlbumImageUrl = "goodbye.com",
-                    Artist = "Mattelicious",
+                    Artists =new List<Artist>{ new Artist{ Name="Mattelicious", Id = "321"} },
                     Explicit = true,
                     Length = 500000,
                     Name = "Kip is the best",
-                    Uri = "zyx321"
+                    Id = "zyx321"
             } };
         }
     }

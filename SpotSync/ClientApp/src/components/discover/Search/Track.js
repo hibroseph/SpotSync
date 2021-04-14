@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { addSongToQueue } from "../../../api/party";
 import notify from "../../../api/notify";
+import ArtistLink from "../../shared/ArtistLink";
 
 const $Track = styled.div`
   border: 3px solid #e1e1e1;
@@ -45,7 +46,11 @@ const Track = ({ addSongToQueue, track }) => {
     <$Track>
       <div className="song-information">
         <p className="title">{track.name}</p>
-        <p className="artist">{track.artist}</p>
+        <div>
+          {track.artists.map((artist) => (
+            <ArtistLink artist={artist}></ArtistLink>
+          ))}
+        </div>
       </div>
       <$StyledFontAwesomeIcon icon={faPlus} onClick={addSongToQueue} />
     </$Track>

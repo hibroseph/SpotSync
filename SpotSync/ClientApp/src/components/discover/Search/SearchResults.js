@@ -21,7 +21,7 @@ const SearchResults = ({ searchTerm, searchResults, isLoading, addSongToQueue })
           <p>Search Results for {searchTerm}</p>
           <$SearchResults>
             {searchResults.map((track, index) => {
-              return <Track key={`${track.uri}_${index}`} track={track} addSongToQueue={() => addSongToQueue(track)}></Track>;
+              return <Track key={`${track.iD}_${index}`} track={track} addSongToQueue={() => addSongToQueue(track)}></Track>;
             })}
           </$SearchResults>
         </React.Fragment>

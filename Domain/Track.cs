@@ -8,18 +8,18 @@ namespace SpotSync.Domain
     public class Track : ValueObject
     {
         public string Name { get; set; }
-        public string Artist { get; set; }
+        public List<Artist> Artists { get; set; }
         public int Length { get; set; }
-        public string Uri { get; set; }
+        public string Id { get; set; }
         public string AlbumImageUrl { get; set; }
         public bool Explicit { get; set; }
 
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Name;
-            yield return Artist;
+            yield return Artists;
             yield return Length;
-            yield return Uri;
+            yield return Id;
         }
     }
 }

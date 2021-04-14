@@ -11,8 +11,8 @@ export const skipSong = (partyCode, connection) => {
 export const userAddSongToQueue = (song, user, partyCode, connection) => {
   connection.invoke("UserAddedSong", {
     Name: song.name,
-    Artist: song.artist,
-    TrackUri: song.uri,
+    Artist: song.artists,
+    TrackUri: song.id,
     Length: song.length,
     PartyCode: partyCode,
     IndexToInsertSongAt: 0,

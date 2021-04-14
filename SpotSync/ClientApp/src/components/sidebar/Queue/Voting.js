@@ -10,7 +10,7 @@ const $Voting = styled.div`
   align-items: center;
 `;
 
-const Voting = ({ onLike, onDislike, feeling, vote }) => {
+const Voting = ({ onLike, onDislike, feeling }) => {
   const DetermineVotingIcons = () => {
     return (
       <React.Fragment>

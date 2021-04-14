@@ -67,7 +67,7 @@ namespace SpotSync.Application.Services
             }
         }
 
-        public async Task<bool> AddNewSongToQueue(AddSongToQueueRequest request)
+        public async Task<bool> AddNewSongToQueue(AddSongToQueueCommand request)
         {
             try
             {
@@ -182,7 +182,7 @@ namespace SpotSync.Application.Services
             {
                 return await _spotifyHttpClient.GetRecommendedSongsAsync(party.GetHost(), new GetRecommendedSongs
                 {
-                    SeedTrackUris = (await _partyGoerService.GetRecommendedSongsAsync(party.GetHost().GetId(), 5)).Select(track => track.Uri).ToList(),
+                    SeedTrackUris = (await _partyGoerService.GetRecommendedSongsAsync(party.GetHost().GetId(), 5)).Select(track => track.Id).ToList(),
                     Market = party.GetHost().GetMarket()
                 });
             }

@@ -73,7 +73,7 @@ export default (state = initalState, action) => {
     }
 
     case UPDATE_SONG: {
-      let indexOfSongToRemove = state.party.queue.findIndex((song) => song.uri == action.song.uri);
+      let indexOfSongToRemove = state.party.queue.findIndex((song) => song.id == action.song.id);
       return Object.assign({}, state, {
         party: Object.assign(
           {},

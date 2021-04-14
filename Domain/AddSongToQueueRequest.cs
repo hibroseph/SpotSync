@@ -5,10 +5,10 @@ using System.Text;
 namespace SpotSync.Domain
 {
     // There is a contract relationship with track
-    public class AddSongToQueueRequest
+    public class AddSongToQueueCommand
     {
         public string Name { get; set; }
-        public string Artist { get; set; }
+        public List<Artist> Artists { get; set; }
         public string TrackUri { get; set; }
         public int Length { get; set; }
         public string AlbumImageUrl { get; set; }

@@ -97,7 +97,7 @@ namespace SpotSync.Domain
 
         private bool IsNowPlayingTrack(string trackUri)
         {
-            return _currentTrack.GetTrackWithoutFeelings().Uri.Equals(trackUri, StringComparison.OrdinalIgnoreCase);
+            return _currentTrack.GetTrackWithoutFeelings().Id.Equals(trackUri, StringComparison.OrdinalIgnoreCase);
         }
 
         public void EndParty()
@@ -178,7 +178,7 @@ namespace SpotSync.Domain
             }
             else
             {
-                return _history.GetRandomNItems(amount).Select(track => track.Uri).ToList();
+                return _history.GetRandomNItems(amount).Select(track => track.Id).ToList();
             }
         }
 
@@ -217,16 +217,16 @@ namespace SpotSync.Domain
             return isMusicPaused ? PlaybackState.Pause : PlaybackState.Play;
         }
 
-        public async Task AddTrackToQueueAsync(AddSongToQueueRequest request)
+        public async Task AddTrackToQueueAsync(AddSongToQueueCommand request)
         {
             Track track = new Track
             {
-                Artist = request.Artist,
+                Artists = request.Artists,
                 AlbumImageUrl = request.AlbumImageUrl,
                 Explicit = request.Explicit,
                 Length = request.Length,
                 Name = request.Name,
-                Uri = request.TrackUri
+                Id = request.TrackUri
             };
 
             if (!_queue.SongExistsInQueue(track))

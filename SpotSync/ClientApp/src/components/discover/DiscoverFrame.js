@@ -81,6 +81,8 @@ const DiscoverFrame = ({ user, partyCode, connection }) => {
     if (currentTabView == "Your Top Songs" && !haveTopSongs && user) {
       getTopSongs(20)
         .then((songs) => {
+          console.log("SONGS");
+          console.log(songs);
           setTopSongs(songs);
         })
         .catch((err) => {

@@ -16,6 +16,10 @@ namespace SpotSync.Tests.Unit_Tests
         public const string PARTIER_NAME = "Kip";
         public const string PARTIER_NAME_1 = "Kip420";
 
+        private const bool EXPLICIT = false;
+        private const string MARKET = "US";
+        private const string PRODUCT = "Premium";
+
         [SetUp]
         public void Initalize()
         {
@@ -26,7 +30,7 @@ namespace SpotSync.Tests.Unit_Tests
         public void CannotCreateTwoPartiesWithSameCode_ThrowsException()
         {
 
-            PartyGoer partyGoer = new PartyGoer(PARTIER_NAME);
+            PartyGoer partyGoer = new PartyGoer(PARTIER_NAME, EXPLICIT, MARKET, PRODUCT);
 
             Party party = new Party(partyGoer);
 
@@ -38,7 +42,7 @@ namespace SpotSync.Tests.Unit_Tests
         [Test]
         public void CannotUpdatePartyThatDoesntExist_ThrowsException()
         {
-            PartyGoer partyGoer = new PartyGoer(PARTIER_NAME);
+            PartyGoer partyGoer = new PartyGoer(PARTIER_NAME, EXPLICIT, MARKET, PRODUCT);
 
             Party party = new Party(partyGoer);
 
@@ -48,7 +52,7 @@ namespace SpotSync.Tests.Unit_Tests
         [Test]
         public async Task HostIsListeningInParty()
         {
-            PartyGoer partyGoer = new PartyGoer(PARTIER_NAME);
+            PartyGoer partyGoer = new PartyGoer(PARTIER_NAME, EXPLICIT, MARKET, PRODUCT);
 
             Party party = new Party(partyGoer);
 
@@ -60,8 +64,8 @@ namespace SpotSync.Tests.Unit_Tests
         [Test]
         public async Task CanGetPartyWithHost()
         {
-            PartyGoer partyGoer = new PartyGoer(PARTIER_NAME);
-            PartyGoer partyGoer1 = new PartyGoer(PARTIER_NAME_1);
+            PartyGoer partyGoer = new PartyGoer(PARTIER_NAME, EXPLICIT, MARKET, PRODUCT);
+            PartyGoer partyGoer1 = new PartyGoer(PARTIER_NAME_1, EXPLICIT, MARKET, PRODUCT);
 
             Party party = new Party(partyGoer);
             Party party1 = new Party(partyGoer1);

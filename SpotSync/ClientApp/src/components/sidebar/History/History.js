@@ -12,15 +12,15 @@ const History = ({ songFeelings, party, connection, dispatch }) => {
         return (
           <QueueItem
             onLike={() => {
-              userLikesSong(party.code, song.uri, connection, dispatch);
+              userLikesSong(party.code, song.id, connection, dispatch);
             }}
             onDislike={() => {
-              userDislikesSong(party.code, song.uri, connection, dispatch);
+              userDislikesSong(party.code, song.id, connection, dispatch);
             }}
-            key={`${song.uri}_${index}`}
+            key={`${song.id}_${index}`}
             title={song.name}
-            artist={song.artist}
-            feeling={songFeelings[song.uri]}
+            artists={song.artists}
+            feeling={songFeelings[song.id]}
           ></QueueItem>
         );
       })}

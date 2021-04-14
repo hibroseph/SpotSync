@@ -13,6 +13,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.min.css";
 import NoAlbumArt from "../../../assets/unknown-album-art.png";
 import Image from "../../shared/Image";
+import ArtistLink from "../../shared/ArtistLink";
+
 const $NowPlaying = styled.div`
   box-sizing: border-box;
   width: 100%;
@@ -116,16 +118,18 @@ const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFe
               <Image src={currentSong?.albumImageUrl != undefined ? currentSong.albumImageUrl : NoAlbumArt} />
               <div className="song-information">
                 <p className={"title"}>{currentSong?.name}</p>
-                <p className={"artist"}>{currentSong?.artist}</p>
+                {currentSong?.artists.map((artist) => (
+                  <ArtistLink artist={artist}></ArtistLink>
+                ))}
               </div>
 
               {songFeelings && currentSong && (
                 <$ThumbsContainer>
                   <ThumbsDown
-                    onDislike={() => userDislikesSong(partyCode, currentSong.uri, connection, dispatch)}
+                    onDislike={() => userDislikesSong(partyCode, currentSong.id, connection, dispatch)}
                     feeling={songFeelings[currentSong?.uri]}
                   />
-                  <ThumbsUp onLike={() => userLikesSong(partyCode, currentSong.uri, connection, dispatch)} feeling={songFeelings[currentSong?.uri]} />
+                  <ThumbsUp onLike={() => userLikesSong(partyCode, currentSong.id, connection, dispatch)} feeling={songFeelings[currentSong?.uri]} />
                 </$ThumbsContainer>
               )}
             </React.Fragment>

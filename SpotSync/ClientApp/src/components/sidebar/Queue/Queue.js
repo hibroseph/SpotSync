@@ -16,17 +16,17 @@ const Queue = ({ party, connection, songFeelings = {}, dispatch }) => {
         return (
           <QueueItem
             onLike={() => {
-              userLikesSong(party.code, song.uri, connection, dispatch);
+              userLikesSong(party.code, song.id, connection, dispatch);
               toast(`We will play more songs like ${song.name}`);
             }}
             onDislike={() => {
-              userDislikesSong(party.code, song.uri, connection, dispatch);
+              userDislikesSong(party.code, song.id, connection, dispatch);
               toast(`We will play less songs like ${song.name}`);
             }}
-            key={`${song.uri}_${index}`}
+            key={`${song.id}_${index}`}
             title={song.name}
-            artist={song.artist}
-            feeling={songFeelings[song.uri]}
+            artists={song.artists}
+            feeling={songFeelings[song.id]}
           ></QueueItem>
         );
       })}

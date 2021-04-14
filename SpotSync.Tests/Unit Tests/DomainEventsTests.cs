@@ -37,10 +37,10 @@ namespace SpotSync.Tests.Unit_Tests
         {
             Track song = new Track
             {
-                Artist = SONG_ARTIST,
+                Artists = new List<Artist> { new Artist { Id = "123", Name = SONG_ARTIST } },
                 Length = SONG_LENGTH,
                 Name = SONG_TITLE,
-                Uri = SONG_URI
+                Id = SONG_URI
             };
 
             DomainEvents.Register<ChangeTrack>(changedSong =>
@@ -58,7 +58,7 @@ namespace SpotSync.Tests.Unit_Tests
                 Track = song,
                 Listeners = new List<PartyGoer>
                 {
-                    new PartyGoer(PARTY_GOER_ID_1)
+                    new PartyGoer(PARTY_GOER_ID_1, false, "US", "premium")
                 }
             });
 

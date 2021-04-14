@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import Voting from "./Voting";
-
+import ArtistLink from "../../shared/ArtistLink";
 const $QueueItem = styled.div`
   width: 100%;
   padding: 15px 20px;
@@ -38,7 +38,9 @@ const QueueItem = (props) => {
     <$QueueItem>
       <div>
         <p className="title">{props.title}</p>
-        <p className="artist">{props.artist}</p>
+        {props.artists.map((artist) => (
+          <ArtistLink artist={artist}></ArtistLink>
+        ))}
       </div>
       <Voting feeling={props.feeling} onDislike={props.onDislike} onLike={props.onLike} vote={props.vote}></Voting>
     </$QueueItem>

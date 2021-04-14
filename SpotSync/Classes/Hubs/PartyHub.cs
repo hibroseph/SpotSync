@@ -145,7 +145,7 @@ namespace SpotSync.Classes.Hubs
             await _partyService.UserWantsToSkipSong(await _partyGoerService.GetCurrentPartyGoerAsync(), partyCode);
         }
 
-        public async Task UserAddedSong(AddSongToQueueRequest request)
+        public async Task UserAddedSong(AddSongToQueueCommand request)
         {
             PartyGoer partier = await _partyGoerService.GetCurrentPartyGoerAsync();
 

@@ -34,8 +34,6 @@ namespace SpotSync.Classes
         {
             if (args.Track != null)
             {
-                await _logService.LogAppActivityAsync($"Updating song for party with code {args.PartyCode}. New song artist: {args.Track.Artist}, title: {args.Track.Name}");
-
                 // TODO: Make this a parallel
                 foreach (PartyGoer listener in args.Listeners)
                 {
@@ -43,8 +41,7 @@ namespace SpotSync.Classes
                     {
                         try
                         {
-                            await _logService.LogAppActivityAsync($"Updating song for PartyGoer {listener.GetId()}. New song artist: {args.Track.Artist}, title: {args.Track.Name}");
-                            await _spotifyHttpClient.UpdateSongForPartyGoerAsync(listener, new List<string> { args.Track.Uri }, args.ProgressMs);
+                            await _spotifyHttpClient.UpdateSongForPartyGoerAsync(listener, new List<string> { args.Track.Id }, args.ProgressMs);
                         }
                         catch (NoActiveDeviceException)
                         {
