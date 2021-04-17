@@ -45,12 +45,14 @@ function App(props) {
     configureSpotifySdk(props, spotifySdkAdded, setSpotifySdkAdded);
   }, [props?.isUserInParty, props?.realTimeConnection?.connection]);
 
+  const [artistView, setArtistView] = useState();
+
   return (
     <React.Fragment>
       {!props?.isUserInParty && <JoinOrCreateParty></JoinOrCreateParty>}
       <Navigation />
-      <MainContent></MainContent>
-      <NowPlaying></NowPlaying>
+      <MainContent artistView={artistView}></MainContent>
+      <NowPlaying ShowArtistView={(artist) => setArtistView(artist)}></NowPlaying>
     </React.Fragment>
   );
 }

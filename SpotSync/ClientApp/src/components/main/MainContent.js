@@ -19,7 +19,7 @@ const $SidebarWithWidth = styled(Sidebar)`
   }
 `;
 
-const MainContent = (props) => {
+const MainContent = () => {
   return (
     <$MainContent>
       <DiscoverFrame />

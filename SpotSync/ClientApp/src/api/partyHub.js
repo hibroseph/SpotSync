@@ -9,11 +9,13 @@ export const skipSong = (partyCode, connection) => {
 };
 
 export const userAddSongToQueue = (song, user, partyCode, connection) => {
+  console.log("hello world");
+  console.log(song);
   connection.invoke("UserAddedSong", {
     Name: song.name,
-    Artist: song.artists,
+    Artists: song.artists,
     TrackUri: song.id,
-    Length: song.length,
+    Length: song.duration_ms,
     PartyCode: partyCode,
     IndexToInsertSongAt: 0,
     AddedBy: user,

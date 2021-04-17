@@ -18,10 +18,17 @@ import {
   LISTENER_JOINED,
   LISTENER_LEFT,
 } from "../actions/party";
+import { SHOW_ARTIST_VIEW } from "../actions/views";
+
 import { REALTIME_CONNECTION_ESTABLISHED } from "../actions/signalr";
 
 export default (state = initalState, action) => {
   switch (action.type) {
+    case SHOW_ARTIST_VIEW: {
+      console.log("Showing artist view");
+      console.log(action);
+      return Object.assign({}, state, { views: { searchArtistId: action.artist } });
+    }
     case LISTENER_LEFT: {
       let indexOfListenerToRemove = state.party.listeners.findIndex((name) => name == action.name);
       return Object.assign({}, state, {
@@ -177,3 +184,4 @@ export const getListeners = (state) => state?.party?.listeners;
 export const getCurrentSong = (state) => state?.party?.nowPlaying;
 export const getParty = (state) => state.party;
 export const getQueue = (state) => state?.party?.queue;
+export const artistView = (state) => state?.views?.searchArtistId;

@@ -6,11 +6,12 @@ import { addSongToQueue } from "../../api/party";
 import { addSomeTracksToQueue as addSomeTracksFromPlaylistToQueue } from "../../api/partyHub";
 import { getPlaylists, getTopSongs, getPlaylistItems } from "../../api/user";
 import SearchResults from "./Search/SearchResults";
-import { getUser, getPartyCode, getRealtimeConnection } from "../../redux/reducers/reducers";
+import { getUser, getPartyCode, getRealtimeConnection, artistView } from "../../redux/reducers/reducers";
 import { connect } from "react-redux";
 import PlaylistView from "./Playlists/PlaylistView";
 import notify, { error } from "../../api/notify";
 import ScrollContainer from "../shared/ScrollContainer";
+import ArtistView from "./Artists";
 
 const $DiscoverFrame = styled.div`
   padding: 0 10px;
@@ -48,7 +49,7 @@ const addSearchResultsToTabs = (tabs, setTabs) => {
   setTabs([...tabs, { title: "Search Results" }]);
 };
 
-const DiscoverFrame = ({ user, partyCode, connection }) => {
+const DiscoverFrame = ({ user, partyCode, connection, searchArtistId }) => {
   const [tabs, setTabs] = useState([
     {
       title: "Your Top Songs",
@@ -56,6 +57,7 @@ const DiscoverFrame = ({ user, partyCode, connection }) => {
     {
       title: "Playlists",
     },
+    { title: "Artists" },
   ]);
 
   const [currentTabView, setTabView] = useState("Your Top Songs");
@@ -63,7 +65,6 @@ const DiscoverFrame = ({ user, partyCode, connection }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const [searchResults, setSearchResults] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(null);
   const [haveTopSongs, setHaveTopSongs] = useState(false);
   const [topSongs, setTopSongs] = useState({});
 
@@ -78,11 +79,14 @@ const DiscoverFrame = ({ user, partyCode, connection }) => {
   }, [searchResults]);
 
   useEffect(() => {
+    console.log("setting tab view for ARTIST");
+    setTabView("Artists");
+  }, [searchArtistId]);
+
+  useEffect(() => {
     if (currentTabView == "Your Top Songs" && !haveTopSongs && user) {
       getTopSongs(20)
         .then((songs) => {
-          console.log("SONGS");
-          console.log(songs);
           setTopSongs(songs);
         })
         .catch((err) => {
@@ -145,12 +149,20 @@ const DiscoverFrame = ({ user, partyCode, connection }) => {
             isLoading={playlistsLoading}
           ></PlaylistView>
         )}
+        {currentTabView == "Artists" && (
+          <ArtistView artistId={searchArtistId} addTrackToQueue={(track) => addTrackToQueue(track, user, partyCode, connection)} />
+        )}
       </ScrollContainer>
     </$DiscoverFrame>
   );
 };
 
 const mapStateToProps = (state) => {
-  return { user: getUser(state), partyCode: getPartyCode(state), connection: getRealtimeConnection(state).connection };
+  return {
+    user: getUser(state),
+    partyCode: getPartyCode(state),
+    connection: getRealtimeConnection(state).connection,
+    searchArtistId: artistView(state),
+  };
 };
 export default connect(mapStateToProps, null)(DiscoverFrame);

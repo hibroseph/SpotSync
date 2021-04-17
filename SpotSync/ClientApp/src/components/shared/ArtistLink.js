@@ -1,5 +1,7 @@
 import React from "react";
 import styled from "styled-components";
+import { connect } from "react-redux";
+import { showArtistView } from "../../redux/actions/views";
 
 const $ArtistLink = styled.a`
   margin-right: 10px;
@@ -10,15 +12,18 @@ const $ArtistLink = styled.a`
   }
 `;
 
-export default ({ artist, ShowArtistView }) => {
+const ArtistLink = ({ artist, dispatch }) => {
   return (
     <$ArtistLink
       onClick={(event) => {
+        console.log("artist link clicked");
         event.preventDefault();
-        ShowArtistView(artist.id);
+        dispatch(showArtistView(artist.id));
       }}
     >
       {artist.name}
     </$ArtistLink>
   );
 };
+
+export default connect()(ArtistLink);

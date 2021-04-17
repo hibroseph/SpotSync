@@ -96,7 +96,7 @@ const $ThumbsContainer = styled.div`
   justify-content: space-around;
   align-items: center;
 `;
-const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFeelings, isHost }) => {
+const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFeelings, isHost, ShowArtistView }) => {
   return (
     <React.Fragment>
       <ToastContainer
@@ -118,9 +118,11 @@ const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFe
               <Image src={currentSong?.albumImageUrl != undefined ? currentSong.albumImageUrl : NoAlbumArt} />
               <div className="song-information">
                 <p className={"title"}>{currentSong?.name}</p>
-                {currentSong?.artists.map((artist) => (
-                  <ArtistLink artist={artist}></ArtistLink>
-                ))}
+                <div>
+                  {currentSong?.artists.map((artist) => (
+                    <ArtistLink ShowArtistView={ShowArtistView} artist={artist}></ArtistLink>
+                  ))}
+                </div>
               </div>
 
               {songFeelings && currentSong && (
