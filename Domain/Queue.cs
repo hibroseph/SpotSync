@@ -1,10 +1,13 @@
-﻿using SpotSync.Domain.Events;
+﻿using SpotSync.Domain.Contracts.SpotibroModels;
+using SpotSync.Domain.Contracts.SpotifyApi.Models;
+using SpotSync.Domain.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
+using SpotibroModels = SpotSync.Domain.Contracts.SpotibroModels;
 
 namespace SpotSync.Domain
 {
@@ -143,11 +146,20 @@ namespace SpotSync.Domain
             _tracks.Add(new TrackWithFeelings(track));
         }
 
-        public Task AddTracksRandomlyToQueueAsync(List<Track> tracks)
+        public Task AddTracksRandomlyToQueueAsync(List<SpotibroModels.Track> tracks)
         {
-            foreach (Track track in tracks)
+            foreach (SpotibroModels.Track track in tracks)
             {
-                _tracks.Insert(GetRandomQueueIndex(), new TrackWithFeelings(track));
+                _tracks.Insert(GetRandomQueueIndex(), new TrackWithFeelings(new Track
+                {
+                    AlbumImageUrl = track.Album.ImageUrl,
+                    Artists = track.Artists.Select(p => new Contracts.SpotifyApi.Models.Artist { Id = p.Id, Name = p.Name }).ToList(),
+                    Explicit = track.IsExplicit,
+                    Id = track.Id,
+                    Length = track.Duration,
+                    Name = track.Name
+                }
+                ));
             }
 
             return Task.CompletedTask;

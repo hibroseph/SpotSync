@@ -1,4 +1,6 @@
-﻿using SpotSync.Domain.Events;
+﻿using SpotSync.Domain.Contracts.SpotibroModels;
+using SpotSync.Domain.Contracts.SpotifyApi.Models;
+using SpotSync.Domain.Events;
 using SpotSync.Domain.Types;
 using System;
 using System.Collections.Concurrent;
@@ -8,6 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using SpotibroModels = SpotSync.Domain.Contracts.SpotibroModels;
 
 namespace SpotSync.Domain
 {
@@ -241,9 +244,9 @@ namespace SpotSync.Domain
             }
         }
 
-        public async Task AddTracksRandomlyToQueueAsync(List<Track> tracks)
+        public async Task AddTracksRandomlyToQueueAsync(List<SpotibroModels.Track> playlistItems)
         {
-            await _queue.AddTracksRandomlyToQueueAsync(tracks);
+            await _queue.AddTracksRandomlyToQueueAsync(playlistItems);
 
             if (_currentTrack == null && _queue.SongsExistInQueue())
             {

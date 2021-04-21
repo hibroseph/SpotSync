@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SpotSync.Domain.Contracts.SpotifyApiModels
+namespace SpotSync.Domain.Contracts.SpotifyApi.Models
 {
-    public class SearchArtists
+    public class PagedObject<T>
     {
-        public List<Artist> Items { get; set; }
+        public List<T> Items { get; set; }
         public string Next { get; set; }
         public string Previous { get; set; }
+        public int Total { get; set; }
     }
 }

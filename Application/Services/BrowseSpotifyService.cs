@@ -1,10 +1,13 @@
 ﻿using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
+using SpotSync.Domain.Contracts.SpotifyApi;
+using SpotSync.Domain.Contracts.SpotifyApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using SpotibroModels = SpotSync.Domain.Contracts.SpotibroModels;
 
 namespace SpotSync.Application.Services
 {
@@ -19,7 +22,7 @@ namespace SpotSync.Application.Services
             _logService = logService;
         }
 
-        public async Task<ArtistInformation> GetArtistInformationAsync(PartyGoer partyGoer, string artistId)
+        public async Task<SpotibroModels.ArtistInformation> GetArtistInformationAsync(PartyGoer partyGoer, string artistId)
         {
             try
             {

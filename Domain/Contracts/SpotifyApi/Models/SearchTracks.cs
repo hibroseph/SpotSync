@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SpotSync.Domain.Contracts.SpotifyApiModels
+namespace SpotSync.Domain.Contracts.SpotifyApi.Models
 {
     public class SearchTracks
     {

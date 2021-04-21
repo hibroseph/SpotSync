@@ -30,7 +30,7 @@ namespace SpotSync.Controllers
             {
                 return new JsonResult(await _browseSpotifyService.GetArtistInformationAsync(await _partyGoerService.GetCurrentPartyGoerAsync(), artistId));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // TODO: return a 500
                 return new JsonResult(new Result(false, "Unable to get artist information"));

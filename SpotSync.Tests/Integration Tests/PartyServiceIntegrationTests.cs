@@ -5,6 +5,8 @@ using SpotSync.Application.Services;
 using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
+using SpotSync.Domain.Contracts.SpotifyApi;
+using SpotSync.Domain.Contracts.SpotifyApi.Models;
 using SpotSync.Domain.DTO;
 using System;
 using System.Collections.Generic;

@@ -9,12 +9,15 @@ const $PlaylistTrackViewHeader = styled.div`
   margin-left: 20px;
 `;
 
-export default ({ playlistTracks, addToQueue }) => (
-  <div>
-    <$PlaylistTrackViewHeader>
-      <Image src={playlistTracks.playlist.playlistImageUrl} />
-      <Text>{playlistTracks.playlist.name}</Text>
-    </$PlaylistTrackViewHeader>
-    <TrackList tracks={playlistTracks.tracks} addToQueue={addToQueue}></TrackList>
-  </div>
-);
+export default ({ playlistTracks, addToQueue }) => {
+  console.log(playlistTracks);
+  return (
+    <div>
+      <$PlaylistTrackViewHeader>
+        <Image src={playlistTracks.playlist.playlistCoverArtUrl} />
+        <Text>{playlistTracks.playlist.name}</Text>
+      </$PlaylistTrackViewHeader>
+      <TrackList tracks={playlistTracks.tracks.tracks} addToQueue={addToQueue}></TrackList>
+    </div>
+  );
+};

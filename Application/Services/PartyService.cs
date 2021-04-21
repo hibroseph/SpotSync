@@ -1,12 +1,14 @@
 ﻿using SpotSync.Domain;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
+using SpotSync.Domain.Contracts.SpotifyApi;
 using SpotSync.Domain.DTO;
 using SpotSync.Domain.Errors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using SpotibroModels = SpotSync.Domain.Contracts.SpotibroModels;
 
 namespace SpotSync.Application.Services
 {
@@ -27,11 +29,11 @@ namespace SpotSync.Application.Services
 
         public async Task AddSomeTracksFromPlaylistToQueueAsync(PartyGoer partyGoer, string playlistId, int amount)
         {
-            List<Track> playlistTracks = await _partyGoerService.GetPlaylistItemsAsync(partyGoer, playlistId);
+            SpotibroModels.PlaylistContents playlistTracks = await _partyGoerService.GetPlaylistItemsAsync(partyGoer, playlistId);
 
             Party party = await _partyRepository.GetPartyWithAttendeeAsync(partyGoer);
 
-            await party.AddTracksRandomlyToQueueAsync(playlistTracks.GetRandomNItems(amount));
+            await party.AddTracksRandomlyToQueueAsync(playlistTracks.Tracks.GetRandomNItems(amount));
         }
 
         public async Task<List<Party>> GetAllPartiesAsync()
@@ -182,7 +184,7 @@ namespace SpotSync.Application.Services
             {
                 return await _spotifyHttpClient.GetRecommendedSongsAsync(party.GetHost(), new GetRecommendedSongs
                 {
-                    SeedTrackUris = (await _partyGoerService.GetRecommendedSongsAsync(party.GetHost().GetId(), 5)).Select(track => track.Id).ToList(),
+                    SeedTrackUris = (await _partyGoerService.GetRecommendedSongsAsync(party.GetHost().GetId(), 5)).Items.Select(track => track.Id).ToList(),
                     Market = party.GetHost().GetMarket()
                 });
             }

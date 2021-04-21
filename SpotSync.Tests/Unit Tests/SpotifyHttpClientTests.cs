@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using NUnit.Framework;
 using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
+using SpotSync.Domain.Contracts.SpotifyApi;
 using SpotSync.Domain.DTO;
 using SpotSync.Infrastructure.SpotifyApi;
 using System;

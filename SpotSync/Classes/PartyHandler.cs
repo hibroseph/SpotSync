@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SpotSync.Domain.DTO;
+using SpotSync.Domain.Contracts.SpotifyApi;
 
 namespace SpotSync.Classes
 {

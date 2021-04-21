@@ -26,6 +26,11 @@ const $Bar = styled.div`
   align-items: center;
 `;
 
+const SEARCH_RESULTS_TITLE = "Search Results";
+const ARTIST_TITLE = "Artist";
+const PLAYLIST_TITLE = "Playlist";
+const TOP_SONGS_TITLE = "Your Top Songs";
+
 const addTrackToQueue = (track, user, partyCode, connection) => {
   addSongToQueue(track, user.details.id, partyCode, connection);
 };
@@ -45,22 +50,26 @@ const addSomeTracksToQueue = (id, amount, connection) => {
   notify("Added some tracks from your playlist to the queue");
 };
 
-const addSearchResultsToTabs = (tabs, setTabs) => {
-  setTabs([...tabs, { title: "Search Results" }]);
+const addSearchResultsToTabs = (tabs, setTabs, setTabView) => {
+  if (tabs.findIndex((p) => p.title == "Search Results")) {
+    setTabView(SEARCH_RESULTS_TITLE);
+  } else {
+    setTabs([...tabs, { title: "Search Results" }]);
+  }
 };
 
 const DiscoverFrame = ({ user, partyCode, connection, searchArtistId }) => {
   const [tabs, setTabs] = useState([
     {
-      title: "Your Top Songs",
+      title: TOP_SONGS_TITLE,
     },
     {
-      title: "Playlists",
+      title: PLAYLIST_TITLE,
     },
-    { title: "Artists" },
+    { title: ARTIST_TITLE },
   ]);
 
-  const [currentTabView, setTabView] = useState("Your Top Songs");
+  const [currentTabView, setTabView] = useState(TOP_SONGS_TITLE);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -79,15 +88,18 @@ const DiscoverFrame = ({ user, partyCode, connection, searchArtistId }) => {
   }, [searchResults]);
 
   useEffect(() => {
-    console.log("setting tab view for ARTIST");
-    setTabView("Artists");
+    if (searchArtistId != undefined) {
+      setTabView(ARTIST_TITLE);
+    }
   }, [searchArtistId]);
 
   useEffect(() => {
-    if (currentTabView == "Your Top Songs" && !haveTopSongs && user) {
+    if (currentTabView == TOP_SONGS_TITLE && !haveTopSongs && user) {
       getTopSongs(20)
         .then((songs) => {
-          setTopSongs(songs);
+          console.log("top songs");
+          console.log(songs);
+          setTopSongs(songs.items);
         })
         .catch((err) => {
           error("There was an error getting your top songs. Try again.");
@@ -97,10 +109,11 @@ const DiscoverFrame = ({ user, partyCode, connection, searchArtistId }) => {
         });
     }
 
-    if (currentTabView == "Playlists" && !havePlaylists) {
+    if (currentTabView == PLAYLIST_TITLE && !havePlaylists) {
       setPlaylistsLoading(true);
       getPlaylists(30, 0)
         .then((playlists) => {
+          console.log(playlists);
           setPlaylists(playlists);
         })
         .catch((err) => {
@@ -117,29 +130,29 @@ const DiscoverFrame = ({ user, partyCode, connection, searchArtistId }) => {
     <$DiscoverFrame>
       <$Bar>
         <Search
-          addSearchResultsToTabs={() => addSearchResultsToTabs(tabs, setTabs)}
-          inputSelected={() => setTabView("Search Results")}
+          addSearchResultsToTabs={() => addSearchResultsToTabs(tabs, setTabs, setTabView)}
+          inputSelected={() => setTabView(SEARCH_RESULTS_TITLE)}
           setIsLoading={setIsLoading}
           setSearchResults={setSearchResults}
         />
         <Tabs selected={currentTabView} changeSelectedTab={setTabView} tabs={tabs} />
       </$Bar>
       <ScrollContainer>
-        {currentTabView == "Search Results" && (
+        {currentTabView == SEARCH_RESULTS_TITLE && (
           <SearchResults
             searchResults={searchResults}
             addSongToQueue={(track) => addTrackToQueue(track, user, partyCode, connection)}
             isLoading={isLoading}
           ></SearchResults>
         )}
-        {currentTabView == "Your Top Songs" && (
+        {currentTabView == TOP_SONGS_TITLE && (
           <SearchResults
             searchResults={topSongs}
             addSongToQueue={(track) => addTrackToQueue(track, user, partyCode, connection)}
             isLoading={!haveTopSongs}
           ></SearchResults>
         )}
-        {currentTabView == "Playlists" && (
+        {currentTabView == PLAYLIST_TITLE && (
           <PlaylistView
             playlists={playlists}
             addSomeTracksToQueue={(id, amount) => addSomeTracksToQueue(id, amount, connection)}
@@ -149,7 +162,7 @@ const DiscoverFrame = ({ user, partyCode, connection, searchArtistId }) => {
             isLoading={playlistsLoading}
           ></PlaylistView>
         )}
-        {currentTabView == "Artists" && (
+        {currentTabView == ARTIST_TITLE && (
           <ArtistView artistId={searchArtistId} addTrackToQueue={(track) => addTrackToQueue(track, user, partyCode, connection)} />
         )}
       </ScrollContainer>

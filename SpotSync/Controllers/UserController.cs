@@ -49,9 +49,7 @@ namespace SpotSync.Controllers
         [Authorize]
         public async Task<IActionResult> SuggestedSongs(int limit = 5)
         {
-            List<Track> recommendedSongs = await _partyGoerService.GetRecommendedSongsAsync((await _partyGoerService.GetCurrentPartyGoerAsync()).GetId(), limit);
-
-            return new JsonResult(recommendedSongs);
+            return new JsonResult(await _partyGoerService.GetRecommendedSongsAsync((await _partyGoerService.GetCurrentPartyGoerAsync()).GetId(), limit));
         }
 
         [HttpGet]

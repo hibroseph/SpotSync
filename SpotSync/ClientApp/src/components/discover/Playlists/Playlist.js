@@ -55,7 +55,7 @@ export default ({ playlist, addSomeTracksToQueue, viewPlaylist }) => {
   const [isHovering, setIsHovering] = useState(false);
   return (
     <$PlaylistContainer>
-      <$Image onMouseEnter={() => setIsHovering(true)} src={playlist.playlistImageUrl}></$Image>
+      <$Image onMouseEnter={() => setIsHovering(true)} src={playlist.playlistCoverArtUrl}></$Image>
       {isHovering && (
         <$PlaylistOptionsContainer onMouseLeave={() => setIsHovering(false)}>
           <$PlaylistOptions>

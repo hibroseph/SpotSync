@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using NUnit.Framework.Internal;
 using SpotSync.Domain;
+using SpotSync.Domain.Contracts.SpotifyApi.Models;
 using SpotSync.Domain.Events;
 using System;
 using System.Collections.Generic;
@@ -35,7 +36,7 @@ namespace SpotSync.Tests.Unit_Tests
         [Test]
         public async Task DomainEventsSuccessfullyRaisesDomainEvent()
         {
-            Track song = new Track
+            Domain.Track song = new Domain.Track
             {
                 Artists = new List<Artist> { new Artist { Id = "123", Name = SONG_ARTIST } },
                 Length = SONG_LENGTH,

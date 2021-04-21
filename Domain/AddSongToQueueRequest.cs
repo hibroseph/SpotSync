@@ -1,4 +1,4 @@
-﻿using SpotSync.Domain.Contracts.SpotifyApiModels;
+﻿using SpotSync.Domain.Contracts.SpotifyApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;

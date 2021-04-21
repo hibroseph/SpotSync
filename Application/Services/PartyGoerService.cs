@@ -13,6 +13,9 @@ using System.Text;
 using System.Threading.Tasks;
 using SpotSync.Domain.Errors;
 using System.Collections.Concurrent;
+using SpotSync.Domain.Contracts.SpotifyApi;
+using SpotSync.Domain.Contracts.SpotifyApi.Models;
+using SpotibroModels = SpotSync.Domain.Contracts.SpotibroModels;
 
 namespace SpotSync.Application.Services
 {
@@ -23,15 +26,17 @@ namespace SpotSync.Application.Services
         private ISpotifyAuthentication _spotifyAuthentication;
         private IDictionary<string, PartyGoer> _partyGoerCache;
         private ILogService _logService;
+        private ISpotifyApi _spotifyApi;
 
         public PartyGoerService(ISpotifyHttpClient spotifyHttpClient, IHttpContextAccessor httpContextAccessor,
-        ISpotifyAuthentication spotifyAuthentication, ILogService logService)
+        ISpotifyAuthentication spotifyAuthentication, ILogService logService, ISpotifyApi spotifyApi)
         {
             _spotifyHttpClient = spotifyHttpClient;
             _httpContextAccessor = httpContextAccessor;
             _spotifyAuthentication = spotifyAuthentication;
             _partyGoerCache = new ConcurrentDictionary<string, PartyGoer>();
             _logService = logService;
+            _spotifyApi = spotifyApi;
         }
 
         public async Task<CurrentSongDTO> GetCurrentSongAsync(string partyGoerId)
@@ -39,9 +44,9 @@ namespace SpotSync.Application.Services
             return await _spotifyHttpClient.GetCurrentSongAsync(partyGoerId);
         }
 
-        public Task<List<Track>> GetRecommendedSongsAsync(string partyGoerId, int count = 10)
+        public async Task<SpotSync.Domain.Contracts.SpotifyApi.Models.SearchTracks> GetRecommendedSongsAsync(string partyGoerId, int count = 10)
         {
-            return _spotifyHttpClient.GetUserTopTracksAsync(partyGoerId, count);
+            return await _spotifyHttpClient.GetUserTopTracksAsync(partyGoerId, count);
         }
 
         public async Task<string> GetUsersActiveDeviceAsync(string partyGoerId)
@@ -106,14 +111,14 @@ namespace SpotSync.Application.Services
             }
         }
 
-        public async Task<List<Playlist>> GetUsersPlaylistsAsync(PartyGoer user, int limit = 10, int offset = 0)
+        public async Task<List<SpotibroModels.PlaylistSummary>> GetUsersPlaylistsAsync(PartyGoer user, int limit = 10, int offset = 0)
         {
-            return await _spotifyHttpClient.GetUsersPlaylistsAsync(user, limit, offset);
+            return await _spotifyApi.GetUsersPlaylistsAsync(user, limit, offset);
         }
 
-        public async Task<List<Track>> GetPlaylistItemsAsync(PartyGoer user, string playlistId)
+        public async Task<SpotibroModels.PlaylistContents> GetPlaylistItemsAsync(PartyGoer user, string playlistId)
         {
-            return await _spotifyHttpClient.GetPlaylistItemsAsync(user, playlistId);
+            return await _spotifyApi.GetPlaylistContentsAsync(user, playlistId);
         }
     }
 }

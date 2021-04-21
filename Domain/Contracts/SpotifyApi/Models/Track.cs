@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace SpotSync.Domain.Contracts.SpotifyApiModels
+namespace SpotSync.Domain.Contracts.SpotifyApi.Models
 {
     public class Track
     {

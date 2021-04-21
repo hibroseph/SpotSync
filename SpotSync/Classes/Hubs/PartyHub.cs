@@ -14,6 +14,7 @@ using System.Linq;
 using System.Security.Policy;
 using System.Threading.Tasks;
 using SpotSync.Models.Party;
+using SpotSync.Domain.Contracts.SpotifyApi;
 
 namespace SpotSync.Classes.Hubs
 {

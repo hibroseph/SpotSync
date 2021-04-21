@@ -15,6 +15,8 @@ using SpotSync.Domain.Events;
 using SpotSync.Infrastructure.SpotifyApi;
 using SpotSync.Infrastructure;
 using System;
+using SpotSync.Domain.Contracts.SpotifyApi;
+using System.Collections.Generic;
 
 namespace SpotSync
 {
@@ -26,9 +28,11 @@ namespace SpotSync
             serviceCollection.AddSingleton<ISpotifyAuthentication>(new SpotifyAuthentication(configuration["Spotify:ClientId"], configuration["Spotify:ClientSecret"], configuration["Spotify:RedirectUrl"]));
             serviceCollection.AddSingleton<IHttpClient>(new HttpClient());
 
+
             serviceCollection.AddSingleton<ISpotifyHttpClient, SpotifyHttpClient>();
             serviceCollection.AddSingleton<ILogRepository>(new LogRepository(configuration["DatabaseConnection"]));
 
+            serviceCollection.AddSingleton<ISpotifyApi, SpotifyApi>();
             serviceCollection.AddSingleton<IPartyRepository, PartyRepository>();
             serviceCollection.AddSingleton<IPartyGoerService, PartyGoerService>();
             serviceCollection.AddSingleton<IBrowseSpotifyService, BrowseSpotifyService>();

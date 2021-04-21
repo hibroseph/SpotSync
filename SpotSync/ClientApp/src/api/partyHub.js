@@ -15,7 +15,7 @@ export const userAddSongToQueue = (song, user, partyCode, connection) => {
     Name: song.name,
     Artists: song.artists,
     TrackUri: song.id,
-    Length: song.duration_ms,
+    Length: song.duration,
     PartyCode: partyCode,
     IndexToInsertSongAt: 0,
     AddedBy: user,

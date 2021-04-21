@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using SpotSync.Domain;
+using SpotSync.Domain.Contracts.SpotifyApi.Models;
 using SpotSync.Domain.Events;
 using System;
 using System.Collections.Generic;
@@ -40,7 +41,7 @@ namespace SpotSync.Tests.Unit_Tests
 
             Party party = new Party(host);
 
-            List<Track> tracks = GetTracks();
+            List<Domain.Track> tracks = GetTracks();
 
             await party.AddNewQueueAsync(tracks);
 
@@ -61,7 +62,7 @@ namespace SpotSync.Tests.Unit_Tests
 
             party.JoinParty(listener);
 
-            List<Track> tracks = GetTracks();
+            List<Domain.Track> tracks = GetTracks();
 
             await party.AddNewQueueAsync(tracks);
 
@@ -84,7 +85,7 @@ namespace SpotSync.Tests.Unit_Tests
 
             Party party = new Party(host);
 
-            List<Track> tracks = GetTracks();
+            List<Domain.Track> tracks = GetTracks();
 
             await party.AddNewQueueAsync(tracks);
 
@@ -103,7 +104,7 @@ namespace SpotSync.Tests.Unit_Tests
 
             Party party = new Party(host);
 
-            List<Track> tracks = GetTracks();
+            List<Domain.Track> tracks = GetTracks();
 
             await party.AddNewQueueAsync(tracks);
 
@@ -125,7 +126,7 @@ namespace SpotSync.Tests.Unit_Tests
 
             party.JoinParty(listener);
 
-            List<Track> tracks = GetTracks();
+            List<Domain.Track> tracks = GetTracks();
 
             await party.AddNewQueueAsync(tracks);
 
@@ -137,10 +138,10 @@ namespace SpotSync.Tests.Unit_Tests
         }
 
 
-        private List<Track> GetTracks()
+        private List<Domain.Track> GetTracks()
         {
-            return new List<Track>() {
-                new Track {
+            return new List<Domain.Track>() {
+                new Domain.Track {
                     AlbumImageUrl = "hello.com",
                     Artists = new List<Artist>{ new Artist{ Name = "Kipelicious", Id = "123" } },
                     Explicit = true,
@@ -148,7 +149,7 @@ namespace SpotSync.Tests.Unit_Tests
                     Name = "I Love Kip",
                     Id = "xyz123"
             },
-                new Track {
+                new Domain.Track {
                     AlbumImageUrl = "goodbye.com",
                     Artists =new List<Artist>{ new Artist{ Name="Mattelicious", Id = "321"} },
                     Explicit = true,
