@@ -1,7 +1,9 @@
 ﻿using SpotSync.Domain.Contracts.SpotifyApi;
+using SpotSync.Domain.Contracts.SpotifyApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using SpotibroModels = SpotSync.Domain.Contracts.SpotibroModels;
 using SpotifyModels = SpotSync.Domain.Contracts.SpotifyApi.Models;
@@ -21,6 +23,11 @@ namespace SpotSync.Domain
                 IsExplicit = track.Explicit,
                 Name = track.Name
             };
+        }
+
+        public List<SpotibroModels.Track> Convert(PagedObject<SpotifyModels.Track> tracks)
+        {
+            return tracks.Items.Select(p => Convert(p)).ToList();
         }
 
         public List<SpotibroModels.Track> Convert(List<SpotifyModels.Track> tracks)

@@ -99,7 +99,7 @@ const DiscoverFrame = ({ user, partyCode, connection, searchArtistId }) => {
         .then((songs) => {
           console.log("top songs");
           console.log(songs);
-          setTopSongs(songs.items);
+          setTopSongs(songs);
         })
         .catch((err) => {
           error("There was an error getting your top songs. Try again.");

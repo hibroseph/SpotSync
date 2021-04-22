@@ -6,7 +6,7 @@ import { faRandom, faListUl } from "@fortawesome/free-solid-svg-icons";
 import Image from "../../shared/Image";
 
 const $Image = styled(Image)`
-  border-radius: 10px;
+  border-radius: 50px;
   margin-bottom: 10px;
 `;
 

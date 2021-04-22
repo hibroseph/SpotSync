@@ -44,7 +44,7 @@ namespace SpotSync.Application.Services
             return await _spotifyHttpClient.GetCurrentSongAsync(partyGoerId);
         }
 
-        public async Task<SpotSync.Domain.Contracts.SpotifyApi.Models.SearchTracks> GetRecommendedSongsAsync(string partyGoerId, int count = 10)
+        public async Task<List<SpotibroModels.Track>> GetRecommendedSongsAsync(string partyGoerId, int count = 10)
         {
             return await _spotifyHttpClient.GetUserTopTracksAsync(partyGoerId, count);
         }

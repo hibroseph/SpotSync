@@ -9,6 +9,7 @@ export const skipSong = (partyCode, connection) => {
 };
 
 export const userAddSongToQueue = (song, user, partyCode, connection) => {
+  console.log("ADDING SONG TO QUEUE");
   console.log("hello world");
   console.log(song);
   connection.invoke("UserAddedSong", {

@@ -184,7 +184,7 @@ namespace SpotSync.Application.Services
             {
                 return await _spotifyHttpClient.GetRecommendedSongsAsync(party.GetHost(), new GetRecommendedSongs
                 {
-                    SeedTrackUris = (await _partyGoerService.GetRecommendedSongsAsync(party.GetHost().GetId(), 5)).Items.Select(track => track.Id).ToList(),
+                    SeedTrackUris = (await _partyGoerService.GetRecommendedSongsAsync(party.GetHost().GetId(), 5)).Select(track => track.Id).ToList(),
                     Market = party.GetHost().GetMarket()
                 });
             }

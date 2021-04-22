@@ -11,7 +11,7 @@ namespace SpotSync.Domain.Contracts.Services
     public interface IPartyGoerService
     {
         Task<CurrentSongDTO> GetCurrentSongAsync(string partyGoerId);
-        Task<Domain.Contracts.SpotifyApi.Models.SearchTracks> GetRecommendedSongsAsync(string partyGoerId, int count = 10);
+        Task<List<SpotibroModels.Track>> GetRecommendedSongsAsync(string partyGoerId, int count = 10);
         Task<string> GetUsersActiveDeviceAsync(string partyGoerId);
         Task<IEnumerable<ISpotifyQueryResult>> SearchSpotifyAsync(string query, SpotifyQueryType queryType, int limit = 10);
         Task<PartyGoer> GetCurrentPartyGoerAsync();

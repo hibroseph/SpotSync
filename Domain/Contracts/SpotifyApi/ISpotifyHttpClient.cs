@@ -17,7 +17,7 @@ namespace SpotSync.Domain.Contracts.SpotifyApi
         Task<User> RequestAccessAndRefreshTokenFromSpotifyAsync(string code);
         Task<Errors.ServiceResult<UpdateSongError>> UpdateSongForPartyGoerAsync(PartyGoer user, List<string> songUris, int currentSongProgressInMs);
         Task<List<Track>> GetRecommendedSongsAsync(PartyGoer partyGoer, GetRecommendedSongs recommendedSongs);
-        Task<SpotifyApi.Models.SearchTracks> GetUserTopTracksAsync(string spotifyId, int limit = 10);
+        Task<List<SpotibroModels.Track>> GetUserTopTracksAsync(string spotifyId, int limit = 10);
         Task<string> GetUsersActiveDeviceAsync(string spotifyId);
         Task<IEnumerable<ISpotifyQueryResult>> QuerySpotifyAsync(PartyGoer user, string searchQuery, SpotifyQueryType queryType, int limit);
         Task<User> GetUserDetailsAsync(string spotifyId);

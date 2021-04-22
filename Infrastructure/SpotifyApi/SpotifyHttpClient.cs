@@ -178,11 +178,14 @@ namespace SpotSync.Infrastructure.SpotifyApi
 
             foreach (var item in json["artists"]["items"])
             {
-                artists.Add(new SpotifyArtistQueryResult
+                if (item != null)
                 {
-                    Name = item["name"].ToString(),
-                    Uri = item["uri"].ToString()
-                });
+                    artists.Add(new SpotifyArtistQueryResult
+                    {
+                        Name = item["name"].ToString(),
+                        Uri = item["uri"].ToString()
+                    });
+                }
             }
 
             return artists;
@@ -210,24 +213,27 @@ namespace SpotSync.Infrastructure.SpotifyApi
 
             foreach (var item in json["albums"]["items"])
             {
-                results.Add(new SpotifyAlbumQueryResult
+                if (item != null)
                 {
-                    Artist = item["artists"].First()["name"].ToString(),
-                    Name = item["name"].ToString(),
-                    Uri = item["uri"].ToString()
-                });
+                    results.Add(new SpotifyAlbumQueryResult
+                    {
+                        Artist = item["artists"].First()["name"].ToString(),
+                        Name = item["name"].ToString(),
+                        Uri = item["uri"].ToString()
+                    });
+                }
             }
 
             return results;
         }
 
-        public async Task<SearchTracks> GetUserTopTracksAsync(string spotifyId, int limit = 10)
+        public async Task<List<SpotibroModels.Track>> GetUserTopTracksAsync(string spotifyId, int limit = 10)
         {
             var response = await SendHttpRequestAsync(spotifyId, _apiEndpoints[ApiEndpointType.GetTopTracks], $"limit={limit}", true);
 
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadFromJsonAsync<SearchTracks>();
+            return _mapper.Convert(await response.Content.ReadFromJsonAsync<PagedObject<SpotifyModels.Track>>());
 
         }
 
@@ -250,7 +256,7 @@ namespace SpotSync.Infrastructure.SpotifyApi
 
             foreach (SpotifyModels.Track track in tracks.Tracks)
             {
-                if (track.Markets.Contains(partyGoer.GetMarket()))
+                if (track.Markets.Contains(partyGoer.GetMarket()) && track != null)
                 {
                     recommendedSongs.Add(new Domain.Track
                     {
