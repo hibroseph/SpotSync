@@ -49,6 +49,8 @@ namespace SpotSync.Infrastructure.SpotifyApi
 
             var playlistItems = await response.Content.ReadFromJsonAsync<PlaylistItems>();
 
+            playlistItems.Items.RemoveAll(p => p == null);
+
             return new SpotibroModels.PlaylistContents()
             {
                 Tracks = playlistItems.Items.Select(p => _mapper.Convert(p.Track)).ToList()

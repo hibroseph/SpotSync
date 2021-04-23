@@ -2,17 +2,16 @@ import React from "react";
 import SearchInput from "./SearchInput";
 import { searchSpotify } from "../../../api/party";
 
-const onSearch = (searchValue, setSearchResults, addSearchResultsToTabs) => {
+const onSearch = (searchValue, setSearchResults) => {
   searchSpotify(searchValue).then((searchResults) => {
     setSearchResults(searchResults);
-    addSearchResultsToTabs();
   });
 };
 
-const Search = ({ addSearchResultsToTabs, inputSelected, setIsLoading, setSearchResults }) => {
+const Search = ({ inputSelected, setIsLoading, setSearchResults }) => {
   return (
     <SearchInput
-      onSearch={(searchValue) => onSearch(searchValue, setSearchResults, addSearchResultsToTabs)}
+      onSearch={(searchValue) => onSearch(searchValue, setSearchResults)}
       setIsLoading={setIsLoading}
       placeholder="Search for Songs, Artists, and Albums"
       inputSelected={inputSelected}

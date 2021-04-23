@@ -50,7 +50,7 @@ const addSomeTracksToQueue = (id, amount, connection) => {
   notify("Added some tracks from your playlist to the queue");
 };
 
-const addSearchResultsToTabs = (tabs, setTabs, setTabView) => {
+const addSearchResultsToTabs = (tabs, setTabs) => {
   if (tabs.findIndex((p) => p.title == "Search Results")) {
     setTabView(SEARCH_RESULTS_TITLE);
   } else {
@@ -66,7 +66,6 @@ const DiscoverFrame = ({ user, partyCode, connection, searchArtistId }) => {
     {
       title: PLAYLIST_TITLE,
     },
-    { title: ARTIST_TITLE },
   ]);
 
   const [currentTabView, setTabView] = useState(TOP_SONGS_TITLE);
@@ -113,7 +112,6 @@ const DiscoverFrame = ({ user, partyCode, connection, searchArtistId }) => {
       setPlaylistsLoading(true);
       getPlaylists(30, 0)
         .then((playlists) => {
-          console.log(playlists);
           setPlaylists(playlists);
         })
         .catch((err) => {
@@ -130,7 +128,7 @@ const DiscoverFrame = ({ user, partyCode, connection, searchArtistId }) => {
     <$DiscoverFrame>
       <$Bar>
         <Search
-          addSearchResultsToTabs={() => addSearchResultsToTabs(tabs, setTabs, setTabView)}
+          addSearchResultsToTabs={() => addSearchResultsToTabs(tabs, setTabs)}
           inputSelected={() => setTabView(SEARCH_RESULTS_TITLE)}
           setIsLoading={setIsLoading}
           setSearchResults={setSearchResults}
