@@ -35,7 +35,7 @@ namespace SpotSync.Infrastructure.SpotifyApi
             {
                 Parameters = new Dictionary<string, string>
                 {
-                    {"fields", "items(track(id,name,album(images(url)),artists(name),explicit(),duration_ms()))" },
+                    {"fields", "items(track(id,name,album(images(url)),artists(name,id),explicit(),duration_ms()))" },
                     {"market",  user.GetMarket()}
                 },
                 Keys = new Dictionary<string, string>{

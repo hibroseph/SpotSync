@@ -6,8 +6,14 @@ import { searchArtist } from "../../api/browse";
 import TrackList from "./TrackList";
 
 const $ArtistImage = styled.img`
-  width: 20%;
-  border-radius: 25px;
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 100px;
+`;
+
+const $ArtistTitle = styled.p`
+  font-weight: bold;
 `;
 export default ({ artistId, addTrackToQueue }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -36,7 +42,7 @@ export default ({ artistId, addTrackToQueue }) => {
       )}
       {!isLoading && (
         <React.Fragment>
-          <p>{currentArtist?.artist.name}</p>
+          <$ArtistTitle>{currentArtist?.artist.name}</$ArtistTitle>
           {currentArtist?.artist?.images?.length > 0 && <$ArtistImage src={currentArtist?.artist?.images[0].url}></$ArtistImage>}
           <TrackList tracks={currentArtist?.topTracks} addToQueue={addTrackToQueue}></TrackList>
         </React.Fragment>

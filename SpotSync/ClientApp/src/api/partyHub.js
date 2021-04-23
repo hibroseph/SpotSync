@@ -25,6 +25,7 @@ export const userAddSongToQueue = (song, user, partyCode, connection) => {
 };
 
 export const userLikesSong = (partyCode, trackUri, connection, dispatch) => {
+  console.log(trackUri);
   dispatch(userLikesSongAction(trackUri));
   connection.invoke("LikeSong", partyCode, trackUri);
 };

@@ -131,7 +131,7 @@ const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFe
                     onDislike={() => userDislikesSong(partyCode, currentSong.id, connection, dispatch)}
                     feeling={songFeelings[currentSong?.uri]}
                   />
-                  <ThumbsUp onLike={() => userLikesSong(partyCode, currentSong.id, connection, dispatch)} feeling={songFeelings[currentSong?.uri]} />
+                  <ThumbsUp onLike={() => userLikesSong(partyCode, currentSong.id, connection, dispatch)} feeling={songFeelings[currentSong?.id]} />
                 </$ThumbsContainer>
               )}
             </React.Fragment>
