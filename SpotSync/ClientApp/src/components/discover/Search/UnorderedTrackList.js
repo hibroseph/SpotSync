@@ -4,11 +4,11 @@ import Loader from "../../shared/Loader";
 import CenteredHorizontally from "../../shared/CenteredHorizontally";
 import styled from "styled-components";
 
-const $SearchResults = styled.div`
+const UnorderedTrackListContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
 `;
-const SearchResults = ({ searchTerm, searchResults, isLoading, addSongToQueue }) => {
+const UnorderedTrackList = ({ tracks, isLoading, addSongToQueue }) => {
   return (
     <React.Fragment>
       {isLoading && (
@@ -16,18 +16,17 @@ const SearchResults = ({ searchTerm, searchResults, isLoading, addSongToQueue })
           <Loader></Loader>
         </CenteredHorizontally>
       )}
-      {!isLoading && searchResults?.length > 0 && (
+      {!isLoading && tracks?.length > 0 && (
         <React.Fragment>
-          <p>Search Results for {searchTerm}</p>
-          <$SearchResults>
-            {searchResults.map((track, index) => {
+          <UnorderedTrackListContainer>
+            {tracks.map((track, index) => {
               return <Track key={`${track.id}_${index}`} track={track} addSongToQueue={() => addSongToQueue(track)}></Track>;
             })}
-          </$SearchResults>
+          </UnorderedTrackListContainer>
         </React.Fragment>
       )}
     </React.Fragment>
   );
 };
 
-export default SearchResults;
+export default UnorderedTrackList;

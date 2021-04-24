@@ -4,9 +4,8 @@ import TrackList from "../TrackList";
 import Image from "../../shared/Image";
 import Text from "../../shared/Text";
 
-const $Image = styled(Image)`
-  border-radius: 100px;
-`;
+const $Image = styled(Image)``;
+
 const $PlaylistTrackViewHeader = styled.div`
   padding: 5px 20px;
   margin-left: 20px;

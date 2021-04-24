@@ -13,6 +13,11 @@ const $ArtistImage = styled.img`
 `;
 
 const $ArtistTitle = styled.p`
+  font-size: 25px;
+  font-weight: bold;
+`;
+const $TrackListTitle = styled.p`
+  font-size: 15px;
   font-weight: bold;
 `;
 export default ({ artistId, addTrackToQueue }) => {
@@ -44,6 +49,7 @@ export default ({ artistId, addTrackToQueue }) => {
         <React.Fragment>
           <$ArtistTitle>{currentArtist?.artist.name}</$ArtistTitle>
           {currentArtist?.artist?.images?.length > 0 && <$ArtistImage src={currentArtist?.artist?.images[0].url}></$ArtistImage>}
+          <$TrackListTitle>Top Tracks</$TrackListTitle>
           <TrackList tracks={currentArtist?.topTracks} addToQueue={addTrackToQueue}></TrackList>
         </React.Fragment>
       )}

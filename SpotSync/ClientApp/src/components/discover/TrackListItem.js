@@ -35,7 +35,6 @@ const $StyledFontAwesomeIcon = styled(FontAwesomeIcon)`
 `;
 
 export default ({ track, index, addToQueue }) => {
-  console.log(track);
   return (
     <$TrackListItem>
       <$FlexQueueNumber>{index}</$FlexQueueNumber>

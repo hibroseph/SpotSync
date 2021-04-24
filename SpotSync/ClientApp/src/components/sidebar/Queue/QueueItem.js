@@ -34,8 +34,6 @@ const $VotingContainer = styled.div`
   display: flex;
 `;
 const QueueItem = (props) => {
-  console.log("props in queueitem");
-  console.log(props);
   return (
     <$QueueItem>
       <div>

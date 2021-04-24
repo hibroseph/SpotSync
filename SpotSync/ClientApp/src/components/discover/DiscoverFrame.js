@@ -5,7 +5,7 @@ import Tabs from "../sidebar/Tabs";
 import { addSongToQueue } from "../../api/party";
 import { addSomeTracksToQueue as addSomeTracksFromPlaylistToQueue } from "../../api/partyHub";
 import { getPlaylists, getTopSongs, getPlaylistItems } from "../../api/user";
-import SearchResults from "./Search/SearchResults";
+import UnorderedTrackList from "./Search/UnorderedTrackList";
 import { getUser, getPartyCode, getRealtimeConnection, artistView } from "../../redux/reducers/reducers";
 import { connect } from "react-redux";
 import PlaylistView from "./Playlists/PlaylistView";
@@ -37,11 +37,14 @@ const addTrackToQueue = (track, user, partyCode, connection) => {
 
 const viewPlaylist = (playlist, setPlaylistTracks, setPlaylistLoading) => {
   setPlaylistLoading(true);
-  getPlaylistItems(playlist.id)
+  return getPlaylistItems(playlist.id)
     .then((playlistTracks) => {
       setPlaylistTracks({ tracks: playlistTracks, playlist });
     })
-    .catch((err) => error("Unable to load tracks for your playlist. Try again."))
+    .catch((err) => {
+      error("Unable to load tracks for your playlist. Try again.");
+      throw err;
+    })
     .finally(() => setPlaylistLoading(false));
 };
 
@@ -137,18 +140,21 @@ const DiscoverFrame = ({ user, partyCode, connection, searchArtistId }) => {
       </$Bar>
       <ScrollContainer>
         {currentTabView == SEARCH_RESULTS_TITLE && (
-          <SearchResults
-            searchResults={searchResults}
-            addSongToQueue={(track) => addTrackToQueue(track, user, partyCode, connection)}
-            isLoading={isLoading}
-          ></SearchResults>
+          <React.Fragment>
+            <p>Search Results For {search}</p>
+            <UnorderedTrackList
+              tracks={searchResults}
+              addSongToQueue={(track) => addTrackToQueue(track, user, partyCode, connection)}
+              isLoading={isLoading}
+            ></UnorderedTrackList>
+          </React.Fragment>
         )}
         {currentTabView == TOP_SONGS_TITLE && (
-          <SearchResults
-            searchResults={topSongs}
+          <UnorderedTrackList
+            tracks={topSongs}
             addSongToQueue={(track) => addTrackToQueue(track, user, partyCode, connection)}
             isLoading={!haveTopSongs}
-          ></SearchResults>
+          ></UnorderedTrackList>
         )}
         {currentTabView == PLAYLIST_TITLE && (
           <PlaylistView

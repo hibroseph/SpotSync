@@ -10,8 +10,11 @@ const $PlaylistContainer = styled.div`
   flex-wrap: wrap;
 `;
 
+const PLAYLIST_VIEW = "Playlists";
+const PLAYLIST_TRACKS = "PlaylistsTracks";
+
 export default ({ playlists, playlistTracks, addSomeTracksToQueue, viewPlaylist, isLoading, addToQueue }) => {
-  const [playlistView, setPlaylistView] = useState("Playlists");
+  const [playlistView, setPlaylistView] = useState(PLAYLIST_VIEW);
   return (
     <React.Fragment>
       {isLoading && (
@@ -19,7 +22,7 @@ export default ({ playlists, playlistTracks, addSomeTracksToQueue, viewPlaylist,
           <Loader></Loader>
         </CenteredHorizontally>
       )}
-      {!isLoading && playlistView == "Playlists" && (
+      {!isLoading && playlistView == PLAYLIST_VIEW && (
         <$PlaylistContainer>
           {playlists.map((playlist) => {
             return (
@@ -28,8 +31,13 @@ export default ({ playlists, playlistTracks, addSomeTracksToQueue, viewPlaylist,
                 playlist={playlist}
                 addSomeTracksToQueue={addSomeTracksToQueue}
                 viewPlaylist={() => {
-                  setPlaylistView("PlaylistTracks");
-                  viewPlaylist(playlist);
+                  setPlaylistView(PLAYLIST_TRACKS);
+                  viewPlaylist(playlist)
+                    .then((p) => console.log("EVERYTHING IS GOOD INSIDE OF PLAYLIST VIEW"))
+                    .catch((p) => {
+                      console.log("THINGS ARE BAD INSIDE OF PLAYLIST VIEW");
+                      setPlaylistView(PLAYLIST_VIEW);
+                    });
                 }}
               ></Playlist>
             );
@@ -37,7 +45,7 @@ export default ({ playlists, playlistTracks, addSomeTracksToQueue, viewPlaylist,
         </$PlaylistContainer>
       )}
 
-      {!isLoading && playlistView == "PlaylistTracks" && (
+      {!isLoading && playlistView == PLAYLIST_TRACKS && (
         <PlaylistTrackView playlistTracks={playlistTracks} addToQueue={addToQueue}></PlaylistTrackView>
       )}
     </React.Fragment>
