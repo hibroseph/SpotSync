@@ -141,9 +141,9 @@ namespace SpotSync.Infrastructure.SpotifyApi
             var searchResults = await response.Content.ReadFromJsonAsync<SearchResults>();
             return searchResults.Tracks.Items.Select(p => new SpotifyTrackQueryResult
             {
-                Uri = p.Id.Replace("spotify:track:", ""),
+                Id = p.Id.Replace("spotify:track:", ""),
                 Artists = p.Artists.Select(p => new Artist { Id = p.Id, Name = p.Name }).ToList(),
-                Length = p.Duration,
+                Duration = p.Duration,
                 Name = p.Name,
                 Explicit = p.Explicit
             });
