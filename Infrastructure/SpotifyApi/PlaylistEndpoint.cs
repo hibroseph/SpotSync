@@ -49,7 +49,7 @@ namespace SpotSync.Infrastructure.SpotifyApi
 
             var playlistItems = await response.Content.ReadFromJsonAsync<PlaylistItems>();
 
-            playlistItems.Items.RemoveAll(p => p == null);
+            playlistItems.Items.RemoveAll(p => p.Track == null);
 
             return new SpotibroModels.PlaylistContents()
             {

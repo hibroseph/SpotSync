@@ -1,15 +1,16 @@
 import React from "react";
 import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faThumbsDown as fasThumbsDown } from "@fortawesome/free-solid-svg-icons";
-import { faThumbsDown } from "@fortawesome/free-regular-svg-icons";
+import { faCaretDown } from "@fortawesome/free-solid-svg-icons";
 
 const $StyledFontAwesomeIcon = styled(FontAwesomeIcon)`
   &:hover {
     transform: scale(1.2);
   }
+  font-size: 20px;
+  color: ${(p) => (p.selected ? "#7d8aff" : null)};
 `;
 
 export default (props) => (
-  <$StyledFontAwesomeIcon onClick={() => props.onDislike()} icon={props?.feeling == 0 ? fasThumbsDown : faThumbsDown}></$StyledFontAwesomeIcon>
+  <$StyledFontAwesomeIcon onClick={() => props.onDislike()} selected={props?.feeling == 0} icon={faCaretDown}></$StyledFontAwesomeIcon>
 );

@@ -30,19 +30,25 @@ const $QueueItem = styled.div`
   }
 `;
 
+const $centeredQueueItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+`;
+
 const $VotingContainer = styled.div`
   display: flex;
 `;
 const QueueItem = (props) => {
   return (
     <$QueueItem>
-      <div>
+      <$centeredQueueItem>
         <p className="title">{props.title}</p>
         {props.artists.map((artist) => (
           <ArtistLink artist={artist}></ArtistLink>
         ))}
-      </div>
-      <Voting feeling={props.feeling} onDislike={props.onDislike} onLike={props.onLike} vote={props.vote}></Voting>
+      </$centeredQueueItem>
+      <Voting feeling={props.feeling} dislikeNumber={0} likeNumber={0} onDislike={props.onDislike} onLike={props.onLike}></Voting>
     </$QueueItem>
   );
 };

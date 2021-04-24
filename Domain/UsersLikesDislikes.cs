@@ -10,10 +10,18 @@ namespace SpotSync.Domain
         private Dictionary<string, List<string>> _usersLikedTracks;
         private Dictionary<string, List<string>> _usersDislikedTracks;
 
+        private Dictionary<string, int> _sumOfLikes;
+
         public UsersLikesDislikes()
         {
             _usersLikedTracks = new Dictionary<string, List<string>>();
             _usersDislikedTracks = new Dictionary<string, List<string>>();
+            _sumOfLikes = new Dictionary<string, int>();
+        }
+
+        public Dictionary<string, int> GetAmountOfTrackFeelings()
+        {
+            return _sumOfLikes;
         }
 
         public List<string> GetLikedTracksUris()
@@ -59,8 +67,6 @@ namespace SpotSync.Domain
         public void UserDislikesTrack(PartyGoer user, string trackUri)
         {
             StoreUsersDislikedTrack(user, trackUri);
-
-
         }
 
         private void StoreUsersDislikedTrack(PartyGoer user, string trackUri)
@@ -111,6 +117,21 @@ namespace SpotSync.Domain
             }
         }
 
+        private void UpdateSongFeelingSum(string trackUri, Feelings feeling ) 
+        {
+            if (_sumOfLikes.ContainsKey(trackUri)) {
+                switch(feeling) {
+                    case Feelings.Dislike:
+                        _sumOfLikes[trackUri]--;
+                        break;
+                    case Feelings.Like:
+                        _sumOfLikes[trackUri]++;
+                        break;
+
+                }
+            }
+        }
+
         private bool HasUserDislikedTracksBefore(PartyGoer user)
         {
             return _usersDislikedTracks.ContainsKey(user.GetId());
@@ -156,5 +177,10 @@ namespace SpotSync.Domain
             return false;
         }
 
+    }
+
+    enum Feelings {
+    Like = 0,
+    Dislike = 1
     }
 }
