@@ -164,12 +164,12 @@ namespace SpotSync.Domain
         {
             foreach (SpotibroModels.Track track in tracks)
             {
-                _tracks.Insert(GetRandomQueueIndex(), new TrackWithFeelings(new Track
+                _tracks.Insert(GetRandomQueueIndexAfterVotedSongs(), new TrackWithFeelings(new Track
                 {
                     AlbumImageUrl = track.Album.ImageUrl,
                     Artists = track.Artists.Select(p => new Contracts.SpotifyApi.Models.Artist { Id = p.Id, Name = p.Name }).ToList(),
                     Explicit = track.IsExplicit,
-                    Id =$"{track.Id}+{GetTrackRepeatNumber(track.Id)}",
+                    Id = $"{track.Id}+{GetTrackRepeatNumber(track.Id)}",
                     Length = track.Duration,
                     Name = track.Name
                 }
@@ -179,9 +179,9 @@ namespace SpotSync.Domain
             return Task.CompletedTask;
         }
 
-        private int GetRandomQueueIndex()
+        private int GetRandomQueueIndexAfterVotedSongs()
         {
-            return _random.Next(0, (_tracks.Count > 0 ? _tracks.Count - 1 : 0));
+            return _random.Next(_tracks.FindAll(p => p.LikeCount() > 0).Count(), (_tracks.Count > 0 ? _tracks.Count : 0));
         }
     }
 }
