@@ -1,31 +1,44 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 
-const $BarContainer = styled.div``;
+const $BarContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
 
 const $Bar = styled.div`
   width: 80%;
   background-color: #f2f2f2;
   border-radius: 10px;
   height: 10px;
-  position: absolute;
 `;
 
 const $Highlight = styled($Bar)`
-  width: ${(props) => props.percentFull}%;
   background-color: #4497fb;
 `;
 
-export default ({ millisecond = 0, lengthOfSong }) => {
+const $TrackTime = styled.p`
+  margin: 0 10px 0 10px;
+  color: #b2b2b2;
+  font-size: 12px;
+`;
+
+const convertMsToSongTime = (songTimeInMs) => {
+  let time = new Date(songTimeInMs).toISOString();
+  return time.slice(14, 19);
+};
+
+export default ({ millisecond = 0, lengthOfSong = 0 }) => {
+  console.log("WHAT ARE THE MILLISECOND ", millisecond);
   const [trackTime, setTrackTime] = useState(millisecond);
 
   const updateSlider = (trackTime, setTrackTime, lengthOfSong) => {
-    let tracky = trackTime + 1000;
-    setTrackTime(tracky);
-    console.log((trackTime / lengthOfSong) * 100);
+    setTrackTime(trackTime + 1000);
   };
 
   useEffect(() => {
+    console.log("trackTime", trackTime);
     const timer = setTimeout(() => {
       updateSlider(trackTime, setTrackTime, lengthOfSong);
     }, 1000);
@@ -39,11 +52,14 @@ export default ({ millisecond = 0, lengthOfSong }) => {
   }, [millisecond]);
 
   return (
-    <$BarContainer>
-      <div>
-        <$Bar></$Bar>
-        <$Highlight percentFull={trackTime != 0 ? (trackTime / lengthOfSong) * 100 : 0}></$Highlight>
-      </div>
-    </$BarContainer>
+    <div>
+      <$BarContainer>
+        <$TrackTime>{convertMsToSongTime(trackTime)}</$TrackTime>
+        <$Bar>
+          <$Highlight style={{ width: `${trackTime != 0 ? (trackTime / lengthOfSong) * 100 : 0}%` }}></$Highlight>
+        </$Bar>
+        <$TrackTime>{convertMsToSongTime(lengthOfSong)}</$TrackTime>
+      </$BarContainer>
+    </div>
   );
 };

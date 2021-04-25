@@ -128,7 +128,7 @@ const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFe
                 <div className="song-information">
                   <p className={"title"}>{currentSong?.name}</p>
                   <div>
-                    {currentSong?.artists.map((artist) => (
+                    {currentSong?.artists?.map((artist) => (
                       <ArtistLink ShowArtistView={ShowArtistView} artist={artist}></ArtistLink>
                     ))}
                   </div>
