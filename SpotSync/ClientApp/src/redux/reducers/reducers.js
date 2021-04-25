@@ -18,6 +18,7 @@ import {
   LISTENER_JOINED,
   LISTENER_LEFT,
   UPDATE_TRACK_VOTES,
+  UPDATE_POSITION_IN_SONG,
 } from "../actions/party";
 import { SHOW_ARTIST_VIEW } from "../actions/views";
 
@@ -25,6 +26,13 @@ import { REALTIME_CONNECTION_ESTABLISHED } from "../actions/signalr";
 
 export default (state = initalState, action) => {
   switch (action.type) {
+    case UPDATE_POSITION_IN_SONG: {
+      console.log("updating position");
+      return Object.assign({}, state, {
+        party: Object.assign({}, state.party, { nowPlaying: Object.assign({}, state.party.nowPlaying, { startPosition: action.position }) }),
+      });
+    }
+
     case UPDATE_TRACK_VOTES: {
       console.log("UPDATING TRACK VOTES");
       console.log(action.trackVotes);
@@ -74,7 +82,10 @@ export default (state = initalState, action) => {
     }
 
     case UPDATE_CURRENT_SONG: {
-      return Object.assign({}, state, { party: Object.assign({}, state.party, { nowPlaying: action.track }) });
+      console.log("updating current song");
+      return Object.assign({}, state, {
+        party: Object.assign({}, state.party, { nowPlaying: Object.assign({}, state.party.nowPlaying, action.track) }),
+      });
     }
 
     case LEFT_PARTY: {
@@ -89,12 +100,13 @@ export default (state = initalState, action) => {
     }
 
     case UPDATE_SONG: {
+      console.log("updating song");
       let indexOfSongToRemove = state.party.queue.findIndex((song) => song.id == action.song.id);
       return Object.assign({}, state, {
         party: Object.assign(
           {},
           state.party,
-          { nowPlaying: action.song },
+          { nowPlaying: Object.assign({}, { startPosition: action.position }, action.song) },
           {
             queue:
               indexOfSongToRemove == -1
@@ -195,3 +207,4 @@ export const getParty = (state) => state.party;
 export const getQueue = (state) => state?.party?.queue;
 export const artistView = (state) => state?.views?.searchArtistId;
 export const getTrackVotes = (state) => state?.party?.trackVotes;
+export const getStartPosition = (state) => state?.party?.nowPlaying?.startPosition;

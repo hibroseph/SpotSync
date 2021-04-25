@@ -3,7 +3,15 @@ import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlayCircle, faStepForward, faPauseCircle } from "@fortawesome/free-solid-svg-icons";
 import { connect } from "react-redux";
-import { getUser, getPartyCode, getRealtimeConnection, getCurrentSong, getSongFeelings, isHost } from "../../../redux/reducers/reducers";
+import {
+  getUser,
+  getPartyCode,
+  getRealtimeConnection,
+  getCurrentSong,
+  getSongFeelings,
+  isHost,
+  getStartPosition,
+} from "../../../redux/reducers/reducers";
 import { togglePlaybackState } from "../../../api/party";
 import { skipSong } from "../../../api/partyHub";
 import { ToastContainer } from "react-toastify";
@@ -11,6 +19,7 @@ import "react-toastify/dist/ReactToastify.min.css";
 import NoAlbumArt from "../../../assets/unknown-album-art.png";
 import Image from "../../shared/Image";
 import ArtistLink from "../../shared/ArtistLink";
+import MusicProgressBar from "./MusicProgressBar";
 
 const $NowPlaying = styled.div`
   box-sizing: border-box;
@@ -93,7 +102,8 @@ const $ThumbsContainer = styled.div`
   justify-content: space-around;
   align-items: center;
 `;
-const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFeelings, isHost, ShowArtistView }) => {
+const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFeelings, isHost, ShowArtistView, startPosition }) => {
+  console.log("WHAT IS THE START POSITION", startPosition);
   return (
     <React.Fragment>
       <ToastContainer
@@ -109,32 +119,35 @@ const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFe
         pauseOnHover
       ></ToastContainer>
       {partyCode && currentSong && (
-        <$NowPlaying>
-          <$NowPlayingSong>
-            <React.Fragment>
-              <Image src={currentSong?.albumImageUrl != undefined ? currentSong.albumImageUrl : NoAlbumArt} />
-              <div className="song-information">
-                <p className={"title"}>{currentSong?.name}</p>
-                <div>
-                  {currentSong?.artists.map((artist) => (
-                    <ArtistLink ShowArtistView={ShowArtistView} artist={artist}></ArtistLink>
-                  ))}
+        <React.Fragment>
+          <MusicProgressBar millisecond={startPosition} lengthOfSong={currentSong.length}></MusicProgressBar>
+          <$NowPlaying>
+            <$NowPlayingSong>
+              <React.Fragment>
+                <Image src={currentSong?.albumImageUrl != undefined ? currentSong.albumImageUrl : NoAlbumArt} />
+                <div className="song-information">
+                  <p className={"title"}>{currentSong?.name}</p>
+                  <div>
+                    {currentSong?.artists.map((artist) => (
+                      <ArtistLink ShowArtistView={ShowArtistView} artist={artist}></ArtistLink>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </React.Fragment>
-          </$NowPlayingSong>
-          <$SongManagement>
-            {user?.details?.pausedMusic ? (
-              <$PlayFontAwesomeIcon icon={faPlayCircle} onClick={() => togglePlaybackState(partyCode, dispatch)} />
-            ) : (
-              <$PlayFontAwesomeIcon icon={faPauseCircle} onClick={() => togglePlaybackState(partyCode, dispatch)} />
-            )}
-            {isHost && <$SkipFontAwesomeIcon icon={faStepForward} onClick={() => skipSong(partyCode, connection)}></$SkipFontAwesomeIcon>}
-          </$SongManagement>
-          <$VolumeManagement>
-            <$Volume type="range" min="0" max="10" id="spotify-volume-slider" />
-          </$VolumeManagement>
-        </$NowPlaying>
+              </React.Fragment>
+            </$NowPlayingSong>
+            <$SongManagement>
+              {user?.details?.pausedMusic ? (
+                <$PlayFontAwesomeIcon icon={faPlayCircle} onClick={() => togglePlaybackState(partyCode, dispatch)} />
+              ) : (
+                <$PlayFontAwesomeIcon icon={faPauseCircle} onClick={() => togglePlaybackState(partyCode, dispatch)} />
+              )}
+              {isHost && <$SkipFontAwesomeIcon icon={faStepForward} onClick={() => skipSong(partyCode, connection)}></$SkipFontAwesomeIcon>}
+            </$SongManagement>
+            <$VolumeManagement>
+              <$Volume type="range" min="0" max="10" id="spotify-volume-slider" />
+            </$VolumeManagement>
+          </$NowPlaying>
+        </React.Fragment>
       )}
     </React.Fragment>
   );
@@ -148,6 +161,7 @@ const mapStateToProps = (state) => {
     currentSong: getCurrentSong(state),
     songFeelings: getSongFeelings(state),
     isHost: isHost(state),
+    startPosition: getStartPosition(state),
   };
 };
 

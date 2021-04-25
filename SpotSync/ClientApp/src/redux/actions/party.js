@@ -11,6 +11,14 @@ export const SET_SONG_FEELINGS = "set_song_feelings";
 export const LISTENER_JOINED = "listener_joined";
 export const LISTENER_LEFT = "listener_left";
 export const UPDATE_TRACK_VOTES = "update_track_votes";
+export const UPDATE_POSITION_IN_SONG = "update_position_in_song";
+
+export const updatePositionInSong = (position) => {
+  return {
+    type: UPDATE_POSITION_IN_SONG,
+    position,
+  };
+};
 
 export const listenerLeft = (name) => {
   return {

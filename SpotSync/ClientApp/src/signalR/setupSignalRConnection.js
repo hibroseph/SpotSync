@@ -9,6 +9,7 @@ import {
   listenerJoined,
   listenerLeft,
   updateTrackVotes,
+  updatePositionInSong,
 } from "../redux/actions/party";
 import notify from "../api/notify";
 const startSignalRConnection = async (connection, dispatch) => {
@@ -78,24 +79,28 @@ export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAc
   });
 
   connection.on("InitialPartyLoad", (currentSong, history, queue, details) => {
-    console.log("WHATS THE QUEUE");
-    console.log(queue);
+    console.log("Initial Party Load");
+    console.log(currentSong);
     dispatch(updateCurrentSong(currentSong.song));
     dispatch(updateQueue(queue));
     dispatch(updateHistory(history));
     dispatch(partyJoined(details.partyCode, details.listeners, details.host));
+    console.log("calling update position in song");
+    dispatch(updatePositionInSong(currentSong.position));
+    console.log("done calling update position in song");
   });
 
   connection.on("ListenerLeft", (name) => {
     notify(`${name} left your party`);
     dispatch(listenerLeft(name));
   });
-  connection.on("UpdatePartyView", (currentSong, history, queue) => {
+  connection.on("UpdatePartyView", (currentSong, history, queue, details) => {
     console.log("UPDATE THE PARTY VIEW");
     console.log(queue);
     dispatch(updateQueue(queue));
     dispatch(updateHistory(history));
     dispatch(updateCurrentSong(currentSong.song));
+    dispatch(updatePositionInSong(details.position));
   });
 
   connection.on("ExplicitSong", (res) => {
