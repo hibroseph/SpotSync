@@ -45,6 +45,14 @@ namespace SpotSync.Domain
             return _queue.GetTrackVoting();
         }
 
+        public void NukeQueue(PartyGoer partier)
+        {
+            if (IsHost(partier))
+            {
+                _queue.Nuke();
+            }
+        }
+
         public LikesDislikes GetUsersLikesDislikes(PartyGoer partyGoer)
         {
             return _queue.GetUsersTrackFeelings(partyGoer);

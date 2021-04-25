@@ -4,12 +4,18 @@ import { connect } from "react-redux";
 import { getParty, getRealtimeConnection, getTrackVotes } from "../../../redux/reducers/reducers";
 import Button from "../../shared/Button";
 import { generateQueue } from "../../../api/party";
-import { userLikesSong, userDislikesSong } from "../../../api/partyHub";
+import { userLikesSong, userDislikesSong, nukeQueue } from "../../../api/partyHub";
 import Subtitle from "../../shared/Subtitle";
 import CenteredHorizontally from "../../shared/CenteredHorizontally";
 import toast from "../../../api/notify";
+import styled from "styled-components";
 
-const Queue = ({ party, connection, trackVotes = {}, songFeelings = {}, dispatch }) => {
+const $NukeButton = styled(Button)`
+  background-color: #bd3939;
+  margin: 30px;
+`;
+
+const Queue = ({ party, connection, trackVotes = {}, songFeelings = {}, dispatch, isHost }) => {
   return party?.queue?.length > 0 ? (
     <React.Fragment>
       {party.queue.map((song, index) => {
@@ -31,6 +37,7 @@ const Queue = ({ party, connection, trackVotes = {}, songFeelings = {}, dispatch
           ></QueueItem>
         );
       })}
+      {isHost && <$NukeButton onClick={() => nukeQueue(party.code, connection)}>Nuke Queue</$NukeButton>}
     </React.Fragment>
   ) : party?.nowPlaying != undefined ? (
     <CenteredHorizontally>

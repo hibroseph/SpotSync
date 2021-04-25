@@ -38,3 +38,7 @@ export const userDislikesSong = (partyCode, trackUri, connection, dispatch) => {
 export const addSomeTracksToQueue = (playlistId, amount, connection) => {
   connection.invoke("AddSomeTracksFromPlaylistToQueue", "", playlistId, amount);
 };
+
+export const nukeQueue = (partyCode, connection) => {
+  connection.invoke("NukeQueue", partyCode);
+};

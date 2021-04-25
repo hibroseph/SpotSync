@@ -27,6 +27,13 @@ namespace SpotSync.Controllers
         }
 
         [Authorize]
+        [HttpGet("api/[controller]/GetParties")]
+        public async Task<IActionResult> GetParties()
+        {
+            return Ok();
+        }
+
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> StartParty()
         {

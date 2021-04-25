@@ -199,6 +199,23 @@ namespace SpotSync.Classes.Hubs
             );
         }
 
+        public async Task NukeQueue(string partyCode)
+        {
+            Party party = await _partyService.GetPartyWithCodeAsync(partyCode);
+
+            party.NukeQueue(await _partyGoerService.GetCurrentPartyGoerAsync());
+
+            await Clients.Group(party.GetPartyCode()).SendAsync("UpdatePartyView",
+                new
+                {
+                    Song = party.GetCurrentSong(),
+                    Position = party.GetCurrentPositionInSong()
+                },
+                party.GetHistory(),
+                party.GetQueue()
+                );
+        }
+
         public async Task UpdateSongForParty(string partyCode, Track currentSong, int currentProgressInMs)
         {
             await Clients.Group(partyCode).SendAsync("UpdateSong", currentSong);

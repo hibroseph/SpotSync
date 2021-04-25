@@ -24,6 +24,11 @@ namespace SpotSync.Domain
             _random = new Random();
         }
 
+        public void Nuke()
+        {
+            _tracks.Clear();
+        }
+
         public Queue()
         {
             _tracks = new List<TrackWithFeelings>();

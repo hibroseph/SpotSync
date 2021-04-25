@@ -5,7 +5,7 @@ import Queue from "./Queue/Queue";
 import History from "./History/History";
 import { getUserLikesDislikes } from "../../api/party";
 import { connect } from "react-redux";
-import { getPartyCode, getSongFeelings } from "../../redux/reducers/reducers";
+import { getPartyCode, getSongFeelings, isHost } from "../../redux/reducers/reducers";
 import { setSongFeelings } from "../../redux/actions/party";
 import Listeners from "./Listeners";
 import $ScrollContainer from "../shared/ScrollContainer";
@@ -56,7 +56,7 @@ const ConvertUserLikesDislikesFromServerToClient = (res) => {
   return songFeelings;
 };
 
-const Sidebar = ({ partyCode, className, songFeelings = {}, dispatch }) => {
+const Sidebar = ({ partyCode, className, songFeelings = {}, dispatch, isHost }) => {
   const [currentTabView, setTabView] = useState("Queue");
 
   useEffect(() => {
@@ -70,7 +70,7 @@ const Sidebar = ({ partyCode, className, songFeelings = {}, dispatch }) => {
   const GetSideBarContent = () => {
     switch (currentTabView) {
       case "Queue":
-        return <Queue songFeelings={songFeelings}></Queue>;
+        return <Queue songFeelings={songFeelings} isHost={isHost}></Queue>;
       case "History":
         return <History></History>;
       case "Listeners":
@@ -92,6 +92,8 @@ const mapStateToProps = (state) => {
   return {
     partyCode: getPartyCode(state),
     songFeelings: getSongFeelings(state),
+    isHost: isHost(state),
   };
 };
+
 export default connect(mapStateToProps, null)(Sidebar);
