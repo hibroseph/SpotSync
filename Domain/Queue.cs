@@ -31,6 +31,11 @@ namespace SpotSync.Domain
             _random = new Random();
         }
 
+        public int GetTrackRepeatNumber(string trackUri)
+        {
+            return _tracks.Count(p => p.GetTrackWithoutFeelings().Id.Contains(trackUri, StringComparison.OrdinalIgnoreCase));
+        }
+
         public Dictionary<string, int> GetTrackVoting()
         {
             return _usersLikesDislikes.GetTrackFeelings();
@@ -108,12 +113,16 @@ namespace SpotSync.Domain
 
                 TrackWithFeelings track = _tracks.Find(p => p.GetTrackWithoutFeelings().Id.Equals(trackUri, StringComparison.OrdinalIgnoreCase));
 
+                track.UserDislikesTrack();
+
                 if (track != null && track.DislikeCount() + 1 > listenerCount * 0.5)
                 {
                     _tracks.RemoveAll(p => p.GetTrackWithoutFeelings().Id.Equals(trackUri, StringComparison.OrdinalIgnoreCase));
 
                     await DomainEvents.RaiseAsync(new UpdateQueue { Tracks = _tracks.Select(p => p.GetTrackWithoutFeelings()).ToList(), PartyCode = partyCode });
                 }
+
+                _tracks.Sort(new ReorderQueueComparer());
             }
         }
 
@@ -160,7 +169,7 @@ namespace SpotSync.Domain
                     AlbumImageUrl = track.Album.ImageUrl,
                     Artists = track.Artists.Select(p => new Contracts.SpotifyApi.Models.Artist { Id = p.Id, Name = p.Name }).ToList(),
                     Explicit = track.IsExplicit,
-                    Id = track.Id,
+                    Id =$"{track.Id}+{GetTrackRepeatNumber(track.Id)}",
                     Length = track.Duration,
                     Name = track.Name
                 }

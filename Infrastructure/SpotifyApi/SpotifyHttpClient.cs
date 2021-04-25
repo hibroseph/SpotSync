@@ -80,6 +80,12 @@ namespace SpotSync.Infrastructure.SpotifyApi
             return await artistResponse.Content.ReadFromJsonAsync<Domain.Contracts.SpotifyApi.Models.ArtistInformation>();
         }
 
+        private string CleanTrackId(string trackUri)
+        {
+            return trackUri.Replace("spotify:track:", string.Empty).Split("+").First();
+
+        }
+
         private async Task<TopTracks> GetTopTracksAsync(PartyGoer partyGoer, string artistId)
         {
             ApiParameters parameters = new ApiParameters { Keys = new Dictionary<string, string> { { "{id}", artistId } }, Parameters = new Dictionary<string, string> { { "market", partyGoer.GetMarket() } } };
@@ -141,7 +147,7 @@ namespace SpotSync.Infrastructure.SpotifyApi
             var searchResults = await response.Content.ReadFromJsonAsync<SearchResults>();
             return searchResults.Tracks.Items.Select(p => new SpotifyTrackQueryResult
             {
-                Id = p.Id.Replace("spotify:track:", ""),
+                Id = CleanTrackId(p.Id),
                 Artists = p.Artists.Select(p => new Artist { Id = p.Id, Name = p.Name }).ToList(),
                 Duration = p.Duration,
                 Name = p.Name,
@@ -246,7 +252,8 @@ namespace SpotSync.Infrastructure.SpotifyApi
                 throw new ArgumentException("Seed tracks cannot exeed 5");
             }
 
-            seedTrackUris = seedTrackUris.Select(p => p.Replace("spotify:track:", "")).ToList();
+            getRecommendedSongs.SeedTrackUris = seedTrackUris.Select(p => p.Replace("spotify:track:", "").Split("+").First()).ToList();
+
 
             var response = await SendHttpRequestAsync(partyGoer.GetSpotifyId(), _apiEndpoints[ApiEndpointType.GetRecommendedTracks], AddRecommendedSongsApiParmeters(getRecommendedSongs), true);
 
@@ -407,12 +414,12 @@ namespace SpotSync.Infrastructure.SpotifyApi
             if (parameters != null)
             {
                 response = await SendHttpRequestAsync(partyGoer, _apiEndpoints[ApiEndpointType.PlaySong], parameters,
-                new StartUserPlaybackSong { uris = songUris.Select(song => song.Contains("spotify:track:") ? song : $"spotify:track:{song}").ToList(), position_ms = currentSongProgressInMs });
+                new StartUserPlaybackSong { uris = songUris.Select(song => song.Contains("spotify:track:") ? song : $"spotify:track:{song}".Split('+').First()).ToList(), position_ms = currentSongProgressInMs });
             }
             else
             {
                 response = await SendHttpRequestAsync(partyGoer, _apiEndpoints[ApiEndpointType.PlaySong],
-                new StartUserPlaybackSong { uris = songUris.Select(song => song.Contains("spotify:track:") ? song : $"spotify:track:{song}").ToList(), position_ms = currentSongProgressInMs });
+                new StartUserPlaybackSong { uris = songUris.Select(song => song.Contains("spotify:track:") ? song : $"spotify:track:{song}".Split('+').First()).ToList(), position_ms = currentSongProgressInMs });
             }
 
             Domain.Errors.ServiceResult<UpdateSongError> error = new Domain.Errors.ServiceResult<UpdateSongError>();

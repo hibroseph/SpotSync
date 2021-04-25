@@ -220,6 +220,11 @@ namespace SpotSync.Domain
             }
         }
 
+        private string DetermineTrackIdExtension(string trackUri)
+        {
+            return $"+{_queue.GetTrackRepeatNumber(trackUri)}";
+        }
+
         private PlaybackState DeterminePlaybackState(bool isMusicPaused)
         {
             return isMusicPaused ? PlaybackState.Pause : PlaybackState.Play;
@@ -234,13 +239,11 @@ namespace SpotSync.Domain
                 Explicit = request.Explicit,
                 Length = request.Length,
                 Name = request.Name,
-                Id = request.TrackUri
+                Id = request.TrackUri + DetermineTrackIdExtension(request.TrackUri)
             };
 
-            if (!_queue.SongExistsInQueue(track))
-            {
-                _queue.QueueTrack(track);
-            }
+            _queue.QueueTrack(track);
+
 
             // check to see if music is playing, if not, lets start it
             if (_currentTrack == null)
