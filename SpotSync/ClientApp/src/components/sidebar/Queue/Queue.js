@@ -1,7 +1,7 @@
 import React from "react";
 import QueueItem from "./QueueItem";
 import { connect } from "react-redux";
-import { getParty, getRealtimeConnection } from "../../../redux/reducers/reducers";
+import { getParty, getRealtimeConnection, getTrackVotes } from "../../../redux/reducers/reducers";
 import Button from "../../shared/Button";
 import { generateQueue } from "../../../api/party";
 import { userLikesSong, userDislikesSong } from "../../../api/partyHub";
@@ -9,7 +9,7 @@ import Subtitle from "../../shared/Subtitle";
 import CenteredHorizontally from "../../shared/CenteredHorizontally";
 import toast from "../../../api/notify";
 
-const Queue = ({ party, connection, songFeelings = {}, dispatch }) => {
+const Queue = ({ party, connection, trackVotes = {}, songFeelings = {}, dispatch }) => {
   return party?.queue?.length > 0 ? (
     <React.Fragment>
       {party.queue.map((song, index) => {
@@ -23,10 +23,11 @@ const Queue = ({ party, connection, songFeelings = {}, dispatch }) => {
               userDislikesSong(party.code, song.id, connection, dispatch);
               toast(`We will play less songs like ${song.name}`);
             }}
+            trackVotes={song.id in trackVotes ? trackVotes[song.id] : 0}
             key={`${song.id}_${index}`}
             title={song.name}
             artists={song.artists}
-            feeling={songFeelings[song.id]}
+            feeling={songFeelings[song.id] ?? -1}
           ></QueueItem>
         );
       })}
@@ -43,7 +44,7 @@ const Queue = ({ party, connection, songFeelings = {}, dispatch }) => {
 };
 
 const mapStateToProps = (state) => {
-  return { party: getParty(state), connection: getRealtimeConnection(state).connection };
+  return { party: getParty(state), connection: getRealtimeConnection(state).connection, trackVotes: getTrackVotes(state) };
 };
 
 export default connect(mapStateToProps, null)(Queue);

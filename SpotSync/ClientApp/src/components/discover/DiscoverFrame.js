@@ -33,6 +33,7 @@ const TOP_SONGS_TITLE = "Your Top Songs";
 
 const addTrackToQueue = (track, user, partyCode, connection) => {
   addSongToQueue(track, user.details.id, partyCode, connection);
+  notify(`Added ${track.name} to queue`);
 };
 
 const viewPlaylist = (playlist, setPlaylistTracks, setPlaylistLoading) => {
@@ -42,7 +43,7 @@ const viewPlaylist = (playlist, setPlaylistTracks, setPlaylistLoading) => {
       setPlaylistTracks({ tracks: playlistTracks, playlist });
     })
     .catch((err) => {
-      error("Unable to load tracks for your playlist. Try again.");
+      error("Unable to load tracks for your playlist, try again later");
       throw err;
     })
     .finally(() => setPlaylistLoading(false));
@@ -141,7 +142,6 @@ const DiscoverFrame = ({ user, partyCode, connection, searchArtistId }) => {
       <ScrollContainer>
         {currentTabView == SEARCH_RESULTS_TITLE && (
           <React.Fragment>
-            <p>Search Results For {search}</p>
             <UnorderedTrackList
               tracks={searchResults}
               addSongToQueue={(track) => addTrackToQueue(track, user, partyCode, connection)}

@@ -10,6 +10,7 @@ export const USER_DISLIKES_SONG = "user_dislikes_song";
 export const SET_SONG_FEELINGS = "set_song_feelings";
 export const LISTENER_JOINED = "listener_joined";
 export const LISTENER_LEFT = "listener_left";
+export const UPDATE_TRACK_VOTES = "update_track_votes";
 
 export const listenerLeft = (name) => {
   return {
@@ -93,5 +94,12 @@ export const updateSong = (song, position) => {
     type: UPDATE_SONG,
     position,
     song,
+  };
+};
+
+export const updateTrackVotes = (trackVotes) => {
+  return {
+    type: UPDATE_TRACK_VOTES,
+    trackVotes,
   };
 };

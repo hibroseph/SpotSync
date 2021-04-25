@@ -56,7 +56,7 @@ const ConvertUserLikesDislikesFromServerToClient = (res) => {
   return songFeelings;
 };
 
-const Sidebar = ({ partyCode, className, songFeelings, dispatch }) => {
+const Sidebar = ({ partyCode, className, songFeelings = {}, dispatch }) => {
   const [currentTabView, setTabView] = useState("Queue");
 
   useEffect(() => {
@@ -72,7 +72,7 @@ const Sidebar = ({ partyCode, className, songFeelings, dispatch }) => {
       case "Queue":
         return <Queue songFeelings={songFeelings}></Queue>;
       case "History":
-        return <History songFeelings={songFeelings}></History>;
+        return <History></History>;
       case "Listeners":
         return <Listeners />;
     }

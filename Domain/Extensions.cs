@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SpotSync.Domain
 {
-    public static class Extensions
+    public static class GenericExtensions
     {
         public static List<T> GetRandomNItems<T>(this List<T> source, int n)
         {

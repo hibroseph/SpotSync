@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace SpotSync.Domain
@@ -19,49 +20,14 @@ namespace SpotSync.Domain
             _sumOfLikes = new Dictionary<string, int>();
         }
 
-        public Dictionary<string, int> GetAmountOfTrackFeelings()
+        public Dictionary<string, int> GetTrackFeelings()
         {
             return _sumOfLikes;
         }
 
-        public List<string> GetLikedTracksUris()
-        {
-            List<string> likedTracks = new List<string>();
-
-            foreach (KeyValuePair<string, List<string>> pair in _usersLikedTracks)
-            {
-                likedTracks.AddRange(_usersLikedTracks[pair.Key]);
-            }
-
-            return likedTracks.Distinct().ToList();
-        }
-
         public LikesDislikes GetUsersTrackFeelings(PartyGoer user)
         {
-            List<string> likedTracks;
-            List<string> dislikedTracks;
-
-            if (HasUserDislikedTracksBefore(user))
-            {
-                dislikedTracks = _usersDislikedTracks[user.GetId()];
-            }
-            else
-            {
-                dislikedTracks = new List<string>();
-            }
-
-            if (HasUserLikedTracksBefore(user))
-            {
-                likedTracks = _usersLikedTracks[user.GetId()];
-
-            }
-            else
-            {
-                likedTracks = new List<string>();
-
-            }
-
-            return new LikesDislikes(likedTracks, dislikedTracks);
+            return new LikesDislikes(_usersLikedTracks.GetUsersTracks(user), _usersDislikedTracks.GetUsersTracks(user));
         }
 
         public void UserDislikesTrack(PartyGoer user, string trackUri)
@@ -71,56 +37,29 @@ namespace SpotSync.Domain
 
         private void StoreUsersDislikedTrack(PartyGoer user, string trackUri)
         {
-            if (HasUserDislikedTracksBefore(user))
-            {
-                if (!_usersDislikedTracks[user.GetId()].Contains(trackUri))
-                {
-                    _usersDislikedTracks[user.GetId()].Add(trackUri);
-                }
-            }
-            else
-            {
-                _usersDislikedTracks[user.GetId()] = new List<string> { trackUri };
-            }
-
-            // If the user used to dislike this song, remove it from that list
-            if (DoesUserLikeTrack(user, trackUri))
-            {
-                UserDoesntLikeTrackAnymore(user, trackUri);
-            }
+            _sumOfLikes.AdjustTrackFeelings(trackUri, Feelings.Dislike);
+            _usersDislikedTracks.AddFeelings(user, trackUri);
+            _usersLikedTracks.RemoveFeelings(user, trackUri);
         }
 
         public void UserLikesTrack(PartyGoer user, string trackUri)
         {
             StoreUsersLikedTrack(user, trackUri);
-
         }
 
         private void StoreUsersLikedTrack(PartyGoer user, string trackUri)
         {
-            if (HasUserLikedTracksBefore(user))
-            {
-                if (!_usersLikedTracks[user.GetId()].Contains(trackUri))
-                {
-                    _usersLikedTracks[user.GetId()].Add(trackUri);
-                }
-            }
-            else
-            {
-                _usersLikedTracks[user.GetId()] = new List<string> { trackUri };
-            }
-
-            // If the user used to dislike this song, remove it from that list
-            if (DoesUserDislikeTrack(user, trackUri))
-            {
-                UserDoesntDislikeTrackAnymore(user, trackUri);
-            }
+            _sumOfLikes.AdjustTrackFeelings(trackUri, Feelings.Like);
+            _usersLikedTracks.AddFeelings(user, trackUri);
+            _usersDislikedTracks.RemoveFeelings(user, trackUri);
         }
 
-        private void UpdateSongFeelingSum(string trackUri, Feelings feeling ) 
+        private void UpdateSongFeelingSum(string trackUri, Feelings feeling)
         {
-            if (_sumOfLikes.ContainsKey(trackUri)) {
-                switch(feeling) {
+            if (_sumOfLikes.ContainsKey(trackUri))
+            {
+                switch (feeling)
+                {
                     case Feelings.Dislike:
                         _sumOfLikes[trackUri]--;
                         break;
@@ -129,23 +68,6 @@ namespace SpotSync.Domain
                         break;
 
                 }
-            }
-        }
-
-        private bool HasUserDislikedTracksBefore(PartyGoer user)
-        {
-            return _usersDislikedTracks.ContainsKey(user.GetId());
-        }
-        private bool HasUserLikedTracksBefore(PartyGoer user)
-        {
-            return _usersLikedTracks.ContainsKey(user.GetId());
-        }
-
-        private void UserDoesntDislikeTrackAnymore(PartyGoer user, string trackUri)
-        {
-            if (_usersDislikedTracks.ContainsKey(user.GetId()))
-            {
-                _usersDislikedTracks[user.GetId()].Remove(trackUri);
             }
         }
 
@@ -159,14 +81,6 @@ namespace SpotSync.Domain
             return false;
         }
 
-        private void UserDoesntLikeTrackAnymore(PartyGoer user, string trackUri)
-        {
-            if (_usersLikedTracks.ContainsKey(user.GetId()))
-            {
-                _usersLikedTracks[user.GetId()].Remove(trackUri);
-            }
-        }
-
         public bool DoesUserLikeTrack(PartyGoer partyGoer, string trackUri)
         {
             if (_usersLikedTracks.ContainsKey(partyGoer.GetId()))
@@ -176,11 +90,89 @@ namespace SpotSync.Domain
 
             return false;
         }
-
     }
 
-    enum Feelings {
-    Like = 0,
-    Dislike = 1
+    public enum Feelings
+    {
+        Like = 0,
+        Dislike = 1
+    }
+
+    public static class Extensions
+    {
+        public static void AdjustTrackFeelings(this Dictionary<string, int> dictionary, string trackUri, Feelings feeling)
+        {
+            if (dictionary.ContainsKey(trackUri))
+            {
+                switch (feeling)
+                {
+                    case Feelings.Like:
+                        dictionary[trackUri]++;
+                        break;
+                    case Feelings.Dislike:
+                        dictionary[trackUri]--;
+                        break;
+                    default:
+                        throw new Exception($"Enum for Feelings does not exist for {feeling}");
+                }
+            }
+            else
+            {
+                switch (feeling)
+                {
+                    case Feelings.Like:
+                        dictionary.Add(trackUri, 1);
+                        break;
+                    case Feelings.Dislike:
+                        dictionary.Add(trackUri, -1);
+                        break;
+                    default:
+                        throw new Exception($"Enum for Feelings does not exist for {feeling}");
+                }
+            }
+        }
+
+        public static void AddFeelings(this Dictionary<string, List<string>> dictionary, PartyGoer partyGoer, string trackUri)
+        {
+            if (dictionary.ContainsKey(partyGoer.GetId()))
+            {
+                dictionary[partyGoer.GetId()].TryAdd(trackUri);
+            }
+            else
+            {
+                dictionary.Add(partyGoer.GetId(), new List<string> { trackUri });
+            }
+        }
+
+        public static void RemoveFeelings(this Dictionary<string, List<string>> dictionary, PartyGoer partyGoer, string trackUri)
+        {
+            if (dictionary.ContainsKey(partyGoer.GetId()))
+            {
+                dictionary[partyGoer.GetId()].RemoveAll(p => p.Equals(trackUri));
+            }
+        }
+
+        public static List<string> GetUsersTracks(this Dictionary<string, List<string>> dictionary, PartyGoer partyGoer)
+        {
+            if (dictionary.ContainsKey(partyGoer.GetId()))
+            {
+                return dictionary[partyGoer.GetId()];
+            }
+            else
+            {
+                return new List<string>();
+            }
+        }
+
+        /*
+         * This adds a string if it does not exist in the list 
+         * */
+        public static void TryAdd(this List<string> listy, string trackUri)
+        {
+            if (!listy.Contains(trackUri))
+            {
+                listy.Add(trackUri);
+            }
+        }
     }
 }

@@ -27,12 +27,12 @@ export const userAddSongToQueue = (song, user, partyCode, connection) => {
 export const userLikesSong = (partyCode, trackUri, connection, dispatch) => {
   console.log(trackUri);
   dispatch(userLikesSongAction(trackUri));
-  connection.invoke("LikeSong", partyCode, trackUri);
+  connection.invoke("AddTrackFeeling", partyCode, trackUri, 1);
 };
 
 export const userDislikesSong = (partyCode, trackUri, connection, dispatch) => {
   dispatch(userDislikesSongAction(trackUri));
-  connection.invoke("DislikeSong", partyCode, trackUri);
+  connection.invoke("AddTrackFeeling", partyCode, trackUri, 0);
 };
 
 export const addSomeTracksToQueue = (playlistId, amount, connection) => {

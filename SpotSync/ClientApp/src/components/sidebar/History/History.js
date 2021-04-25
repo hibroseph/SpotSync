@@ -5,7 +5,7 @@ import { getParty, getRealtimeConnection } from "../../../redux/reducers/reducer
 
 import { userLikesSong, userDislikesSong } from "../../../api/partyHub";
 
-const History = ({ songFeelings, party, connection, dispatch }) => {
+const History = ({ party, connection, dispatch }) => {
   return party?.history?.length > 0 ? (
     <React.Fragment>
       {party?.history.map((song, index) => {
@@ -20,7 +20,6 @@ const History = ({ songFeelings, party, connection, dispatch }) => {
             key={`${song.id}_${index}`}
             title={song.name}
             artists={song.artists}
-            feeling={songFeelings[song.id]}
           ></QueueItem>
         );
       })}

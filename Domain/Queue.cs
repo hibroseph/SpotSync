@@ -31,6 +31,11 @@ namespace SpotSync.Domain
             _random = new Random();
         }
 
+        public Dictionary<string, int> GetTrackVoting()
+        {
+            return _usersLikesDislikes.GetTrackFeelings();
+        }
+
         public bool SongsExistInQueue()
         {
             return _tracks.Count > 0;

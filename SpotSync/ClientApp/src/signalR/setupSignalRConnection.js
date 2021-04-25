@@ -1,6 +1,15 @@
 import { JsonHubProtocol, HubConnectionState, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
 import { realTimeConnectionEstablished } from "../redux/actions/signalr";
-import { updateQueue, updateHistory, updateSong, partyJoined, updateCurrentSong, listenerJoined, listenerLeft } from "../redux/actions/party";
+import {
+  updateQueue,
+  updateHistory,
+  updateSong,
+  partyJoined,
+  updateCurrentSong,
+  listenerJoined,
+  listenerLeft,
+  updateTrackVotes,
+} from "../redux/actions/party";
 import notify from "../api/notify";
 const startSignalRConnection = async (connection, dispatch) => {
   try {
@@ -92,6 +101,10 @@ export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAc
   connection.on("ExplicitSong", (res) => {
     const eventHandler = actionEventMap[res.eventType];
     eventHandler && dispatch(eventHandler(res));
+  });
+
+  connection.on("UpdateTrackVotes", (trackVotes) => {
+    dispatch(updateTrackVotes(trackVotes));
   });
 
   connection.on("InitializeWebPlayer", (res) => {

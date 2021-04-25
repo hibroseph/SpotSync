@@ -7,6 +7,7 @@ const $StyledFontAwesomeIcon = styled(FontAwesomeIcon)`
   &:hover {
     transform: scale(1.2);
   }
+  cursor: pointer;
   font-size: 20px;
   color: ${(p) => (p.selected ? "#7d8aff" : null)};
 `;

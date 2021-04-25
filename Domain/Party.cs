@@ -40,6 +40,11 @@ namespace SpotSync.Domain
             _usersThatDislikeCurrentSong = new List<PartyGoer>();
         }
 
+        public Dictionary<string, int> GetTrackVotes()
+        {
+            return _queue.GetTrackVoting();
+        }
+
         public LikesDislikes GetUsersLikesDislikes(PartyGoer partyGoer)
         {
             return _queue.GetUsersTrackFeelings(partyGoer);

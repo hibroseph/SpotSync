@@ -26,6 +26,8 @@ namespace SpotSync.Classes.Hubs
         private ISpotifyHttpClient _spotifyHttpClient;
         private ILogService _logService;
 
+        private const string UPDATE_TRACK_FEELINGS_ENDPOINT = "UpdateTrackVotes";
+
         public PartyHub(IPartyService partyService, ISpotifyHttpClient spotifyHttpClient, ILogService logService, IPartyGoerService partyGoerService)
         {
             _partyService = partyService;
@@ -34,22 +36,25 @@ namespace SpotSync.Classes.Hubs
             _partyGoerService = partyGoerService;
         }
 
-        public async Task LikeSong(string partyCode, string trackUri)
+        public async Task AddTrackFeeling(string partyCode, string trackUri, int feeling)
         {
             Party party = await _partyService.GetPartyWithCodeAsync(partyCode);
             PartyGoer user = await _partyGoerService.GetCurrentPartyGoerAsync();
 
-            await party.UserLikesTrackAsync(user, trackUri);
+            switch (feeling)
+            {
+                case 0:
+                    await party.UserDislikesTrackAsync(user, trackUri);
+                    break;
+                case 1:
+                    await party.UserLikesTrackAsync(user, trackUri);
+                    break;
+            }
+            await Clients.Group(partyCode).SendAsync(UPDATE_TRACK_FEELINGS_ENDPOINT, party.GetTrackVotes());
+
+
         }
 
-        public async Task DislikeSong(string partyCode, string trackUri)
-        {
-
-            Party party = await _partyService.GetPartyWithCodeAsync(partyCode);
-            PartyGoer user = await _partyGoerService.GetCurrentPartyGoerAsync();
-
-            await party.UserDislikesTrackAsync(user, trackUri);
-        }
 
         public async Task ConnectToParty(string partyCode)
         {

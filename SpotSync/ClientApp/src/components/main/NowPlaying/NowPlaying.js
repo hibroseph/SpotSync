@@ -6,9 +6,6 @@ import { connect } from "react-redux";
 import { getUser, getPartyCode, getRealtimeConnection, getCurrentSong, getSongFeelings, isHost } from "../../../redux/reducers/reducers";
 import { togglePlaybackState } from "../../../api/party";
 import { skipSong } from "../../../api/partyHub";
-import { userLikesSong, userDislikesSong } from "../../../api/partyHub";
-import ThumbsUp from "../../shared/ThumbsUp";
-import ThumbsDown from "../../shared/ThumbsDown";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.min.css";
 import NoAlbumArt from "../../../assets/unknown-album-art.png";
@@ -124,16 +121,6 @@ const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFe
                   ))}
                 </div>
               </div>
-
-              {songFeelings && currentSong && (
-                <$ThumbsContainer>
-                  <ThumbsDown
-                    onDislike={() => userDislikesSong(partyCode, currentSong.id, connection, dispatch)}
-                    feeling={songFeelings[currentSong?.uri]}
-                  />
-                  <ThumbsUp onLike={() => userLikesSong(partyCode, currentSong.id, connection, dispatch)} feeling={songFeelings[currentSong?.id]} />
-                </$ThumbsContainer>
-              )}
             </React.Fragment>
           </$NowPlayingSong>
           <$SongManagement>

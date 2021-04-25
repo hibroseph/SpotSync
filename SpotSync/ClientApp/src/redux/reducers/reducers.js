@@ -17,6 +17,7 @@ import {
   SET_SONG_FEELINGS,
   LISTENER_JOINED,
   LISTENER_LEFT,
+  UPDATE_TRACK_VOTES,
 } from "../actions/party";
 import { SHOW_ARTIST_VIEW } from "../actions/views";
 
@@ -24,11 +25,19 @@ import { REALTIME_CONNECTION_ESTABLISHED } from "../actions/signalr";
 
 export default (state = initalState, action) => {
   switch (action.type) {
+    case UPDATE_TRACK_VOTES: {
+      console.log("UPDATING TRACK VOTES");
+      console.log(action.trackVotes);
+
+      return Object.assign({}, state, { party: Object.assign({}, state.party, { trackVotes: action.trackVotes }) });
+    }
+
     case SHOW_ARTIST_VIEW: {
       console.log("Showing artist view");
       console.log(action);
       return Object.assign({}, state, { views: { searchArtistId: action.artist } });
     }
+
     case LISTENER_LEFT: {
       let indexOfListenerToRemove = state.party.listeners.findIndex((name) => name == action.name);
       return Object.assign({}, state, {
@@ -185,3 +194,4 @@ export const getCurrentSong = (state) => state?.party?.nowPlaying;
 export const getParty = (state) => state.party;
 export const getQueue = (state) => state?.party?.queue;
 export const artistView = (state) => state?.views?.searchArtistId;
+export const getTrackVotes = (state) => state?.party?.trackVotes;

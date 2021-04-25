@@ -8,6 +8,7 @@ const $StyledFontAwesomeIcon = styled(FontAwesomeIcon)`
     transform: scale(1.2);
   }
   font-size: 20px;
+  cursor: pointer;
   color: ${(p) => (p.selected ? "#7d8aff" : null)};
 `;
 
