@@ -47,8 +47,8 @@ const Track = ({ addSongToQueue, track }) => {
       <div className="song-information">
         <p className="title">{track.name}</p>
         <div>
-          {track.artists.map((artist) => (
-            <ArtistLink artist={artist}></ArtistLink>
+          {track.artists.map((artist, index) => (
+            <ArtistLink key={`${artist}_${index}`} artist={artist}></ArtistLink>
           ))}
         </div>
       </div>

@@ -94,6 +94,7 @@ export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAc
     notify(`${name} left your party`);
     dispatch(listenerLeft(name));
   });
+
   connection.on("UpdatePartyView", (currentSong, history, queue, details) => {
     console.log("UPDATE THE PARTY VIEW");
     console.log(queue);

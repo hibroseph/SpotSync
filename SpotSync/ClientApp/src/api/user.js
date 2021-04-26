@@ -33,3 +33,19 @@ export const getPlaylistItems = (playlistId) => {
     .then((res) => res.json())
     .then((json) => json);
 };
+
+export const getFavoriteTracks = () => {
+  return fetch("/api/user/getfavoritetracks")
+    .then((res) => res.json())
+    .then((json) => json);
+};
+
+export const favoriteTrack = (trackId) => {
+  return fetch(`/api/user/favoritetrack?trackId=${trackId.split("+")[0]}`, {
+    method: "POST",
+  });
+};
+
+export const unfavoriteTrack = (trackId) => {
+  return fetch(`/api/user/unfavoritetrack?trackId=${trackId.split("+")[0]}`, { method: "POST" });
+};

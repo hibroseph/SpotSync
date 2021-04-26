@@ -45,8 +45,8 @@ const QueueItem = ({ feeling, trackVotes, onLike, onDislike, artists, title }) =
       <$centeredQueueItem>
         <p className="title">{title}</p>
         <div>
-          {artists.map((artist) => (
-            <ArtistLink artist={artist}></ArtistLink>
+          {artists.map((artist, index) => (
+            <ArtistLink key={`${artist.id}_${index}`} artist={artist}></ArtistLink>
           ))}
         </div>
       </$centeredQueueItem>

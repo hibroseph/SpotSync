@@ -130,5 +130,59 @@ namespace SpotSync.Controllers
                 return StatusCode(500);
             }
         }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> FavoriteTrackAsync(string trackId)
+        {
+            try
+            {
+                PartyGoer user = await _partyGoerService.GetCurrentPartyGoerAsync();
+
+                await _partyGoerService.FavoriteTrackAsync(user, trackId);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, $"Error occurred while user was trying to favorite song {trackId}");
+                return StatusCode(500);
+            }
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> UnfavoriteTrackAsync(string trackId)
+        {
+            try
+            {
+                PartyGoer user = await _partyGoerService.GetCurrentPartyGoerAsync();
+
+                await _partyGoerService.UnfavoriteTrackAsync(user, trackId);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, $"Error occurred while user was trying to unfavorite song {trackId}");
+                return StatusCode(500);
+            }
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetFavoriteTracks()
+        {
+            try
+            {
+                PartyGoer partyGoer = await _partyGoerService.GetCurrentPartyGoerAsync();
+                return new JsonResult(await _partyGoerService.GetUsersFavoriteTracksAsync(partyGoer));
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, "Error occurred in GetFavoriteTracks");
+                return StatusCode(500);
+            }
+        }
     }
 }

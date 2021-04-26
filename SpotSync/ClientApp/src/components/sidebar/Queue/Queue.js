@@ -39,7 +39,7 @@ const Queue = ({ party, connection, trackVotes = {}, songFeelings = {}, dispatch
       })}
       {isHost && <$NukeButton onClick={() => nukeQueue(party.code, connection)}>Nuke Queue</$NukeButton>}
     </React.Fragment>
-  ) : party?.nowPlaying != undefined ? (
+  ) : party?.nowPlaying?.id != undefined ? (
     <CenteredHorizontally>
       <Subtitle>A new queue will be generated from your liked songs next song.</Subtitle>
     </CenteredHorizontally>

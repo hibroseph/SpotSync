@@ -30,15 +30,12 @@ const convertMsToSongTime = (songTimeInMs) => {
 };
 
 export default ({ millisecond = 0, lengthOfSong = 0 }) => {
-  console.log("WHAT ARE THE MILLISECOND ", millisecond);
   const [trackTime, setTrackTime] = useState(millisecond);
-
   const updateSlider = (trackTime, setTrackTime, lengthOfSong) => {
     setTrackTime(trackTime + 1000);
   };
 
   useEffect(() => {
-    console.log("trackTime", trackTime);
     const timer = setTimeout(() => {
       updateSlider(trackTime, setTrackTime, lengthOfSong);
     }, 1000);

@@ -14,11 +14,10 @@ namespace Persistence
 {
     public class LogRepository : ILogRepository
     {
-        private string _connectionString;
-
+        private NpgsqlConnection _connection;
         public LogRepository(string connectionString)
         {
-            _connectionString = connectionString;
+            _connection = new NpgsqlConnection(connectionString);
         }
 
         public async Task<string> LogExceptionAsync(Exception exception, string customMessage = null)
@@ -28,17 +27,14 @@ namespace Persistence
 
             string referenceId = Guid.NewGuid().ToString();
 
-            using (var connection = new NpgsqlConnection(_connectionString))
-            {
-                await connection.ExecuteAsync(sql, new
-                {
-                    ExceptionMessage = exception.Message,
-                    StackTrace = exception.StackTrace,
-                    CustomMessage = customMessage,
-                    ReferenceId = referenceId
-                });
-            }
 
+            await _connection.ExecuteAsync(sql, new
+            {
+                ExceptionMessage = exception.Message,
+                StackTrace = exception.StackTrace,
+                CustomMessage = customMessage,
+                ReferenceId = referenceId
+            });
             return referenceId;
         }
 
@@ -53,14 +49,12 @@ namespace Persistence
                            VALUES (NOW(), @Action, @Username)";
 
 
-            using (var connection = new NpgsqlConnection(_connectionString))
+            await _connection.ExecuteAsync(sql, new
             {
-                await connection.ExecuteAsync(sql, new
-                {
-                    Action = action,
-                    Username = username
-                });
-            }
+                Action = action,
+                Username = username
+            });
+
         }
     }
 }

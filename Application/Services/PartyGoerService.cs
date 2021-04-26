@@ -16,6 +16,7 @@ using System.Collections.Concurrent;
 using SpotSync.Domain.Contracts.SpotifyApi;
 using SpotSync.Domain.Contracts.SpotifyApi.Models;
 using SpotibroModels = SpotSync.Domain.Contracts.SpotibroModels;
+using SpotSync.Domain.Contracts.Repositories;
 
 namespace SpotSync.Application.Services
 {
@@ -27,9 +28,11 @@ namespace SpotSync.Application.Services
         private IDictionary<string, PartyGoer> _partyGoerCache;
         private ILogService _logService;
         private ISpotifyApi _spotifyApi;
+        private IUserRepository _userRepository;
+        private IDictionary<string, int> _userIds;
 
         public PartyGoerService(ISpotifyHttpClient spotifyHttpClient, IHttpContextAccessor httpContextAccessor,
-        ISpotifyAuthentication spotifyAuthentication, ILogService logService, ISpotifyApi spotifyApi)
+        ISpotifyAuthentication spotifyAuthentication, ILogService logService, ISpotifyApi spotifyApi, IUserRepository userRepository)
         {
             _spotifyHttpClient = spotifyHttpClient;
             _httpContextAccessor = httpContextAccessor;
@@ -37,6 +40,61 @@ namespace SpotSync.Application.Services
             _partyGoerCache = new ConcurrentDictionary<string, PartyGoer>();
             _logService = logService;
             _spotifyApi = spotifyApi;
+            _userRepository = userRepository;
+            _userIds = new Dictionary<string, int>();
+        }
+
+        public async Task FavoriteTrackAsync(PartyGoer user, string trackUri)
+        {
+            await _userRepository.FavoriteTrackAsync(await GetUserIdAsync(user), trackUri);
+        }
+
+        public async Task UnfavoriteTrackAsync(PartyGoer user, string trackUri)
+        {
+            await _userRepository.UnfavoriteTrackAsync(await GetUserIdAsync(user), trackUri);
+        }
+
+        public async Task<int> LoginUser(PartyGoer user)
+        {
+            int? userId = await _userRepository.GetUserIdAsync(user);
+
+            if (!userId.HasValue)
+            {
+                userId = await _userRepository.SaveUserAsync(user);
+
+                if (userId.HasValue)
+                {
+                    if (!_userIds.ContainsKey(user.GetSpotifyId()))
+                    {
+                        _userIds.Add(user.GetSpotifyId(), userId.Value);
+                    }
+                }
+                else
+                {
+                    throw new Exception($"User {user.GetSpotifyId()} does not have a user id even after saving user");
+                }
+            }
+
+            await _userRepository.UpdateLastLoginTimeAsync(userId.Value);
+
+            return userId.Value;
+        }
+
+        private async Task<int> GetUserIdAsync(PartyGoer user)
+        {
+            if (_userIds.ContainsKey(user.GetSpotifyId()))
+            {
+                return _userIds[user.GetSpotifyId()];
+            }
+
+            int? userId = await _userRepository.GetUserIdAsync(user);
+
+            if (!userId.HasValue)
+            {
+                throw new Exception($"The user {user.GetSpotifyId()} does not have a user id. They need to be registered");
+            }
+
+            return userId.Value;
         }
 
         public async Task<CurrentSongDTO> GetCurrentSongAsync(string partyGoerId)
@@ -119,6 +177,11 @@ namespace SpotSync.Application.Services
         public async Task<SpotibroModels.PlaylistContents> GetPlaylistItemsAsync(PartyGoer user, string playlistId)
         {
             return await _spotifyApi.GetPlaylistContentsAsync(user, playlistId);
+        }
+
+        public async Task<List<string>> GetUsersFavoriteTracksAsync(PartyGoer user)
+        {
+            return await _userRepository.GetFavoriteTracksAsync(await GetUserIdAsync(user));
         }
     }
 }

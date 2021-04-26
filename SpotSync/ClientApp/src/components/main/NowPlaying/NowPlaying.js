@@ -1,25 +1,21 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlayCircle, faStepForward, faPauseCircle } from "@fortawesome/free-solid-svg-icons";
 import { connect } from "react-redux";
-import {
-  getUser,
-  getPartyCode,
-  getRealtimeConnection,
-  getCurrentSong,
-  getSongFeelings,
-  isHost,
-  getStartPosition,
-} from "../../../redux/reducers/reducers";
+import { getUser, getPartyCode, getRealtimeConnection, getCurrentSong, isHost, getStartPosition } from "../../../redux/reducers/reducers";
 import { togglePlaybackState } from "../../../api/party";
 import { skipSong } from "../../../api/partyHub";
+import { getFavoriteTracks } from "../../../api/user";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.min.css";
 import NoAlbumArt from "../../../assets/unknown-album-art.png";
 import Image from "../../shared/Image";
 import ArtistLink from "../../shared/ArtistLink";
 import MusicProgressBar from "./MusicProgressBar";
+import TrackFeedback from "./TrackFeedback";
+import { favoriteTrack, unfavoriteTrack } from "../../../api/user";
+import { error } from "../../../api/notify";
 
 const $NowPlaying = styled.div`
   box-sizing: border-box;
@@ -70,7 +66,7 @@ const $NowPlayingSong = styled.div`
   display: flex;
   margin-right: auto;
   flex: 1;
-
+  align-items: center;
   .song-information {
     display: flex;
     flex-direction: column;
@@ -102,8 +98,29 @@ const $ThumbsContainer = styled.div`
   justify-content: space-around;
   align-items: center;
 `;
-const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFeelings, isHost, ShowArtistView, startPosition }) => {
-  console.log("WHAT IS THE START POSITION", startPosition);
+
+const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, isHost, ShowArtistView, startPosition }) => {
+  const addAsFavorite = (trackId) => {
+    console.log("adding ", trackId);
+    setFavoriteTracks([...favoriteTracks, trackId]);
+    console.log(favoriteTracks);
+  };
+
+  const removeAsFavorite = (trackId) => {
+    console.log("removing", trackId);
+    setFavoriteTracks(favoriteTracks.filter((p) => !p.includes(trackId)));
+    console.log(favoriteTracks);
+  };
+
+  const [favoriteTracks, setFavoriteTracks] = useState([]);
+
+  useEffect(() => {
+    getFavoriteTracks().then((favoriteTracks) => {
+      console.log("FAVORITE TRACKS", favoriteTracks);
+      setFavoriteTracks(favoriteTracks);
+    });
+  }, []);
+
   return (
     <React.Fragment>
       <ToastContainer
@@ -120,7 +137,7 @@ const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFe
       ></ToastContainer>
       {partyCode && currentSong && (
         <React.Fragment>
-          <MusicProgressBar millisecond={startPosition} lengthOfSong={currentSong.length}></MusicProgressBar>
+          {/*<MusicProgressBar millisecond={startPosition} lengthOfSong={currentSong.length}></MusicProgressBar>*/}
           <$NowPlaying>
             <$NowPlayingSong>
               <React.Fragment>
@@ -128,11 +145,27 @@ const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, songFe
                 <div className="song-information">
                   <p className={"title"}>{currentSong?.name}</p>
                   <div>
-                    {currentSong?.artists?.map((artist) => (
-                      <ArtistLink ShowArtistView={ShowArtistView} artist={artist}></ArtistLink>
+                    {currentSong?.artists?.map((artist, index) => (
+                      <ArtistLink key={`${artist.id}_${index}`} ShowArtistView={ShowArtistView} artist={artist}></ArtistLink>
                     ))}
                   </div>
                 </div>
+                <TrackFeedback
+                  trackId={currentSong?.id}
+                  isFavorite={favoriteTracks.filter((p) => p.includes(currentSong?.id?.split("+")[0])).length > 0}
+                  favoriteTrack={() => {
+                    console.log("FAVORITING TRACK");
+                    favoriteTrack(currentSong?.id)
+                      .then((p) => addAsFavorite(currentSong?.id?.split("+")[0]))
+                      .catch((p) => error("Failed to favorite track. Please try again later."));
+                  }}
+                  unfavoriteTrack={() => {
+                    console.log("UNFAVORITING TRACK");
+                    unfavoriteTrack(currentSong?.id)
+                      .then((p) => removeAsFavorite(currentSong?.id?.split("+")[0]))
+                      .catch((p) => error("Failed to unfavorite track. Please try again later."));
+                  }}
+                ></TrackFeedback>
               </React.Fragment>
             </$NowPlayingSong>
             <$SongManagement>
@@ -159,7 +192,6 @@ const mapStateToProps = (state) => {
     partyCode: getPartyCode(state),
     connection: getRealtimeConnection(state).connection,
     currentSong: getCurrentSong(state),
-    songFeelings: getSongFeelings(state),
     isHost: isHost(state),
     startPosition: getStartPosition(state),
   };

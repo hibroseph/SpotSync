@@ -19,5 +19,9 @@ namespace SpotSync.Domain.Contracts.Services
         Task<ServiceResult<List<Device>>> GetUserDevicesAsync(PartyGoer partyGoer);
         Task<List<SpotibroModels.PlaylistSummary>> GetUsersPlaylistsAsync(PartyGoer user, int limit = 10, int offset = 0);
         Task<SpotibroModels.PlaylistContents> GetPlaylistItemsAsync(PartyGoer user, string playlistId);
+        Task<int> LoginUser(PartyGoer user);
+        Task FavoriteTrackAsync(PartyGoer user, string trackUri);
+        Task UnfavoriteTrackAsync(PartyGoer user, string trackUri);
+        Task<List<string>> GetUsersFavoriteTracksAsync(PartyGoer user);
     }
 }
