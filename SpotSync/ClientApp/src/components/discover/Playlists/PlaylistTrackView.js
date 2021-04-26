@@ -12,7 +12,6 @@ const $PlaylistTrackViewHeader = styled.div`
 `;
 
 export default ({ playlistTracks, addToQueue }) => {
-  console.log(playlistTracks);
   return (
     <div>
       <$PlaylistTrackViewHeader>

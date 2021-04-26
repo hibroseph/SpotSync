@@ -101,22 +101,17 @@ const $ThumbsContainer = styled.div`
 
 const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, isHost, ShowArtistView, startPosition }) => {
   const addAsFavorite = (trackId) => {
-    console.log("adding ", trackId);
     setFavoriteTracks([...favoriteTracks, trackId]);
-    console.log(favoriteTracks);
   };
 
   const removeAsFavorite = (trackId) => {
-    console.log("removing", trackId);
     setFavoriteTracks(favoriteTracks.filter((p) => !p.includes(trackId)));
-    console.log(favoriteTracks);
   };
 
   const [favoriteTracks, setFavoriteTracks] = useState([]);
 
   useEffect(() => {
     getFavoriteTracks().then((favoriteTracks) => {
-      console.log("FAVORITE TRACKS", favoriteTracks);
       setFavoriteTracks(favoriteTracks);
     });
   }, []);
@@ -135,7 +130,7 @@ const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, isHost
         draggable
         pauseOnHover
       ></ToastContainer>
-      {partyCode && currentSong && (
+      {partyCode && currentSong?.id && (
         <React.Fragment>
           {/*<MusicProgressBar millisecond={startPosition} lengthOfSong={currentSong.length}></MusicProgressBar>*/}
           <$NowPlaying>
@@ -154,13 +149,11 @@ const NowPlaying = ({ user, partyCode, dispatch, connection, currentSong, isHost
                   trackId={currentSong?.id}
                   isFavorite={favoriteTracks.filter((p) => p.includes(currentSong?.id?.split("+")[0])).length > 0}
                   favoriteTrack={() => {
-                    console.log("FAVORITING TRACK");
                     favoriteTrack(currentSong?.id)
                       .then((p) => addAsFavorite(currentSong?.id?.split("+")[0]))
                       .catch((p) => error("Failed to favorite track. Please try again later."));
                   }}
                   unfavoriteTrack={() => {
-                    console.log("UNFAVORITING TRACK");
                     unfavoriteTrack(currentSong?.id)
                       .then((p) => removeAsFavorite(currentSong?.id?.split("+")[0]))
                       .catch((p) => error("Failed to unfavorite track. Please try again later."));

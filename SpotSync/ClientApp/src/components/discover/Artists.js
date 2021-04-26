@@ -28,16 +28,13 @@ export default ({ artistId, addTrackToQueue }) => {
     if (currentArtist == undefined || currentArtist.id != artistId) {
       setIsLoading(true);
       setCurrentArtist(undefined);
-      console.log("CALLING BROWSE ARTIST API");
       searchArtist(artistId).then((artist) => {
-        console.log("artist returned from api");
         setCurrentArtist(artist);
         setIsLoading(false);
       });
     }
   }, [artistId]);
 
-  console.log(currentArtist);
   return (
     <div>
       {isLoading && (

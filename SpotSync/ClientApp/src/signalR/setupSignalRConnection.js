@@ -73,21 +73,15 @@ export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAc
   });
 
   connection.on("UpdateQueue", (queue) => {
-    console.log("WHATS THE QUEUE 222");
-    console.log(queue);
     dispatch(updateQueue(queue));
   });
 
   connection.on("InitialPartyLoad", (currentSong, history, queue, details) => {
-    console.log("Initial Party Load");
-    console.log(currentSong);
     dispatch(updateCurrentSong(currentSong.song));
     dispatch(updateQueue(queue));
     dispatch(updateHistory(history));
     dispatch(partyJoined(details.partyCode, details.listeners, details.host));
-    console.log("calling update position in song");
     dispatch(updatePositionInSong(currentSong.position));
-    console.log("done calling update position in song");
   });
 
   connection.on("ListenerLeft", (name) => {
@@ -96,8 +90,6 @@ export const setupSignalRConnection = (connectionHub, actionEventMap = {}, getAc
   });
 
   connection.on("UpdatePartyView", (currentSong, history, queue, details) => {
-    console.log("UPDATE THE PARTY VIEW");
-    console.log(queue);
     dispatch(updateQueue(queue));
     dispatch(updateHistory(history));
     dispatch(updateCurrentSong(currentSong.song));

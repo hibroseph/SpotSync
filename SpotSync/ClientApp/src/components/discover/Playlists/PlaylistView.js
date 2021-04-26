@@ -32,12 +32,9 @@ export default ({ playlists, playlistTracks, addSomeTracksToQueue, viewPlaylist,
                 addSomeTracksToQueue={addSomeTracksToQueue}
                 viewPlaylist={() => {
                   setPlaylistView(PLAYLIST_TRACKS);
-                  viewPlaylist(playlist)
-                    .then((p) => console.log("EVERYTHING IS GOOD INSIDE OF PLAYLIST VIEW"))
-                    .catch((p) => {
-                      console.log("THINGS ARE BAD INSIDE OF PLAYLIST VIEW");
-                      setPlaylistView(PLAYLIST_VIEW);
-                    });
+                  viewPlaylist(playlist).catch((p) => {
+                    setPlaylistView(PLAYLIST_VIEW);
+                  });
                 }}
               ></Playlist>
             );

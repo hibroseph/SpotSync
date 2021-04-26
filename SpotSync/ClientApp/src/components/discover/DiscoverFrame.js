@@ -85,6 +85,7 @@ const DiscoverFrame = ({ user, partyCode, connection, searchArtistId }) => {
   const [havePlaylists, setHavePlaylists] = useState(false);
 
   const [playlistTracks, setPlaylistTracks] = useState([]);
+  const [gettingTopSongs, setGettingTopSongs] = useState(false);
 
   useEffect(() => {
     setIsLoading(false);
@@ -97,11 +98,10 @@ const DiscoverFrame = ({ user, partyCode, connection, searchArtistId }) => {
   }, [searchArtistId]);
 
   useEffect(() => {
-    if (currentTabView == TOP_SONGS_TITLE && !haveTopSongs && user) {
+    if (currentTabView == TOP_SONGS_TITLE && !haveTopSongs && user && !gettingTopSongs) {
+      setGettingTopSongs(true);
       getTopSongs(20)
         .then((songs) => {
-          console.log("top songs");
-          console.log(songs);
           setTopSongs(songs);
         })
         .catch((err) => {
