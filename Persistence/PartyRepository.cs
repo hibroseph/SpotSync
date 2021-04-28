@@ -9,6 +9,7 @@ using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.DTO;
 using SpotSync.Domain.Errors;
+using SpotSync.Domain.PartyAggregate;
 
 namespace Persistence
 {

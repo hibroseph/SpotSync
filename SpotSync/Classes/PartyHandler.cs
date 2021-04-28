@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using SpotSync.Domain.DTO;
 using SpotSync.Domain.Contracts.SpotifyApi;
+using SpotSync.Domain.PartyAggregate;
 
 namespace SpotSync.Classes
 {

@@ -10,6 +10,8 @@ using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.DTO;
 using SpotSync.Domain.Events;
 using SpotSync.Models.Party;
+using SpotSync.Domain.PartyAggregate;
+using System.Collections.Generic;
 
 namespace SpotSync.Controllers
 {
@@ -24,6 +26,13 @@ namespace SpotSync.Controllers
             _partyService = partyService;
             _partyGoerService = partyGoerService;
             _logService = logService;
+        }
+
+        [Authorize]
+        [HttpPost("api/[controller]/AddContribution")]
+        public async Task<IActionResult> AddContribution(List<Tuple<ContributionType, string>> contribution)
+        {
+            return Ok();
         }
 
         [Authorize]

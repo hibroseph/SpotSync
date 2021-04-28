@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SpotSync.Domain;
 using SpotSync.Domain.DTO;
+using SpotSync.Domain.PartyAggregate;
 
 namespace SpotSync.Domain.Contracts
 {

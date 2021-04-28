@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SpotibroModels = SpotSync.Domain.Contracts.SpotibroModels;
+using SpotSync.Domain.PartyAggregate;
 
 namespace SpotSync.Application.Services
 {
@@ -25,6 +26,18 @@ namespace SpotSync.Application.Services
             _spotifyHttpClient = spotifyHttpClient;
             _partyGoerService = partyGoerService;
             _logService = logService;
+        }
+
+        public async Task AddContributionAsync(string partyCode, Contribution contribution)
+        {
+            Party party = await _partyRepository.GetPartyWithCodeAsync(partyCode);
+
+            if (party == null)
+            {
+                throw new Exception($"{partyCode} is not associated with a party");
+            }
+
+            party.AddContribution(contribution);
         }
 
         public async Task AddSomeTracksFromPlaylistToQueueAsync(PartyGoer partyGoer, string playlistId, int amount)

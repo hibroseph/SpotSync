@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using SpotSync.Domain.PartyAggregate;
 
 namespace SpotSync.Tests.Unit_Tests
 {

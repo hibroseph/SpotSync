@@ -12,7 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using SpotibroModels = SpotSync.Domain.Contracts.SpotibroModels;
 
-namespace SpotSync.Domain
+namespace SpotSync.Domain.PartyAggregate
 {
     public class Party : IEquatable<Party>
     {
@@ -27,6 +27,7 @@ namespace SpotSync.Domain
         private Stopwatch _trackPositionTime;
         private Timer _nextTrackTimer;
         private List<PartyGoer> _usersThatDislikeCurrentSong;
+        private ContributionManager _contributionManager;
 
         public Party(PartyGoer host)
         {
@@ -38,6 +39,12 @@ namespace SpotSync.Domain
             _history = new List<Track>();
             _nextTrackTimer = new Timer(async (obj) => await NextTrackAsync());
             _usersThatDislikeCurrentSong = new List<PartyGoer>();
+            _contributionManager = new ContributionManager();
+        }
+
+        public void AddContribution(Contribution contribution)
+        {
+            _contributionManager.AddContribution(contribution);
         }
 
         public Dictionary<string, int> GetTrackVotes()

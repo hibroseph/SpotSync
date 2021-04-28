@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
+using SpotSync.Domain.PartyAggregate;
 
 namespace SpotSync.Domain.Contracts
 {
@@ -30,5 +31,6 @@ namespace SpotSync.Domain.Contracts
         Task<List<Party>> GetAllPartiesAsync();
         Task<List<Track>> GenerateNewPlaylist(Party party, List<string> recommendedTrackUris);
         Task AddSomeTracksFromPlaylistToQueueAsync(PartyGoer partyGoer, string playlistId, int amount);
+        Task AddContributionAsync(string partyCode, Contribution contribution);
     }
 }

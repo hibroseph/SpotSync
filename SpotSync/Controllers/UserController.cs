@@ -8,6 +8,7 @@ using SpotSync.Domain.Contracts.Services;
 using SpotSync.Domain.DTO;
 using SpotSync.Domain.Types;
 using SpotSync.Domain.Contracts;
+using SpotSync.Domain.PartyAggregate;
 
 namespace SpotSync.Controllers
 {

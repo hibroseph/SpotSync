@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using SpotSync.Domain.PartyAggregate;
 
 namespace SpotSync.Tests
 {
@@ -203,7 +204,7 @@ namespace SpotSync.Tests
             await _partyService.JoinPartyAsync(partyCodeDTO2, PartyAttendee2);
             await _partyService.JoinPartyAsync(partyCodeDTO3, PartyAttendee3);
 
-            Domain.Party party = await _partyService.GetPartyWithAttendeeAsync(PartyAttendee3);
+            Party party = await _partyService.GetPartyWithAttendeeAsync(PartyAttendee3);
 
             Assert.AreEqual(partyCodeDTO3.PartyCode, party.GetPartyCode());
         }

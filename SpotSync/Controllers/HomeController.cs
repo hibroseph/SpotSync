@@ -12,6 +12,7 @@ using SpotSync.Domain.Contracts;
 using SpotSync.Domain.Contracts.Services;
 using SpotSync.Models;
 using SpotSync.Models.Shared;
+using SpotSync.Domain.PartyAggregate;
 
 namespace SpotSync.Controllers
 {
