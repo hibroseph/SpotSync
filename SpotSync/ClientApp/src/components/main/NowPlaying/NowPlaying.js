@@ -15,7 +15,7 @@ import ArtistLink from "../../shared/ArtistLink";
 import MusicProgressBar from "./MusicProgressBar";
 import TrackFeedback from "./TrackFeedback";
 import { favoriteTrack, unfavoriteTrack } from "../../../api/user";
-import { error } from "../../../api/notify";
+import { error } from "../../shared/notify";
 
 const $NowPlaying = styled.div`
   box-sizing: border-box;

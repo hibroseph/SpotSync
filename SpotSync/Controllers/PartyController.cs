@@ -12,6 +12,7 @@ using SpotSync.Domain.Events;
 using SpotSync.Models.Party;
 using SpotSync.Domain.PartyAggregate;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SpotSync.Controllers
 {
@@ -30,8 +31,24 @@ namespace SpotSync.Controllers
 
         [Authorize]
         [HttpPost("api/[controller]/AddContribution")]
-        public async Task<IActionResult> AddContribution(List<Tuple<ContributionType, string>> contribution)
+        public async Task<IActionResult> AddContribution(string partyCode, [FromBody]List<UserContribution> contributions)
         {
+            try
+            {
+                if (contributions != null && contributions.Count == 0)
+                {
+                    return Ok();
+                }
+                PartyGoer partyGoer = await _partyGoerService.GetCurrentPartyGoerAsync();
+
+                await _partyService.AddContributionAsync(partyCode, contributions.Select(p => new Contribution { ContributedBy = partyGoer.GetSpotifyId(), ContributionId = Guid.NewGuid(), Id = p.Id, Type = p.Type, Name = p.Name }).ToList());
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, "Error occurred while trying to add contribution");
+                return StatusCode(500);
+            }
+
             return Ok();
         }
 
@@ -262,7 +279,8 @@ namespace SpotSync.Controllers
 
         private async Task UpdatePlaylistForEveryoneInPartyAsync(Party party, PartyGoer partyGoer)
         {
-            await DomainEvents.RaiseAsync(new QueueEnded { PartyCode = party.GetPartyCode(), LikedTracksUris = party.GetLikedTracksUris(5) });
+            var seeds = party.GetSeedUris(5);
+            await DomainEvents.RaiseAsync(new QueueEnded { PartyCode = party.GetPartyCode(), SeedTracksUris = seeds.Item1, SeedArtistUris = seeds.Item2 });
         }
 
         private async Task<IActionResult> UpdateCurrentSongForEveryoneInPartyAsync(Party party, PartyGoer partyGoer)

@@ -52,11 +52,11 @@ namespace SpotSync.Application.Services
         public async Task<List<SuggestedContribution>> GetSuggestedContributionsAsync(PartyGoer partier)
         {
             // get items from multiple sources and return that to the client
-            Task<List<SpotibroModels.PlaylistSummary>> playlistsTask = GetUsersPlaylistsAsync(partier, 10);
+            //Task<List<SpotibroModels.PlaylistSummary>> playlistsTask = GetUsersPlaylistsAsync(partier, 10);
             Task<List<SpotibroModels.Track>> tracksTask = _spotifyHttpClient.GetUserTopTracksAsync(partier.GetSpotifyId());
             Task<List<SpotibroModels.Artist>> artistsTask = _spotifyApi.GetUsersTopArtistsAsync(partier);
 
-            await Task.WhenAll(playlistsTask, tracksTask);
+            await Task.WhenAll(artistsTask, tracksTask);
 
             List<SuggestedContribution> contributions = new List<SuggestedContribution>();
 
@@ -73,7 +73,7 @@ namespace SpotSync.Application.Services
                         Type = ContributionType.Track
                     });
                 }
-
+                /*
                 for (int i = 0; i < 2; i++)
                 {
                     SpotibroModels.PlaylistSummary playlist = playlistsTask.Result.ElementAt(_random.Next(0, playlistsTask.Result.Count - 1));
@@ -84,7 +84,7 @@ namespace SpotSync.Application.Services
                         Name = playlist.Name,
                         Type = ContributionType.Playlist
                     });
-                }
+                }*/
 
                 for (int i = 0; i < 2; i++)
                 {

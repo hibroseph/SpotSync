@@ -6,9 +6,10 @@ import { checkIfAuthenticated } from "./api/authentication";
 import { fetchUserDetails, getUserAccessToken } from "./api/user";
 import { connect } from "react-redux";
 import { getRealtimeConnection, getUser, getPartyCode } from "./redux/reducers/reducers";
-import JoinOrCreateParty from "./components/main/JoinOrCreateParty";
 import { setUpSpotifyWebPlayback } from "./api/spotify";
-import NowPlaying from "../src/components/main/NowPlaying/NowPlaying";
+import NowPlaying from "./components/main/NowPlaying/NowPlaying";
+import MusicContributionPopup from "./components/popups/MusicContributionPopup";
+import JoinOrCreateParty from "./components/popups/JoinOrCreateParty";
 
 const setUpProcess = (dispatch) => {
   checkIfAuthenticated()(dispatch);
@@ -34,6 +35,21 @@ const configureSpotifySdk = (props, spotifySdkAdded, setSpotifySdkAdded) => {
   }
 };
 
+const MUSIC_CONTRIBUTIONS = "Music Contributions";
+const JOIN_OR_CREATE_PARTY = "Join or Create Party";
+
+const Popups = (popupName, setPopup, partyCode) => {
+  switch (popupName) {
+    case JOIN_OR_CREATE_PARTY:
+      return <JoinOrCreateParty showContributionsPopup={(show) => (show ? setPopup(MUSIC_CONTRIBUTIONS) : setPopup(null))}></JoinOrCreateParty>;
+    case MUSIC_CONTRIBUTIONS:
+      return (
+        <MusicContributionPopup setPopup={setPopup} partyCode={partyCode} hideMusicContributionPopup={() => setPopup(null)}></MusicContributionPopup>
+      );
+    default:
+      return null;
+  }
+};
 function App(props) {
   const [spotifySdkAdded, setSpotifySdkAdded] = useState(false);
 
@@ -46,11 +62,12 @@ function App(props) {
   }, [props?.isUserInParty, props?.realTimeConnection?.connection]);
 
   const [artistView, setArtistView] = useState();
+  const [currentPopup, setCurrentPopup] = useState(JOIN_OR_CREATE_PARTY);
 
   return (
     <React.Fragment>
-      {!props?.isUserInParty && <JoinOrCreateParty></JoinOrCreateParty>}
-      <Navigation />
+      {Popups(currentPopup, setCurrentPopup, props.partyCode)}
+      <Navigation showCreateOrJoinPartyPopup={() => setCurrentPopup(JOIN_OR_CREATE_PARTY)} />
       <MainContent artistView={artistView}></MainContent>
       <NowPlaying ShowArtistView={(artist) => setArtistView(artist)}></NowPlaying>
     </React.Fragment>

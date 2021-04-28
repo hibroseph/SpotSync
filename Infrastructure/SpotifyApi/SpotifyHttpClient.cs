@@ -243,19 +243,19 @@ namespace SpotSync.Infrastructure.SpotifyApi
 
         }
 
-        public async Task<List<Domain.Track>> GetRecommendedSongsAsync(PartyGoer partyGoer, GetRecommendedSongs getRecommendedSongs)
+        public async Task<List<Domain.Track>> GetRecommendedTracksAsync(PartyGoer partyGoer, RecommendedTracksSeed recommendedTrackSeeds)
         {
-            List<string> seedTrackUris = getRecommendedSongs.SeedTrackUris;
+            List<string> seedTrackUris = recommendedTrackSeeds?.SeedTrackUris;
+            List<string> seedArtistUris = recommendedTrackSeeds?.SeedArtistUris;
 
-            if (seedTrackUris.Count > 5)
+            if (seedTrackUris?.Count + seedArtistUris?.Count > 5 || seedTrackUris?.Count + seedArtistUris?.Count == 0)
             {
-                throw new ArgumentException("Seed tracks cannot exeed 5");
+                throw new ArgumentException("The count of seeds need to be between 1 and 5");
             }
 
-            getRecommendedSongs.SeedTrackUris = seedTrackUris.Select(p => p.Replace("spotify:track:", "").Split("+").First()).ToList();
+            recommendedTrackSeeds.SeedTrackUris = seedTrackUris.Select(p => p.Replace("spotify:track:", "").Split("+").First()).ToList();
 
-
-            var response = await SendHttpRequestAsync(partyGoer.GetSpotifyId(), _apiEndpoints[ApiEndpointType.GetRecommendedTracks], AddRecommendedSongsApiParmeters(getRecommendedSongs), true);
+            var response = await SendHttpRequestAsync(partyGoer.GetSpotifyId(), _apiEndpoints[ApiEndpointType.GetRecommendedTracks], AddRecommendedSeedApiParmeters(recommendedTrackSeeds), true);
 
             RecommendedTracks tracks = await response.Content.ReadFromJsonAsync<RecommendedTracks>();
 
@@ -280,9 +280,11 @@ namespace SpotSync.Infrastructure.SpotifyApi
             return recommendedSongs.ToList();
         }
 
-        private string AddRecommendedSongsApiParmeters(GetRecommendedSongs getRecommendedSongs)
+        private string AddRecommendedSeedApiParmeters(RecommendedTracksSeed getRecommendedSongs)
         {
-            return $"seed_tracks={ HttpUtility.UrlEncode(ConvertToCommaDelimitedString(getRecommendedSongs.SeedTrackUris))}{(!string.IsNullOrWhiteSpace(getRecommendedSongs.Market) ? $"&{getRecommendedSongs.Market}" : string.Empty)}";
+            return $"{(!getRecommendedSongs.SeedTrackUris.IsNullOrEmpty() ? $"seed_tracks={ HttpUtility.UrlEncode(ConvertToCommaDelimitedString(getRecommendedSongs.SeedTrackUris))}&" : string.Empty)}{(!getRecommendedSongs.SeedArtistUris.IsNullOrEmpty() ? $"seed_artists={ HttpUtility.UrlEncode(ConvertToCommaDelimitedString(getRecommendedSongs.SeedArtistUris))}&" : string.Empty)}{(!string.IsNullOrWhiteSpace(getRecommendedSongs.Market) ? $"{getRecommendedSongs.Market}" : string.Empty)}";
+
+
         }
 
         private string ConvertToCommaDelimitedString(List<string> items)

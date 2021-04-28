@@ -67,12 +67,12 @@ export const getUserLikesDislikes = (partyCode) => {
     });
 };
 
-export const favoriteTrack = (trackId) => {
-  return fetch(`/api/user/favoritetrack?trackId=${trackId.split("+")[0]}`, {
+export const addContributionsToParty = (partyCode, contributions) => {
+  return fetch(`/api/party/addContribution?partyCode=${partyCode}`, {
     method: "POST",
+    body: JSON.stringify(contributions),
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
-};
-
-export const unfavoriteTrack = (trackId) => {
-  return fetch(`/api/user/unfavoritetrack?trackId=${trackId.split("+")[0]}`, { method: "POST" });
 };

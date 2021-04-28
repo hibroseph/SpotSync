@@ -49,3 +49,7 @@ export const favoriteTrack = (trackId) => {
 export const unfavoriteTrack = (trackId) => {
   return fetch(`/api/user/unfavoritetrack?trackId=${trackId.split("+")[0]}`, { method: "POST" });
 };
+
+export const getSuggestedContributions = () => {
+  return fetch(`/api/user/suggestedcontributions`).then((res) => res.json());
+};

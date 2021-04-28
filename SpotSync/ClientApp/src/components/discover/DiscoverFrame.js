@@ -9,7 +9,7 @@ import UnorderedTrackList from "./Search/UnorderedTrackList";
 import { getUser, getPartyCode, getRealtimeConnection, artistView } from "../../redux/reducers/reducers";
 import { connect } from "react-redux";
 import PlaylistView from "./Playlists/PlaylistView";
-import notify, { error } from "../../api/notify";
+import notify, { error } from "../shared/notify";
 import ScrollContainer from "../shared/ScrollContainer";
 import ArtistView from "./Artists";
 

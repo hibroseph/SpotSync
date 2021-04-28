@@ -86,7 +86,7 @@ namespace SpotSync.Classes
                 return;
             }
 
-            List<Track> playlistSongs = await _partyService.GenerateNewPlaylist(party, args.LikedTracksUris);
+            List<Track> playlistSongs = await _partyService.GenerateNewPlaylist(party, args.SeedTracksUris, args.SeedArtistUris);
 
             await party.AddNewQueueAsync(playlistSongs);
 

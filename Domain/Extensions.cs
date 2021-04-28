@@ -28,5 +28,9 @@ namespace SpotSync.Domain
             return source.Count > n ? n : source.Count;
         }
 
+        public static bool IsNullOrEmpty<T>(this List<T> source)
+        {
+            return source == null || source?.Count == 0;
+        }
     }
 }

@@ -7,7 +7,7 @@ import { generateQueue } from "../../../api/party";
 import { userLikesSong, userDislikesSong, nukeQueue } from "../../../api/partyHub";
 import Subtitle from "../../shared/Subtitle";
 import CenteredHorizontally from "../../shared/CenteredHorizontally";
-import toast from "../../../api/notify";
+import toast from "../../shared/notify";
 import styled from "styled-components";
 
 const $NukeButton = styled(Button)`

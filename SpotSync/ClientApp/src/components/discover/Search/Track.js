@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { addSongToQueue } from "../../../api/party";
-import notify from "../../../api/notify";
+import notify from "../../shared/notify";
 import ArtistLink from "../../shared/ArtistLink";
 
 const $Track = styled.div`

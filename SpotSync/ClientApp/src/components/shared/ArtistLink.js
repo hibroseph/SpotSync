@@ -16,7 +16,6 @@ const ArtistLink = ({ artist, dispatch }) => {
   return (
     <$ArtistLink
       onClick={(event) => {
-        console.log("artist link clicked");
         event.preventDefault();
         dispatch(showArtistView(artist.id));
       }}

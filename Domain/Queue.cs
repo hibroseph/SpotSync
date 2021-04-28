@@ -82,9 +82,9 @@ namespace SpotSync.Domain
             return false;
         }
 
-        public List<string> GetRandomLikedTrackUris(int amount)
+        public Tuple<List<string>, List<string>> GetRandomLikedTrackUris(int amount)
         {
-            return _tracks.GetRandomNItems(5).Select(track => track.GetTrackWithoutFeelings().Id).ToList();
+            return new Tuple<List<string>, List<string>>(_tracks.GetRandomNItems(5).Select(track => track.GetTrackWithoutFeelings().Id).ToList(), new List<string>());
         }
 
         public LikesDislikes GetUsersTrackFeelings(PartyGoer user)

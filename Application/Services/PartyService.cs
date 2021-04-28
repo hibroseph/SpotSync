@@ -28,7 +28,7 @@ namespace SpotSync.Application.Services
             _logService = logService;
         }
 
-        public async Task AddContributionAsync(string partyCode, Contribution contribution)
+        public async Task AddContributionAsync(string partyCode, List<Contribution> contribution)
         {
             Party party = await _partyRepository.GetPartyWithCodeAsync(partyCode);
 
@@ -37,7 +37,7 @@ namespace SpotSync.Application.Services
                 throw new Exception($"{partyCode} is not associated with a party");
             }
 
-            party.AddContribution(contribution);
+            await party.AddContributionsAsync(contribution);
         }
 
         public async Task AddSomeTracksFromPlaylistToQueueAsync(PartyGoer partyGoer, string playlistId, int amount)
@@ -183,20 +183,22 @@ namespace SpotSync.Application.Services
             }
         }
 
-        public async Task<List<Track>> GenerateNewPlaylist(Party party, List<string> recommendedTrackUris)
+        public async Task<List<Track>> GenerateNewPlaylist(Party party, List<string> recommendedTrackUris, List<string> recommendedArtistUris)
         {
-            if (recommendedTrackUris.Count > 0)
+            if (recommendedTrackUris.Count > 0 || recommendedArtistUris.Count > 0)
             {
-                return await _spotifyHttpClient.GetRecommendedSongsAsync(party.GetHost(), new GetRecommendedSongs
+                return await _spotifyHttpClient.GetRecommendedTracksAsync(party.GetHost(), new RecommendedTracksSeed
                 {
+                    SeedArtistUris = recommendedArtistUris,
                     SeedTrackUris = recommendedTrackUris,
                     Market = party.GetHost().GetMarket()
                 });
             }
             else
             {
-                return await _spotifyHttpClient.GetRecommendedSongsAsync(party.GetHost(), new GetRecommendedSongs
+                return await _spotifyHttpClient.GetRecommendedTracksAsync(party.GetHost(), new RecommendedTracksSeed
                 {
+                    SeedArtistUris = recommendedArtistUris,
                     SeedTrackUris = (await _partyGoerService.GetRecommendedSongsAsync(party.GetHost().GetId(), 5)).Select(track => track.Id).ToList(),
                     Market = party.GetHost().GetMarket()
                 });

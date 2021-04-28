@@ -16,28 +16,29 @@ namespace SpotSync.Domain.PartyAggregate
             _random = new Random();
         }
 
-        public void AddContribution(Contribution contribution)
+        public void AddContributions(List<Contribution> contribution)
         {
-            _contributions.Add(contribution);
+            _contributions.AddRange(contribution);
         }
 
-        public Dictionary<ContributionType, string> GetContributionSeeds(List<PartyGoer> partyGoers)
+        public Dictionary<ContributionType, List<string>> GetContributionSeeds(List<PartyGoer> partyGoers)
         {
-            if (partyGoers != null && partyGoers.Count == 0)
-            {
-                return new Dictionary<ContributionType, string>();
-            }
+            Dictionary<ContributionType, List<string>> seedContributions = new Dictionary<ContributionType, List<string>>();
 
-            // get 5 random items from all the contributions and try to spread it around the users
-            Dictionary<ContributionType, string> seedContributions = new Dictionary<ContributionType, string>();
+            if (partyGoers != null && partyGoers.Count == 0 || _contributions.Count == 0)
+            {
+                return seedContributions;
+            }
 
             HashSet<string> selectedPartyGoers = new HashSet<string>();
 
-            bool canSelectPartyGoersMultipleTimes = partyGoers.Count < 5;
+            Dictionary<ContributionType, List<int>> alreadyGrabbedContributions = new Dictionary<ContributionType, List<int>>();
 
+            bool canSelectPartyGoersMultipleTimes = partyGoers.Count < 5;
+            int addedContributions = 0;
             bool exit = false;
 
-            while (seedContributions.Count < 5 || exit)
+            while (seedContributions.Count < 5 && !exit)
             {
                 string selectedPartyGoerId = partyGoers.ElementAt(_random.Next(0, partyGoers.Count)).GetId();
 
@@ -45,10 +46,24 @@ namespace SpotSync.Domain.PartyAggregate
 
                 if (canSelectPartyGoersMultipleTimes || !selectedPartyGoers.Contains(selectedPartyGoerId))
                 {
-                    seedContributions.Add(possibleContribution.Type, possibleContribution.Item.Id);
+                    if (!canSelectPartyGoersMultipleTimes)
+                    {
+                        selectedPartyGoers.Add(selectedPartyGoerId);
+                    }
+
+                    if (seedContributions.ContainsKey(possibleContribution.Type))
+                    {
+                        seedContributions[possibleContribution.Type].Add(possibleContribution.Id);
+                    }
+                    else
+                    {
+                        seedContributions.Add(possibleContribution.Type, new List<string> { possibleContribution.Id });
+                    }
+
+                    addedContributions++;
                 }
 
-                if (seedContributions.Count == _contributions.Count)
+                if (addedContributions >= _contributions.Count || addedContributions == 5)
                 {
                     exit = true;
                 }

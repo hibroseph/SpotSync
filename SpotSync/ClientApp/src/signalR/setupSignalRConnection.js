@@ -11,7 +11,7 @@ import {
   updateTrackVotes,
   updatePositionInSong,
 } from "../redux/actions/party";
-import notify from "../api/notify";
+import notify from "../components/shared/notify";
 const startSignalRConnection = async (connection, dispatch) => {
   try {
     await connection.start();

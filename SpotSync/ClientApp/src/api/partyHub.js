@@ -9,9 +9,6 @@ export const skipSong = (partyCode, connection) => {
 };
 
 export const userAddSongToQueue = (song, user, partyCode, connection) => {
-  console.log("ADDING SONG TO QUEUE");
-  console.log("hello world");
-  console.log(song);
   connection.invoke("UserAddedSong", {
     Name: song.name,
     Artists: song.artists,
@@ -25,7 +22,6 @@ export const userAddSongToQueue = (song, user, partyCode, connection) => {
 };
 
 export const userLikesSong = (partyCode, trackUri, connection, dispatch) => {
-  console.log(trackUri);
   dispatch(userLikesSongAction(trackUri));
   connection.invoke("AddTrackFeeling", partyCode, trackUri, 1);
 };

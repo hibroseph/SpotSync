@@ -44,7 +44,7 @@ const $MarginLeftButton = styled(LinkButton)`
   margin-left: 25px;
 `;
 
-const Navigation = ({ partyCode, user, dispatch }) => {
+const Navigation = ({ partyCode, user, dispatch, showCreateOrJoinPartyPopup }) => {
   return (
     <$Navigation>
       <div className="left-nav-item">
@@ -55,7 +55,13 @@ const Navigation = ({ partyCode, user, dispatch }) => {
       <$ButtonGroup>
         {user?.details?.isInParty && (
           <React.Fragment>
-            <Button selected onClick={() => leaveParty(partyCode)(dispatch)}>
+            <Button
+              selected
+              onClick={() => {
+                leaveParty(partyCode)(dispatch);
+                showCreateOrJoinPartyPopup();
+              }}
+            >
               Leave Party
             </Button>
           </React.Fragment>

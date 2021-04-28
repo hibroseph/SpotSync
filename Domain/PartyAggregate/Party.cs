@@ -42,9 +42,27 @@ namespace SpotSync.Domain.PartyAggregate
             _contributionManager = new ContributionManager();
         }
 
-        public void AddContribution(Contribution contribution)
+        public async Task AddContributionsAsync(List<Contribution> contribution)
         {
-            _contributionManager.AddContribution(contribution);
+            _contributionManager.AddContributions(contribution);
+
+            // if no music is playing
+            if (!HasPartyStarted())
+            {
+                // start party with contributions
+                var seeds = _contributionManager.GetContributionSeeds(GetListeners());
+                await DomainEvents.RaiseAsync(new QueueEnded
+                {
+                    PartyCode = _partyCode,
+                    SeedTracksUris = seeds.ContainsKey(ContributionType.Track) ? seeds[ContributionType.Track] : new List<string>(),
+                    SeedArtistUris = seeds.ContainsKey(ContributionType.Artist) ? seeds[ContributionType.Artist] : new List<string>()
+                });
+            }
+        }
+
+        private bool HasPartyStarted()
+        {
+            return _currentTrack != null;
         }
 
         public Dictionary<string, int> GetTrackVotes()
@@ -189,19 +207,27 @@ namespace SpotSync.Domain.PartyAggregate
             else
             {
                 _currentTrack = null;
-                await DomainEvents.RaiseAsync(new QueueEnded { PartyCode = _partyCode, LikedTracksUris = GetLikedTracksUris(5) });
+                var seeds = GetSeedUris(5);
+                await DomainEvents.RaiseAsync(new QueueEnded { PartyCode = _partyCode, SeedTracksUris = seeds.Item1, SeedArtistUris = seeds.Item2 });
             }
         }
 
-        public List<string> GetLikedTracksUris(int amount)
+        public Tuple<List<string>, List<string>> GetSeedUris(int amount)
         {
+            Dictionary<ContributionType, List<string>> seeds = _contributionManager.GetContributionSeeds(GetListeners());
+
+            if (seeds.Count > 0)
+            {
+                return new Tuple<List<string>, List<string>>(seeds.ContainsKey(ContributionType.Track) ? seeds[ContributionType.Track] : new List<string>(), seeds.ContainsKey(ContributionType.Artist) ? seeds[ContributionType.Artist] : new List<string>());
+            }
+
             if (_queue.TracksAreLiked())
             {
                 return _queue.GetRandomLikedTrackUris(5);
             }
             else
             {
-                return _history.GetRandomNItems(amount).Select(track => track.Id).ToList();
+                return new Tuple<List<string>, List<string>>(_history.GetRandomNItems(amount).Select(track => track.Id).ToList(), new List<string>());
             }
         }
 

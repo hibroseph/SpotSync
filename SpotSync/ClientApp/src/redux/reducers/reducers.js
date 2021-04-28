@@ -27,22 +27,16 @@ import { REALTIME_CONNECTION_ESTABLISHED } from "../actions/signalr";
 export default (state = initalState, action) => {
   switch (action.type) {
     case UPDATE_POSITION_IN_SONG: {
-      console.log("updating position");
       return Object.assign({}, state, {
         party: Object.assign({}, state.party, { nowPlaying: Object.assign({}, state.party.nowPlaying, { startPosition: action.position }) }),
       });
     }
 
     case UPDATE_TRACK_VOTES: {
-      console.log("UPDATING TRACK VOTES");
-      console.log(action.trackVotes);
-
       return Object.assign({}, state, { party: Object.assign({}, state.party, { trackVotes: action.trackVotes }) });
     }
 
     case SHOW_ARTIST_VIEW: {
-      console.log("Showing artist view");
-      console.log(action);
       return Object.assign({}, state, { views: { searchArtistId: action.artist } });
     }
 
@@ -82,7 +76,6 @@ export default (state = initalState, action) => {
     }
 
     case UPDATE_CURRENT_SONG: {
-      console.log("updating current song");
       return Object.assign({}, state, {
         party: Object.assign({}, state.party, { nowPlaying: Object.assign({}, state.party.nowPlaying, action.track) }),
       });
@@ -100,7 +93,6 @@ export default (state = initalState, action) => {
     }
 
     case UPDATE_SONG: {
-      console.log("updating song");
       let indexOfSongToRemove = state.party.queue.findIndex((song) => song.id == action.song.id);
       return Object.assign({}, state, {
         party: Object.assign(
