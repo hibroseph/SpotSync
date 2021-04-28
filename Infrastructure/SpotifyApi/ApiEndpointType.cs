@@ -18,6 +18,7 @@ namespace SpotSync.Infrastructure.SpotifyApi
         GetUserPlaylists = 10,
         GetPlaylistItems = 11,
         ArtistInformation = 12,
-        ArtistTopTracks = 13
+        ArtistTopTracks = 13,
+        UsersTopArtists = 14
     }
 }

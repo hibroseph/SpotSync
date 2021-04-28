@@ -1,4 +1,5 @@
 ﻿using SpotSync.Domain.DTO;
+using SpotSync.Domain.PartyAggregate;
 using SpotSync.Domain.Types;
 using System;
 using System.Collections.Generic;
@@ -23,5 +24,6 @@ namespace SpotSync.Domain.Contracts.Services
         Task FavoriteTrackAsync(PartyGoer user, string trackUri);
         Task UnfavoriteTrackAsync(PartyGoer user, string trackUri);
         Task<List<string>> GetUsersFavoriteTracksAsync(PartyGoer user);
+        Task<List<SuggestedContribution>> GetSuggestedContributionsAsync(PartyGoer partier);
     }
 }

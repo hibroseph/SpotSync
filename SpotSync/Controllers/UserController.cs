@@ -55,6 +55,15 @@ namespace SpotSync.Controllers
 
         [HttpGet]
         [Authorize]
+        public async Task<IActionResult> SuggestedContributions()
+        {
+            var result = await _partyGoerService.GetSuggestedContributionsAsync(await _partyGoerService.GetCurrentPartyGoerAsync());
+
+            return new JsonResult(result);
+        }
+
+        [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetUserDetails()
         {
             PartyGoer currentUser = await _partyGoerService.GetCurrentPartyGoerAsync();

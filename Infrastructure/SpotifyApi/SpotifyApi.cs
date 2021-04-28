@@ -14,6 +14,7 @@ namespace SpotSync.Infrastructure.SpotifyApi
     public class SpotifyApi : ISpotifyApi
     {
         private PlaylistEndpoint _playlistEndpoint;
+        private PersonalizationEndpoint _personalizationEndpoint;
 
         public SpotifyApi(ISpotifyHttpClient spotifyHttpClient, ILogService logService)
         {
@@ -33,10 +34,12 @@ namespace SpotSync.Infrastructure.SpotifyApi
                 Keys = new List<string> {"{playlist_id}"} } },
                 { ApiEndpointType.ArtistInformation, new SpotifyEndpoint { EndpointUrl =  "https://api.spotify.com/v1/artists/{id}", HttpMethod = HttpMethod.Get,
                 Keys = new List<string> { "{id}"} } }, {ApiEndpointType.ArtistTopTracks, new SpotifyEndpoint{ EndpointUrl = "https://api.spotify.com/v1/artists/{id}/top-tracks", HttpMethod = HttpMethod.Get,
-                Keys = new List<string> {"{id}" }  } }
+                Keys = new List<string> {"{id}" }  } },
+                { ApiEndpointType.UsersTopArtists, new SpotifyEndpoint{ EndpointUrl ="https://api.spotify.com/v1/me/top/artists", HttpMethod = HttpMethod.Get} }
             };
 
             _playlistEndpoint = new PlaylistEndpoint(spotifyHttpClient, logService, apiEndpoints);
+            _personalizationEndpoint = new PersonalizationEndpoint(spotifyHttpClient, logService, apiEndpoints);
         }
 
         public async Task<PlaylistContents> GetPlaylistContentsAsync(PartyGoer partyGoer, string playlistId)
@@ -47,6 +50,16 @@ namespace SpotSync.Infrastructure.SpotifyApi
         public async Task<List<PlaylistSummary>> GetUsersPlaylistsAsync(PartyGoer partyGoer, int limit, int offset)
         {
             return await _playlistEndpoint.GetUsersPlaylistsAsync(partyGoer, limit, offset);
+        }
+
+        public async Task<List<Artist>> GetUsersTopArtistsAsync(PartyGoer partyGoer, int amount = 10)
+        {
+            if (amount < 0 || amount > 50)
+            {
+                throw new Exception($"Amount must be between 0 and 50. Currently it is {amount}");
+            }
+
+            return await _personalizationEndpoint.GetUsersTopArtistsAsync(partyGoer, amount);
         }
     }
 }

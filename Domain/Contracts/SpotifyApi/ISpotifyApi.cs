@@ -11,5 +11,6 @@ namespace SpotSync.Domain.Contracts.SpotifyApi
     {
         Task<List<PlaylistSummary>> GetUsersPlaylistsAsync(PartyGoer partyGoer, int limit, int offset);
         Task<PlaylistContents> GetPlaylistContentsAsync(PartyGoer partyGoer, string playlistId);
+        Task<List<Artist>> GetUsersTopArtistsAsync(PartyGoer partyGoer, int amount = 10);
     }
 }

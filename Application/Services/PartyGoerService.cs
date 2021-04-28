@@ -17,6 +17,7 @@ using SpotSync.Domain.Contracts.SpotifyApi;
 using SpotSync.Domain.Contracts.SpotifyApi.Models;
 using SpotibroModels = SpotSync.Domain.Contracts.SpotibroModels;
 using SpotSync.Domain.Contracts.Repositories;
+using SpotSync.Domain.PartyAggregate;
 
 namespace SpotSync.Application.Services
 {
@@ -30,6 +31,8 @@ namespace SpotSync.Application.Services
         private ISpotifyApi _spotifyApi;
         private IUserRepository _userRepository;
         private IDictionary<string, int> _userIds;
+        private object _randomLock;
+        private Random _random;
 
         public PartyGoerService(ISpotifyHttpClient spotifyHttpClient, IHttpContextAccessor httpContextAccessor,
         ISpotifyAuthentication spotifyAuthentication, ILogService logService, ISpotifyApi spotifyApi, IUserRepository userRepository)
@@ -42,6 +45,61 @@ namespace SpotSync.Application.Services
             _spotifyApi = spotifyApi;
             _userRepository = userRepository;
             _userIds = new Dictionary<string, int>();
+            _randomLock = new object();
+            _random = new Random();
+        }
+
+        public async Task<List<SuggestedContribution>> GetSuggestedContributionsAsync(PartyGoer partier)
+        {
+            // get items from multiple sources and return that to the client
+            Task<List<SpotibroModels.PlaylistSummary>> playlistsTask = GetUsersPlaylistsAsync(partier, 10);
+            Task<List<SpotibroModels.Track>> tracksTask = _spotifyHttpClient.GetUserTopTracksAsync(partier.GetSpotifyId());
+            Task<List<SpotibroModels.Artist>> artistsTask = _spotifyApi.GetUsersTopArtistsAsync(partier);
+
+            await Task.WhenAll(playlistsTask, tracksTask);
+
+            List<SuggestedContribution> contributions = new List<SuggestedContribution>();
+
+            lock (_randomLock)
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    SpotibroModels.Track track = tracksTask.Result.ElementAt(_random.Next(0, tracksTask.Result.Count - 1));
+
+                    contributions.Add(new SuggestedContribution
+                    {
+                        Id = track.Id,
+                        Name = $"{track.Name} - {track.Artists.First().Name}",
+                        Type = ContributionType.Track
+                    });
+                }
+
+                for (int i = 0; i < 2; i++)
+                {
+                    SpotibroModels.PlaylistSummary playlist = playlistsTask.Result.ElementAt(_random.Next(0, playlistsTask.Result.Count - 1));
+
+                    contributions.Add(new SuggestedContribution
+                    {
+                        Id = playlist.Id,
+                        Name = playlist.Name,
+                        Type = ContributionType.Playlist
+                    });
+                }
+
+                for (int i = 0; i < 2; i++)
+                {
+                    SpotibroModels.Artist artist = artistsTask.Result.ElementAt(_random.Next(0, artistsTask.Result.Count - 1));
+
+                    contributions.Add(new SuggestedContribution
+                    {
+                        Id = artist.Id,
+                        Name = artist.Name,
+                        Type = ContributionType.Artist
+                    });
+                }
+            }
+
+            return contributions;
         }
 
         public async Task FavoriteTrackAsync(PartyGoer user, string trackUri)
