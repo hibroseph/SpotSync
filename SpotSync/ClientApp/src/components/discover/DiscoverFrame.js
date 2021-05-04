@@ -12,6 +12,7 @@ import PlaylistView from "./Playlists/PlaylistView";
 import notify, { error } from "../shared/notify";
 import ScrollContainer from "../shared/ScrollContainer";
 import ArtistView from "./Artists";
+import Dashboard from "./Dashboard/Dashboard";
 
 const $DiscoverFrame = styled.div`
   padding: 0 10px;
@@ -30,6 +31,7 @@ const SEARCH_RESULTS_TITLE = "Search Results";
 const ARTIST_TITLE = "Artist";
 const PLAYLIST_TITLE = "Playlist";
 const TOP_SONGS_TITLE = "Your Top Songs";
+const DASHBOARD_TITLE = "Dashboard";
 
 const addTrackToQueue = (track, user, partyCode, connection) => {
   addSongToQueue(track, user.details.id, partyCode, connection);
@@ -62,8 +64,11 @@ const addSearchResultsToTabs = (tabs, setTabs) => {
   }
 };
 
-const DiscoverFrame = ({ user, partyCode, connection, searchArtistId }) => {
+const DiscoverFrame = ({ user, partyCode, connection, searchArtistId, partyInitalized, showContributionsPopup }) => {
   const [tabs, setTabs] = useState([
+    {
+      title: DASHBOARD_TITLE,
+    },
     {
       title: TOP_SONGS_TITLE,
     },
@@ -72,7 +77,7 @@ const DiscoverFrame = ({ user, partyCode, connection, searchArtistId }) => {
     },
   ]);
 
-  const [currentTabView, setTabView] = useState(TOP_SONGS_TITLE);
+  const [currentTabView, setTabView] = useState(DASHBOARD_TITLE);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -140,6 +145,9 @@ const DiscoverFrame = ({ user, partyCode, connection, searchArtistId }) => {
         <Tabs selected={currentTabView} changeSelectedTab={setTabView} tabs={tabs} />
       </$Bar>
       <ScrollContainer>
+        {currentTabView == DASHBOARD_TITLE && (
+          <Dashboard showContributionsPopup={showContributionsPopup} partyInitalized={partyInitalized} partyCode={partyCode}></Dashboard>
+        )}
         {currentTabView == SEARCH_RESULTS_TITLE && (
           <React.Fragment>
             <UnorderedTrackList

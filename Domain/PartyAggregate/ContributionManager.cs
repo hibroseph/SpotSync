@@ -21,6 +21,22 @@ namespace SpotSync.Domain.PartyAggregate
             _contributions.AddRange(contribution);
         }
 
+        public List<PartierContribution> GetContributions(PartyGoer partier)
+        {
+            return _contributions.Where(p => p.ContributedBy == partier.GetId()).Select(p => new PartierContribution
+            {
+                Id = p.Id,
+                ContributionId = p.ContributionId,
+                Name = p.Name,
+                Type = p.Type
+            }).ToList();
+        }
+
+        public void RemoveContribution(PartyGoer partier, Guid contributionId)
+        {
+            _contributions.RemoveAll(p => p.ContributedBy == partier.GetId() && p.ContributionId == contributionId);
+        }
+
         public Dictionary<ContributionType, List<string>> GetContributionSeeds(List<PartyGoer> partyGoers)
         {
             Dictionary<ContributionType, List<string>> seedContributions = new Dictionary<ContributionType, List<string>>();

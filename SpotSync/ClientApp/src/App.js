@@ -38,13 +38,18 @@ const configureSpotifySdk = (props, spotifySdkAdded, setSpotifySdkAdded) => {
 const MUSIC_CONTRIBUTIONS = "Music Contributions";
 const JOIN_OR_CREATE_PARTY = "Join or Create Party";
 
-const Popups = (popupName, setPopup, partyCode) => {
+const Popups = (popupName, setPopup, partyCode, setPartyInitalized) => {
   switch (popupName) {
     case JOIN_OR_CREATE_PARTY:
       return <JoinOrCreateParty showContributionsPopup={(show) => (show ? setPopup(MUSIC_CONTRIBUTIONS) : setPopup(null))}></JoinOrCreateParty>;
     case MUSIC_CONTRIBUTIONS:
       return (
-        <MusicContributionPopup setPopup={setPopup} partyCode={partyCode} hideMusicContributionPopup={() => setPopup(null)}></MusicContributionPopup>
+        <MusicContributionPopup
+          setPartyInitalized={setPartyInitalized}
+          setPopup={setPopup}
+          partyCode={partyCode}
+          hideMusicContributionPopup={() => setPopup(null)}
+        ></MusicContributionPopup>
       );
     default:
       return null;
@@ -52,7 +57,7 @@ const Popups = (popupName, setPopup, partyCode) => {
 };
 function App(props) {
   const [spotifySdkAdded, setSpotifySdkAdded] = useState(false);
-
+  const [isPartyInitalized, setPartyInitalized] = useState(false);
   useEffect(() => {
     setUpProcess(props.dispatch);
   }, []);
@@ -66,9 +71,13 @@ function App(props) {
 
   return (
     <React.Fragment>
-      {Popups(currentPopup, setCurrentPopup, props.partyCode)}
-      <Navigation showCreateOrJoinPartyPopup={() => setCurrentPopup(JOIN_OR_CREATE_PARTY)} />
-      <MainContent artistView={artistView}></MainContent>
+      {Popups(currentPopup, setCurrentPopup, props.partyCode, setPartyInitalized)}
+      <Navigation setPartyInitalized={setPartyInitalized} showCreateOrJoinPartyPopup={() => setCurrentPopup(JOIN_OR_CREATE_PARTY)} />
+      <MainContent
+        showContributionsPopup={() => setCurrentPopup(MUSIC_CONTRIBUTIONS)}
+        partyInitalized={isPartyInitalized}
+        artistView={artistView}
+      ></MainContent>
       <NowPlaying ShowArtistView={(artist) => setArtistView(artist)}></NowPlaying>
     </React.Fragment>
   );

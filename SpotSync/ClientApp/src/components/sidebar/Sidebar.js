@@ -9,14 +9,13 @@ import { getPartyCode, getSongFeelings, isHost } from "../../redux/reducers/redu
 import { setSongFeelings } from "../../redux/actions/party";
 import Listeners from "./Listeners";
 import $ScrollContainer from "../shared/ScrollContainer";
+import OutlinedContainer from "../shared/OutlinedContainer";
 
-const $Sidebar = styled.div`
+const $Sidebar = styled(OutlinedContainer)`
   margin: 0 5px 5px 0;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  border: 3px solid #e1e1e1;
-  border-radius: 10px;
 `;
 
 const $SidebarContent = styled.div`

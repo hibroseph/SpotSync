@@ -8,6 +8,7 @@ import { createParty, joinParty } from "../../api/party";
 import { getRealtimeConnection } from "../../redux/reducers/reducers";
 import Loader from "../shared/Loader";
 import Popup from "../shared/Popup";
+import Title from "../shared/Title";
 
 const $flexContainer = styled.div`
   display: flex;
@@ -15,6 +16,7 @@ const $flexContainer = styled.div`
   padding: 20px;
   box-sizing: border-box;
   justify-content: center;
+  align-items: center;
 `;
 
 const $marginedButton = styled(Button)`
@@ -46,7 +48,7 @@ const JoinOrCreateParty = ({ connection, showContributionsPopup }) => {
   }, [connection]);
   return (
     <Popup>
-      Join or Create Party
+      <Title>Join or Create Party</Title>
       <$flexContainer>
         {isLoading && <Loader isLoading={isLoading}></Loader>}
         {!isLoading && (

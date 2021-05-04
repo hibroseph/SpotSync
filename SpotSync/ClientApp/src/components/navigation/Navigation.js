@@ -44,7 +44,7 @@ const $MarginLeftButton = styled(LinkButton)`
   margin-left: 25px;
 `;
 
-const Navigation = ({ partyCode, user, dispatch, showCreateOrJoinPartyPopup }) => {
+const Navigation = ({ partyCode, user, dispatch, showCreateOrJoinPartyPopup, setPartyInitalized }) => {
   return (
     <$Navigation>
       <div className="left-nav-item">
@@ -60,6 +60,7 @@ const Navigation = ({ partyCode, user, dispatch, showCreateOrJoinPartyPopup }) =
               onClick={() => {
                 leaveParty(partyCode)(dispatch);
                 showCreateOrJoinPartyPopup();
+                setPartyInitalized(false);
               }}
             >
               Leave Party

@@ -19,10 +19,10 @@ const $SidebarWithWidth = styled(Sidebar)`
   }
 `;
 
-const MainContent = () => {
+const MainContent = ({ partyInitalized, showContributionsPopup }) => {
   return (
     <$MainContent>
-      <DiscoverFrame />
+      <DiscoverFrame showContributionsPopup={showContributionsPopup} partyInitalized={partyInitalized} />
       <$SidebarWithWidth />
     </$MainContent>
   );

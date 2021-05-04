@@ -28,6 +28,7 @@ namespace SpotSync.Application.Services
             _logService = logService;
         }
 
+        #region Contributions
         public async Task AddContributionAsync(string partyCode, List<Contribution> contribution)
         {
             Party party = await _partyRepository.GetPartyWithCodeAsync(partyCode);
@@ -39,6 +40,32 @@ namespace SpotSync.Application.Services
 
             await party.AddContributionsAsync(contribution);
         }
+
+        public async Task<List<PartierContribution>> GetContributionsAsync(string partyCode, PartyGoer partier)
+        {
+            Party party = await _partyRepository.GetPartyWithCodeAsync(partyCode);
+
+            if (!party.IsListener(partier))
+            {
+                throw new Exception($"{partier.GetId()} is not part of party {partyCode} but tried to get their contributions to that party");
+            }
+
+            return await party.GetUserContributionsAsync(partier);
+        }
+
+        public async Task RemoveContributionAsync(string partyCode, PartyGoer partier, Guid contributionId)
+        {
+            Party party = await _partyRepository.GetPartyWithCodeAsync(partyCode);
+
+            if (!party.IsListener(partier))
+            {
+                throw new Exception($"{partier.GetId()} is not part of party {partyCode} but tried to remove contribution {contributionId}");
+            }
+
+            party.RemoveContribution(partier, contributionId);
+        }
+
+        #endregion
 
         public async Task AddSomeTracksFromPlaylistToQueueAsync(PartyGoer partyGoer, string playlistId, int amount)
         {

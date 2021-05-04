@@ -60,6 +60,16 @@ namespace SpotSync.Domain.PartyAggregate
             }
         }
 
+        public Task<List<PartierContribution>> GetUserContributionsAsync(PartyGoer partier)
+        {
+            return Task.FromResult(_contributionManager.GetContributions(partier));
+        }
+
+        public void RemoveContribution(PartyGoer partier, Guid contributionId)
+        {
+            _contributionManager.RemoveContribution(partier, contributionId);
+        }
+
         private bool HasPartyStarted()
         {
             return _currentTrack != null;

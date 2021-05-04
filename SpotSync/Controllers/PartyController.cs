@@ -53,6 +53,39 @@ namespace SpotSync.Controllers
         }
 
         [Authorize]
+        [HttpGet("api/[controller]/UserContributions")]
+        public async Task<IActionResult> UserContributions(string partyCode)
+        {
+            PartyGoer partier = await _partyGoerService.GetCurrentPartyGoerAsync();
+            try
+            {
+                return new JsonResult(await _partyService.GetContributionsAsync(partyCode, partier));
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, "Failed to get user contributions");
+                return StatusCode(500);
+            }
+        }
+
+        [Authorize]
+        [HttpDelete("api/[controller]/RemoveContribution")]
+        public async Task<IActionResult> RemoveUserContribution(string partyCode, Guid contributionId)
+        {
+            PartyGoer partier = await _partyGoerService.GetCurrentPartyGoerAsync();
+            try
+            {
+                await _partyService.RemoveContributionAsync(partyCode, partier, contributionId);
+                return StatusCode(200);
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogExceptionAsync(ex, $"Failed to remove contribution {contributionId} for user {partier.GetId()}");
+                return StatusCode(500);
+            }
+        }
+
+        [Authorize]
         [HttpGet("api/[controller]/GetParties")]
         public async Task<IActionResult> GetParties()
         {

@@ -19,8 +19,8 @@ const $popup = styled.div`
   background-color: #ffffff;
   border-radius: 10px;
   padding: 20px;
-  width: 70%;
-  height: 70%;
+  max-width: 70%;
+  max-height: 70%;
 `;
 
 export default ({ children }) => (

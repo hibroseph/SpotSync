@@ -41,10 +41,11 @@ const $contribution = styled.div`
     margin: 3px 9px;
 `;
 
-export default ({ name, id, type, actOnContribution }) => {
+export default ({ name, id, type, actOnContribution, children }) => {
   return (
     <$contribution type={type} onClick={() => actOnContribution({ name, id, type })}>
       {name}
+      {children}
     </$contribution>
   );
 };

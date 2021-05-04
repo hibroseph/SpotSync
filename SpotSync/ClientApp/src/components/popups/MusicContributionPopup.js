@@ -11,6 +11,7 @@ import Title from "../shared/Title";
 import CenteredHorizontally from "../shared/CenteredHorizontally";
 import $Button from "../shared/Button";
 import { addContributionsToParty } from "../../api/party";
+import { getContributions } from "../../api/party";
 
 const $contributionContainer = styled.div`
   display: flex;
@@ -19,13 +20,11 @@ const $contributionContainer = styled.div`
 `;
 
 const addContribution = (contribution, contributions, setContributions, suggestedContributions, setSuggestedContributions) => {
-  console.log("ADDING CONTRIBUTION");
   setContributions([...contributions, contribution]);
   setSuggestedContributions(suggestedContributions.filter((p) => p.id != contribution.id));
 };
 
 const removeContribution = (contribution, contributions, setContributions, suggestedContributions, setSuggestedContributions) => {
-  console.log("REMOVING CONTRIBUTION");
   setContributions(contributions.filter((p) => p.id != contribution.id));
   setSuggestedContributions([...suggestedContributions, contribution]);
 };
@@ -34,8 +33,6 @@ const getSuggestedContributionsPls = (setIsLoading, suggestedContributions, setS
   setIsLoading(true);
   getSuggestedContributions()
     .then((newSuggestedContributions) => {
-      console.log("SUGGESTED CONTRIBUTIONS");
-      console.log(newSuggestedContributions);
       setSuggestedContributions([...suggestedContributions, ...newSuggestedContributions]);
       setIsLoading(false);
     })
@@ -44,16 +41,25 @@ const getSuggestedContributionsPls = (setIsLoading, suggestedContributions, setS
     });
 };
 
-const sendContributionsToServer = (partyCode, contributions, setPopup) => {
-  addContributionsToParty(partyCode, contributions)
+const sendContributionsToServer = (partyCode, contributons, setPopup, setPartyInitalized) => {
+  addContributionsToParty(partyCode, contributons)
     .catch((p) => error("Failed to add contributions to party. Try again later"))
-    .finally((p) => setPopup(null));
+    .finally((p) => {
+      setPopup(null);
+      setPartyInitalized(true);
+    });
 };
 
-export default ({ hideMusicContributionPopup, partyCode, setPopup }) => {
+export default ({ hideMusicContributionPopup, partyCode, setPopup, setPartyInitalized }) => {
   useEffect(() => {
     getSuggestedContributionsPls(setIsLoading, suggestedContributions, setSuggestedContributions);
   }, []);
+
+  useEffect(() => {
+    if (partyCode != undefined) {
+      getContributions(partyCode).then((contributons) => setContributions(contributons));
+    }
+  }, [partyCode]);
 
   const [suggestedContributions, setSuggestedContributions] = useState([]);
   const [contributions, setContributions] = useState([]);
@@ -111,15 +117,16 @@ export default ({ hideMusicContributionPopup, partyCode, setPopup }) => {
       </$contributionContainer>
       <CenteredHorizontally>
         {contributions?.length > 0 ? (
+          <$Button onClick={() => sendContributionsToServer(partyCode, contributions, setPopup, setPartyInitalized)}>Contribute</$Button>
+        ) : (
           <$Button
             onClick={() => {
-              sendContributionsToServer(partyCode, contributions, setPopup);
+              hideMusicContributionPopup();
+              setPartyInitalized(true);
             }}
           >
-            Contribute
+            Just Listen
           </$Button>
-        ) : (
-          <$Button onClick={hideMusicContributionPopup}>Just Listen</$Button>
         )}
       </CenteredHorizontally>
     </Popup>

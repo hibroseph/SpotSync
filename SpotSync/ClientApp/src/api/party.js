@@ -76,3 +76,13 @@ export const addContributionsToParty = (partyCode, contributions) => {
     },
   });
 };
+
+export const getContributions = (partyCode) => {
+  return fetch(`/api/party/usercontributions?partyCode=${partyCode}`).then((json) => json.json());
+};
+
+export const removeContribution = (partyCode, contributionIdToRemove) => {
+  return fetch(`/api/party/removecontribution?partyCode=${partyCode}&contributionId=${contributionIdToRemove}`, {
+    method: "DELETE",
+  });
+};
