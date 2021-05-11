@@ -18,6 +18,8 @@ using SpotSync.Domain.Contracts.SpotifyApi.Models;
 using SpotibroModels = SpotSync.Domain.Contracts.SpotibroModels;
 using SpotSync.Domain.Contracts.Repositories;
 using SpotSync.Domain.PartyAggregate;
+using System.Diagnostics.CodeAnalysis;
+using SpotSync.Domain.Contracts.SpotibroModels;
 
 namespace SpotSync.Application.Services
 {
@@ -49,14 +51,45 @@ namespace SpotSync.Application.Services
             _random = new Random();
         }
 
-        public async Task<List<SuggestedContribution>> GetSuggestedContributionsAsync(PartyGoer partier)
+        public async Task<List<SuggestedContribution>> GetSuggestedContributionsAsync(PartyGoer partier, List<string> excludedIds = null)
         {
-            // get items from multiple sources and return that to the client
-            //Task<List<SpotibroModels.PlaylistSummary>> playlistsTask = GetUsersPlaylistsAsync(partier, 10);
-            Task<List<SpotibroModels.Track>> tracksTask = _spotifyHttpClient.GetUserTopTracksAsync(partier.GetSpotifyId());
-            Task<List<SpotibroModels.Artist>> artistsTask = _spotifyApi.GetUsersTopArtistsAsync(partier);
+            if (excludedIds == null)
+            {
+                excludedIds = new List<string>();
+            }
 
-            await Task.WhenAll(artistsTask, tracksTask);
+            bool newSuggestionExists = false;
+            Task<List<SpotibroModels.Track>> tracksTask;
+            Task<List<SpotibroModels.Artist>> artistsTask;
+
+            List<SpotibroModels.Track> uniqueTracks = null;
+            List<SpotibroModels.Artist> uniqueArtists = null;
+
+            // How about some nice lil API calls in a while loop :o
+            do
+            {
+                // get items from multiple sources and return that to the client
+                //Task<List<SpotibroModels.PlaylistSummary>> playlistsTask = GetUsersPlaylistsAsync(partier, 10);
+                tracksTask = _spotifyHttpClient.GetUserTopTracksAsync(partier.GetSpotifyId(), 15);
+                artistsTask = _spotifyApi.GetUsersTopArtistsAsync(partier, 15);
+
+                await Task.WhenAll(artistsTask, tracksTask);
+
+                // Lets make sure we got some results
+                foreach (var excludedId in excludedIds)
+                {
+                    tracksTask.Result.RemoveAll(p => p.Id == excludedId);
+                    artistsTask.Result.RemoveAll(p => p.Id == excludedId);
+                }
+
+                if (tracksTask.Result.Count + artistsTask.Result.Count > 0)
+                {
+                    uniqueArtists = artistsTask.Result.Distinct(new ArtistComparer()).ToList();
+                    uniqueTracks = tracksTask.Result.Distinct(new TrackComparer()).ToList();
+                    newSuggestionExists = true;
+                }
+
+            } while (!newSuggestionExists);
 
             List<SuggestedContribution> contributions = new List<SuggestedContribution>();
 
@@ -64,7 +97,7 @@ namespace SpotSync.Application.Services
             {
                 for (int i = 0; i < 2; i++)
                 {
-                    SpotibroModels.Track track = tracksTask.Result.ElementAt(_random.Next(0, tracksTask.Result.Count - 1));
+                    SpotibroModels.Track track = uniqueTracks.ElementAt(_random.Next(0, uniqueTracks.Count - 1));
 
                     contributions.Add(new SuggestedContribution
                     {
@@ -88,7 +121,7 @@ namespace SpotSync.Application.Services
 
                 for (int i = 0; i < 2; i++)
                 {
-                    SpotibroModels.Artist artist = artistsTask.Result.ElementAt(_random.Next(0, artistsTask.Result.Count - 1));
+                    SpotibroModels.Artist artist = uniqueArtists.ElementAt(_random.Next(0, uniqueArtists.Count - 1));
 
                     contributions.Add(new SuggestedContribution
                     {
@@ -100,6 +133,33 @@ namespace SpotSync.Application.Services
             }
 
             return contributions;
+        }
+
+        public class TrackComparer : IEqualityComparer<SpotibroModels.Track>
+        {
+            public bool Equals([AllowNull] SpotibroModels.Track x, [AllowNull] SpotibroModels.Track y)
+            {
+                return x.GetHashCode() == y.GetHashCode();
+            }
+
+
+            public int GetHashCode([DisallowNull] SpotibroModels.Track obj)
+            {
+                return obj.GetHashCode();
+            }
+        }
+
+        public class ArtistComparer : IEqualityComparer<SpotibroModels.Artist>
+        {
+            public bool Equals([AllowNull] SpotibroModels.Artist x, [AllowNull] SpotibroModels.Artist y)
+            {
+                return x.GetHashCode() == y.GetHashCode();
+            }
+
+            public int GetHashCode([DisallowNull] SpotibroModels.Artist obj)
+            {
+                return obj.GetHashCode();
+            }
         }
 
         public async Task FavoriteTrackAsync(PartyGoer user, string trackUri)

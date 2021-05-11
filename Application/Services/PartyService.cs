@@ -29,7 +29,7 @@ namespace SpotSync.Application.Services
         }
 
         #region Contributions
-        public async Task AddContributionAsync(string partyCode, List<Contribution> contribution)
+        public async Task UpdateContributionsAsync(string partyCode, List<Contribution> contributionsToAdd, List<Contribution> contributionsToRemove)
         {
             Party party = await _partyRepository.GetPartyWithCodeAsync(partyCode);
 
@@ -38,7 +38,7 @@ namespace SpotSync.Application.Services
                 throw new Exception($"{partyCode} is not associated with a party");
             }
 
-            await party.AddContributionsAsync(contribution);
+            await party.UpdateContributionsAsync(contributionsToAdd, contributionsToRemove);
         }
 
         public async Task<List<PartierContribution>> GetContributionsAsync(string partyCode, PartyGoer partier)

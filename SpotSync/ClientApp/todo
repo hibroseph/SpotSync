@@ -1,6 +1,6 @@
 This is used to keep track of what is currently an issue and what I am working on.
 
-Issue: Inconsistent loading of elements on page
-Issue: Joining existing party sometimes does not play music
-Issue: JS build size after transpilation
-
+- Flesh out non repetitive suggested contributions
+- Add searching to contributions page
+- Add ability to add genres and playlists and albums to contributions
+- Flesh out adding and removing existing contributions on contribution popup

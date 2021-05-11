@@ -12,11 +12,23 @@ import CenteredHorizontally from "../shared/CenteredHorizontally";
 import $Button from "../shared/Button";
 import { addContributionsToParty } from "../../api/party";
 import { getContributions } from "../../api/party";
+import OutlinedContainer from "../shared/OutlinedContainer";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
 
-const $contributionContainer = styled.div`
+const $ContributionContainer = styled.div`
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
+`;
+
+const $StyledPopup = styled(Popup)`
+  width: 70%;
+`;
+
+const $PopupNav = styled.div`
+  display: flex;
+  justify-content: space-between;
 `;
 
 const addContribution = (contribution, contributions, setContributions, suggestedContributions, setSuggestedContributions) => {
@@ -24,33 +36,45 @@ const addContribution = (contribution, contributions, setContributions, suggeste
   setSuggestedContributions(suggestedContributions.filter((p) => p.id != contribution.id));
 };
 
-const removeContribution = (contribution, contributions, setContributions, suggestedContributions, setSuggestedContributions) => {
+const removeContribution = (contribution, contributions, setContributions, someContributions, setSomeContributions) => {
+  console.log(`REMOVING`, contribution);
   setContributions(contributions.filter((p) => p.id != contribution.id));
-  setSuggestedContributions([...suggestedContributions, contribution]);
+  setSomeContributions([...someContributions, contribution]);
+  console.log(someContributions);
 };
 
 const getSuggestedContributionsPls = (setIsLoading, suggestedContributions, setSuggestedContributions) => {
   setIsLoading(true);
-  getSuggestedContributions()
+  getSuggestedContributions(suggestedContributions.map((contribution) => contribution.id))
     .then((newSuggestedContributions) => {
       setSuggestedContributions([...suggestedContributions, ...newSuggestedContributions]);
       setIsLoading(false);
     })
     .catch((err) => {
       error("Unable to get suggested contributions");
+      console.error(err);
     });
 };
 
-const sendContributionsToServer = (partyCode, contributons, setPopup, setPartyInitalized) => {
-  addContributionsToParty(partyCode, contributons)
+const sendContributionsToServer = (partyCode, contributons, contributionsToRemove, setPopup, setPartyInitalized, setGlobalContributions) => {
+  addContributionsToParty(partyCode, contributons, contributionsToRemove)
     .catch((p) => error("Failed to add contributions to party. Try again later"))
     .finally((p) => {
-      setPopup(null);
-      setPartyInitalized(true);
+      console.log("getting contributions");
+      getContributions(partyCode)
+        .then((realContributions) => {
+          console.log("got contributions");
+          console.log(realContributions);
+          setGlobalContributions(realContributions);
+        })
+        .finally(() => {
+          setPopup(null);
+          setPartyInitalized(true);
+        });
     });
 };
 
-export default ({ hideMusicContributionPopup, partyCode, setPopup, setPartyInitalized }) => {
+export default ({ hideMusicContributionPopup, partyCode, setPopup, setPartyInitalized, setGlobalContributions }) => {
   useEffect(() => {
     getSuggestedContributionsPls(setIsLoading, suggestedContributions, setSuggestedContributions);
   }, []);
@@ -63,72 +87,109 @@ export default ({ hideMusicContributionPopup, partyCode, setPopup, setPartyInita
 
   const [suggestedContributions, setSuggestedContributions] = useState([]);
   const [contributions, setContributions] = useState([]);
+  const [newContributions, setNewContributions] = useState([]);
+  const [contributionsToRemove, setContributionsToRemove] = useState([]);
+
   const [isLoading, setIsLoading] = useState(true);
 
   return (
-    <Popup>
-      <Title>Contribute Music</Title>
-      <Subtitle>Suggested Contributions</Subtitle>
-      <$contributionContainer>
-        {suggestedContributions?.map((contribution, index) => {
-          return (
-            <Contribution
-              key={index}
-              type={contribution.type}
-              id={contribution.id}
-              name={contribution.name}
-              actOnContribution={(contribution) =>
-                addContribution(contribution, contributions, setContributions, suggestedContributions, setSuggestedContributions)
-              }
-            ></Contribution>
-          );
-        })}
-        <Contribution
-          id="load_more"
-          name="Load More"
-          actOnContribution={(contribution) => {
-            getSuggestedContributionsPls(setIsLoading, suggestedContributions, setSuggestedContributions);
-          }}
-        ></Contribution>
-      </$contributionContainer>
+    <$StyledPopup>
+      <$PopupNav>
+        <Title>Contribute Music</Title>
+        <FontAwesomeIcon icon={faTimes} onClick={() => hideMusicContributionPopup()}></FontAwesomeIcon>
+      </$PopupNav>
+      <OutlinedContainer>
+        <Subtitle>Suggested Contributions</Subtitle>
+        <$ContributionContainer>
+          {suggestedContributions?.map((contribution, index) => {
+            return (
+              <Contribution
+                key={index}
+                type={contribution.type}
+                id={contribution.id}
+                name={contribution.name}
+                actOnContribution={(contribution) =>
+                  addContribution(contribution, newContributions, setNewContributions, suggestedContributions, setSuggestedContributions)
+                }
+              ></Contribution>
+            );
+          })}
+          <Contribution
+            id="load_more"
+            name="Load More"
+            actOnContribution={(contribution) => {
+              getSuggestedContributionsPls(setIsLoading, suggestedContributions, setSuggestedContributions);
+            }}
+          ></Contribution>
+        </$ContributionContainer>
+      </OutlinedContainer>
       {isLoading && (
         <CenteredHorizontally>
           <Loader></Loader>
         </CenteredHorizontally>
       )}
-      <Subtitle>Contributions</Subtitle>
-      <$contributionContainer>
-        {contributions?.length == 0 && (
-          <p>You currently are not contributing anything to this party. Click some items above to add some contributions.</p>
-        )}
-        {contributions?.map((contribution, index) => {
-          return (
-            <Contribution
-              key={index}
-              type={contribution.type}
-              id={contribution.id}
-              name={contribution.name}
-              actOnContribution={(contribution) =>
-                removeContribution(contribution, contributions, setContributions, suggestedContributions, setSuggestedContributions)
-              }
-            ></Contribution>
-          );
-        })}
-      </$contributionContainer>
+      <OutlinedContainer>
+        <Subtitle>Contributions</Subtitle>
+        <$ContributionContainer>
+          {contributions?.length == 0 && newContributions?.length == 0 && (
+            <p>You currently are not contributing anything to this party. Click some items above to add some contributions.</p>
+          )}
+          {contributions?.map((contribution, index) => {
+            return (
+              <Contribution
+                key={index}
+                type={contribution.type}
+                id={contribution.id}
+                name={contribution.name}
+                actOnContribution={(contribution) =>
+                  removeContribution(contribution, contributions, setContributions, contributionsToRemove, setContributionsToRemove)
+                }
+              ></Contribution>
+            );
+          })}
+          {newContributions?.map((contribution, index) => {
+            return (
+              <Contribution
+                key={index}
+                type={contribution.type}
+                id={contribution.id}
+                name={contribution.name}
+                actOnContribution={(contribution) =>
+                  removeContribution(contribution, newContributions, setNewContributions, suggestedContributions, setSuggestedContributions)
+                }
+              ></Contribution>
+            );
+          })}
+        </$ContributionContainer>
+      </OutlinedContainer>
       <CenteredHorizontally>
-        {contributions?.length > 0 ? (
-          <$Button onClick={() => sendContributionsToServer(partyCode, contributions, setPopup, setPartyInitalized)}>Contribute</$Button>
+        {newContributions?.length > 0 || contributionsToRemove?.length > 0 ? (
+          <$Button
+            onClick={() =>
+              sendContributionsToServer(partyCode, newContributions, contributionsToRemove, setPopup, setPartyInitalized, setGlobalContributions)
+            }
+          >
+            Update Contributions
+          </$Button>
         ) : (
           <$Button
             onClick={() => {
-              hideMusicContributionPopup();
-              setPartyInitalized(true);
+              getContributions(partyCode)
+                .then((realContributions) => {
+                  console.log("got contributions");
+                  console.log(realContributions);
+                  setGlobalContributions(realContributions);
+                })
+                .finally(() => {
+                  setPopup(null);
+                  setPartyInitalized(true);
+                });
             }}
           >
             Just Listen
           </$Button>
         )}
       </CenteredHorizontally>
-    </Popup>
+    </$StyledPopup>
   );
 };

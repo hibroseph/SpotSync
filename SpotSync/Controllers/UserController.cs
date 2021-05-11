@@ -53,11 +53,11 @@ namespace SpotSync.Controllers
             return new JsonResult(await _partyGoerService.GetRecommendedSongsAsync((await _partyGoerService.GetCurrentPartyGoerAsync()).GetId(), limit));
         }
 
-        [HttpGet]
+        [HttpPost]
         [Authorize]
-        public async Task<IActionResult> SuggestedContributions()
+        public async Task<IActionResult> SuggestedContributions(List<string> excludedIds)
         {
-            var result = await _partyGoerService.GetSuggestedContributionsAsync(await _partyGoerService.GetCurrentPartyGoerAsync());
+            var result = await _partyGoerService.GetSuggestedContributionsAsync(await _partyGoerService.GetCurrentPartyGoerAsync(), excludedIds);
 
             return new JsonResult(result);
         }

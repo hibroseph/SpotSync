@@ -64,7 +64,7 @@ const addSearchResultsToTabs = (tabs, setTabs) => {
   }
 };
 
-const DiscoverFrame = ({ user, partyCode, connection, searchArtistId, partyInitalized, showContributionsPopup }) => {
+const DiscoverFrame = ({ user, partyCode, connection, searchArtistId, contributions, showContributionsPopup, setContributions }) => {
   const [tabs, setTabs] = useState([
     {
       title: DASHBOARD_TITLE,
@@ -146,7 +146,12 @@ const DiscoverFrame = ({ user, partyCode, connection, searchArtistId, partyInita
       </$Bar>
       <ScrollContainer>
         {currentTabView == DASHBOARD_TITLE && (
-          <Dashboard showContributionsPopup={showContributionsPopup} partyInitalized={partyInitalized} partyCode={partyCode}></Dashboard>
+          <Dashboard
+            setContributions={setContributions}
+            showContributionsPopup={showContributionsPopup}
+            contributions={contributions}
+            partyCode={partyCode}
+          ></Dashboard>
         )}
         {currentTabView == SEARCH_RESULTS_TITLE && (
           <React.Fragment>

@@ -50,6 +50,13 @@ export const unfavoriteTrack = (trackId) => {
   return fetch(`/api/user/unfavoritetrack?trackId=${trackId.split("+")[0]}`, { method: "POST" });
 };
 
-export const getSuggestedContributions = () => {
-  return fetch(`/api/user/suggestedcontributions`).then((res) => res.json());
+export const getSuggestedContributions = (excludedIds) => {
+  console.log("getting contributions");
+  return fetch(`/api/user/suggestedcontributions`, {
+    method: "POST",
+    body: JSON.stringify(excludedIds),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }).then((res) => res.json());
 };

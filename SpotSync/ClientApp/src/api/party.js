@@ -67,10 +67,12 @@ export const getUserLikesDislikes = (partyCode) => {
     });
 };
 
-export const addContributionsToParty = (partyCode, contributions) => {
-  return fetch(`/api/party/addContribution?partyCode=${partyCode}`, {
+export const addContributionsToParty = (partyCode, contributions, contributionsToRemove) => {
+  console.log("contributions", contributions);
+  console.log("contributionsToRemove", contributionsToRemove);
+  return fetch(`/api/party/updateContribution?partyCode=${partyCode}`, {
     method: "POST",
-    body: JSON.stringify(contributions),
+    body: JSON.stringify({ newContributions: contributions, contributionsToRemove: contributionsToRemove }),
     headers: {
       "Content-Type": "application/json",
     },

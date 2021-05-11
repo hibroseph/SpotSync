@@ -30,18 +30,31 @@ namespace SpotSync.Controllers
         }
 
         [Authorize]
-        [HttpPost("api/[controller]/AddContribution")]
-        public async Task<IActionResult> AddContribution(string partyCode, [FromBody]List<UserContribution> contributions)
+        [HttpPost("api/[controller]/UpdateContribution")]
+        public async Task<IActionResult> UpdateContribution(string partyCode, [FromBody]UpdateContributions updateContributions)
         {
             try
             {
-                if (contributions != null && contributions.Count == 0)
+                if (updateContributions.ContributionsToRemove == null)
+                {
+                    updateContributions.ContributionsToRemove = new List<UserContribution>();
+                }
+
+                if (updateContributions.NewContributions == null)
+                {
+                    updateContributions.NewContributions = new List<UserContribution>();
+                }
+
+                if (updateContributions != null && updateContributions.ContributionsToRemove.Count == 0 && updateContributions.NewContributions.Count == 0)
                 {
                     return Ok();
                 }
+
                 PartyGoer partyGoer = await _partyGoerService.GetCurrentPartyGoerAsync();
 
-                await _partyService.AddContributionAsync(partyCode, contributions.Select(p => new Contribution { ContributedBy = partyGoer.GetSpotifyId(), ContributionId = Guid.NewGuid(), Id = p.Id, Type = p.Type, Name = p.Name }).ToList());
+                await _partyService.UpdateContributionsAsync(partyCode,
+                updateContributions.NewContributions.Select(p => CreateContribution(partyGoer, p)).ToList(),
+                updateContributions.ContributionsToRemove.Select(p => CreateContribution(partyGoer, p)).ToList());
             }
             catch (Exception ex)
             {
@@ -50,6 +63,18 @@ namespace SpotSync.Controllers
             }
 
             return Ok();
+        }
+
+        private Contribution CreateContribution(PartyGoer partyGoer, UserContribution userContribution)
+        {
+            return new Contribution
+            {
+                ContributedBy = partyGoer.GetSpotifyId(),
+                ContributionId = Guid.NewGuid(),
+                Id = userContribution.Id,
+                Type = userContribution.Type,
+                Name = userContribution.Name
+            };
         }
 
         [Authorize]

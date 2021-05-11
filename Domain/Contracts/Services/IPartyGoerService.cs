@@ -24,6 +24,6 @@ namespace SpotSync.Domain.Contracts.Services
         Task FavoriteTrackAsync(PartyGoer user, string trackUri);
         Task UnfavoriteTrackAsync(PartyGoer user, string trackUri);
         Task<List<string>> GetUsersFavoriteTracksAsync(PartyGoer user);
-        Task<List<SuggestedContribution>> GetSuggestedContributionsAsync(PartyGoer partier);
+        Task<List<SuggestedContribution>> GetSuggestedContributionsAsync(PartyGoer partier, List<string> exlcudedIds = null);
     }
 }

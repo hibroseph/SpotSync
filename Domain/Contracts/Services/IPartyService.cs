@@ -33,7 +33,7 @@ namespace SpotSync.Domain.Contracts
         Task AddSomeTracksFromPlaylistToQueueAsync(PartyGoer partyGoer, string playlistId, int amount);
 
         #region Contributions
-        Task AddContributionAsync(string partyCode, List<Contribution> contribution);
+        Task UpdateContributionsAsync(string partyCode, List<Contribution> contributionsToAdd, List<Contribution> contributionsToRemove);
         Task<List<PartierContribution>> GetContributionsAsync(string partyCode, PartyGoer partier);
         Task RemoveContributionAsync(string partyCode, PartyGoer partier, Guid contributionId);
         #endregion

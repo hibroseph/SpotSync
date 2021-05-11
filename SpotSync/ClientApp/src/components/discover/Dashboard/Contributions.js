@@ -28,25 +28,15 @@ const removeContribution = (partyCode, id, contributions, setContributions) => {
     .catch((err) => error(`Failed to remove contribution. Try again later.`));
 };
 
-export default ({ partyCode, partyInitalized, showContributionsPopup }) => {
-  const [contributions, setContributions] = useState([]);
-
-  useEffect(() => {
-    if (partyInitalized && partyCode != undefined) {
-      getContributions(partyCode)
-        .then((contributions) => setContributions(contributions))
-        .catch((err) => error(`Could not access your contributions. Try again later`));
-    }
-  }, [partyInitalized]);
-
+export default ({ partyCode, showContributionsPopup, contributions, setContributions }) => {
   return (
     <OutlinedContainer>
       <Title>Your Music Contributions</Title>
       <$ContributionContainer>
         {contributions.length > 0 ? (
           <React.Fragment>
-            {contributions.map((contribution) => (
-              <Contribution key={contribution.id} name={contribution.name} type={contribution.type}>
+            {contributions.map((contribution, index) => (
+              <Contribution key={`${contribution.id}_${index}`} name={contribution.name} type={contribution.type}>
                 <$StyledRemoveIcon
                   icon={faTimes}
                   onClick={() => removeContribution(partyCode, contribution.contributionId, contributions, setContributions)}
@@ -65,7 +55,7 @@ export default ({ partyCode, partyInitalized, showContributionsPopup }) => {
           <div style={{ display: "flex", flexDirection: "column" }}>
             <p>You currently do not have any contributions to this party.</p>
 
-            <Button onClick={() => console.log("ADD SOME CONTRIBUTIONS")}>Add Some Music</Button>
+            <Button onClick={() => showContributionsPopup()}>Add Some Music</Button>
           </div>
         )}
       </$ContributionContainer>

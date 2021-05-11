@@ -42,9 +42,10 @@ namespace SpotSync.Domain.PartyAggregate
             _contributionManager = new ContributionManager();
         }
 
-        public async Task AddContributionsAsync(List<Contribution> contribution)
+        public async Task UpdateContributionsAsync(List<Contribution> contributionsToAdd, List<Contribution> contributionsToRemove)
         {
-            _contributionManager.AddContributions(contribution);
+            _contributionManager.RemoveContributions(contributionsToRemove);
+            _contributionManager.AddContributions(contributionsToAdd);
 
             // if no music is playing
             if (!HasPartyStarted())
