@@ -20,7 +20,6 @@ const $popup = styled.div`
   border-radius: 10px;
   padding: 20px;
   max-width: 70%;
-  max-height: 70%;
 `;
 
 export default ({ children }) => (

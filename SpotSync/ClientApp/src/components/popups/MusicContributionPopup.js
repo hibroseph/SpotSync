@@ -15,6 +15,8 @@ import { getContributions } from "../../api/party";
 import OutlinedContainer from "../shared/OutlinedContainer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
+import Input from "../shared/Input";
+import { searchSpotify } from "../../api/party";
 
 const $ContributionContainer = styled.div`
   display: flex;
@@ -31,6 +33,10 @@ const $PopupNav = styled.div`
   justify-content: space-between;
 `;
 
+const $Search = styled(Input)`
+  width: 100%;
+  padding: 15px;
+`;
 const addContribution = (contribution, contributions, setContributions, suggestedContributions, setSuggestedContributions) => {
   setContributions([...contributions, contribution]);
   setSuggestedContributions(suggestedContributions.filter((p) => p.id != contribution.id));
@@ -74,6 +80,18 @@ const sendContributionsToServer = (partyCode, contributons, contributionsToRemov
     });
 };
 
+const searchForContributions = (query, setSearchedContributions, setIsLoading) => {
+  console.log("SEARCH SPOTIFY");
+  searchSpotify(query)
+    .then((tracks) => {
+      setSearchedContributions(tracks);
+      console.log("got tracks");
+      console.log(tracks);
+    })
+    .catch((err) => console.error(err))
+    .finally(() => setIsLoading(false));
+};
+
 export default ({ hideMusicContributionPopup, partyCode, setPopup, setPartyInitalized, setGlobalContributions }) => {
   useEffect(() => {
     getSuggestedContributionsPls(setIsLoading, suggestedContributions, setSuggestedContributions);
@@ -89,9 +107,20 @@ export default ({ hideMusicContributionPopup, partyCode, setPopup, setPartyInita
   const [contributions, setContributions] = useState([]);
   const [newContributions, setNewContributions] = useState([]);
   const [contributionsToRemove, setContributionsToRemove] = useState([]);
-
+  const [searchedContributions, setSearchedContributions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchValue, setSearchValue] = useState(null);
 
+  useEffect(() => {
+    console.log("SEARCH VALUE CHANGED", searchValue);
+    if (searchValue == "" || searchValue == null) {
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
+    const timeoutId = setTimeout(() => searchForContributions(searchValue, setSearchedContributions, setIsLoading), 1000);
+    return () => clearTimeout(timeoutId);
+  }, [searchValue]);
   return (
     <$StyledPopup>
       <$PopupNav>
@@ -99,6 +128,29 @@ export default ({ hideMusicContributionPopup, partyCode, setPopup, setPartyInita
         <FontAwesomeIcon icon={faTimes} onClick={() => hideMusicContributionPopup()}></FontAwesomeIcon>
       </$PopupNav>
       <OutlinedContainer>
+        <div>
+          <$Search
+            onInput={(event) => {
+              console.log("whats happening", event.target.value);
+              setSearchValue(event.target.value);
+            }}
+            placeholder="Search Tracks & Artists"
+          ></$Search>
+          <$ContributionContainer>
+            {searchedContributions.length > 0 &&
+              searchedContributions.map((contribution, index) => (
+                <Contribution
+                  key={index}
+                  type={0}
+                  id={contribution.id}
+                  name={`${contribution.name} - ${contribution.artists[0].name}`}
+                  actOnContribution={(contribution) =>
+                    addContribution(contribution, newContributions, setNewContributions, suggestedContributions, setSuggestedContributions)
+                  }
+                ></Contribution>
+              ))}
+          </$ContributionContainer>
+        </div>
         <Subtitle>Suggested Contributions</Subtitle>
         <$ContributionContainer>
           {suggestedContributions?.map((contribution, index) => {
